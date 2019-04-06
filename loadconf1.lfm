@@ -1,0 +1,39 @@
+object FLoadConf: TFLoadConf
+  Left = 1435
+  Height = 120
+  Top = 133
+  Width = 320
+  BorderStyle = bsDialog
+  Caption = 'FLoadConf'
+  ClientHeight = 120
+  ClientWidth = 320
+  LCLVersion = '2.0.0.4'
+  object LB2: TListBox
+    Left = 10
+    Height = 99
+    Top = 10
+    Width = 214
+    ItemHeight = 0
+    OnClick = LB2Click
+    TabOrder = 0
+  end
+  object BtnApply: TButton
+    Left = 232
+    Height = 25
+    Top = 24
+    Width = 75
+    Caption = 'Appliquer'
+    Enabled = False
+    ModalResult = 1
+    TabOrder = 1
+  end
+  object BtnCancel: TButton
+    Left = 232
+    Height = 25
+    Top = 64
+    Width = 75
+    Caption = 'Annuler'
+    ModalResult = 2
+    TabOrder = 2
+  end
+end

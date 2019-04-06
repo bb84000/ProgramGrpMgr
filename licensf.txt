@@ -1,0 +1,10 @@
+Ce logiciel est fourni tel quel, sans aucune garantie expresse ou implicite. L'auteur et/ou l'éditeur ne sauraient être tenus pour responsables des erreurs, dommages ou pertes de revenus consécutifs à l'utilisation de ce logiciel.
+
+L'utilisateur emploie le programme à ses propres risques. Effectuez une sauvegarde des fichiers que vous voulez modifier.
+
+LICENCE D'UTILISATION
+Le logiciel peut être utilisé librement dans le cadre d'une utilisation non commerciale.
+
+Ce logiciel ne peut être copié, dupliqué, distribué, transféré, proposé en téléchargement sans autorisation écrite de l'auteur ou de l'éditeur.
+
+Contact: www.sdtp.com

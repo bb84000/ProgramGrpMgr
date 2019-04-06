@@ -1,0 +1,177 @@
+object FProperty: TFProperty
+  Left = 862
+  Height = 311
+  Top = 202
+  Width = 469
+  Caption = 'FProperty'
+  ClientHeight = 311
+  ClientWidth = 469
+  LCLVersion = '2.0.0.4'
+  object PC1: TPageControl
+    Left = 0
+    Height = 270
+    Top = 0
+    Width = 469
+    ActivePage = TSGeneral
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 0
+    object TSGeneral: TTabSheet
+      Caption = 'General'
+      ClientHeight = 242
+      ClientWidth = 461
+      object Image1: TImage
+        Left = 16
+        Height = 32
+        Top = 8
+        Width = 32
+        OnDblClick = Image1DblClick
+        ParentShowHint = False
+        ShowHint = True
+      end
+      object LFileType: TLabel
+        Left = 16
+        Height = 15
+        Top = 48
+        Width = 80
+        Caption = 'Type de fichier '
+        ParentColor = False
+      end
+      object LTypeName: TLabel
+        Left = 104
+        Height = 15
+        Top = 48
+        Width = 62
+        Caption = 'LTypeName'
+        ParentColor = False
+      end
+      object LDescription: TLabel
+        Left = 16
+        Height = 15
+        Top = 176
+        Width = 60
+        Caption = 'Description'
+        ParentColor = False
+      end
+      object LCible: TLabel
+        Left = 16
+        Height = 15
+        Top = 80
+        Width = 27
+        Caption = 'Cible'
+        ParentColor = False
+      end
+      object SBCible: TSpeedButton
+        Left = 416
+        Height = 22
+        Hint = 'Changer le fichier cible'
+        Top = 72
+        Width = 23
+        Glyph.Data = {
+          76010000424D7601000000000000760000002800000020000000100000000100
+          04000000000000010000120B0000120B00001000000000000000000000000000
+          800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+          FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00555555555555
+          5555555555555555555555555555555555555555555555555555555555555555
+          555555555555555555555555555555555555555FFFFFFFFFF555550000000000
+          55555577777777775F55500B8B8B8B8B05555775F555555575F550F0B8B8B8B8
+          B05557F75F555555575F50BF0B8B8B8B8B0557F575FFFFFFFF7F50FBF0000000
+          000557F557777777777550BFBFBFBFB0555557F555555557F55550FBFBFBFBF0
+          555557F555555FF7555550BFBFBF00055555575F555577755555550BFBF05555
+          55555575FFF75555555555700007555555555557777555555555555555555555
+          5555555555555555555555555555555555555555555555555555
+        }
+        NumGlyphs = 2
+        OnClick = SBCibleClick
+        ShowHint = True
+        ParentShowHint = False
+      end
+      object LParams: TLabel
+        Left = 16
+        Height = 15
+        Top = 112
+        Width = 59
+        Caption = 'Paramètres'
+        ParentColor = False
+      end
+      object LPath: TLabel
+        Left = 16
+        Height = 15
+        Top = 144
+        Width = 42
+        Caption = 'Chemin'
+        ParentColor = False
+      end
+      object EDisplayName: TEdit
+        Left = 88
+        Height = 23
+        Top = 16
+        Width = 353
+        TabOrder = 0
+      end
+      object Memo1: TMemo
+        Left = 88
+        Height = 65
+        Top = 168
+        Width = 353
+        Lines.Strings = (
+          'Memo1'
+        )
+        TabOrder = 1
+      end
+      object ECible: TEdit
+        Left = 88
+        Height = 23
+        Top = 72
+        Width = 321
+        TabOrder = 2
+      end
+      object EParams: TEdit
+        Left = 88
+        Height = 23
+        Top = 104
+        Width = 353
+        TabOrder = 3
+      end
+      object EPath: TEdit
+        Left = 88
+        Height = 23
+        Top = 136
+        Width = 353
+        TabOrder = 4
+      end
+    end
+  end
+  object PButtons: TPanel
+    Left = 0
+    Height = 41
+    Top = 270
+    Width = 469
+    Align = alBottom
+    ClientHeight = 41
+    ClientWidth = 469
+    TabOrder = 1
+    object BtnOK: TButton
+      Left = 152
+      Height = 25
+      Top = 8
+      Width = 75
+      Caption = 'OK'
+      ModalResult = 1
+      TabOrder = 0
+    end
+    object BtnCancel: TButton
+      Left = 256
+      Height = 25
+      Top = 8
+      Width = 75
+      Caption = 'Annuler'
+      ModalResult = 2
+      TabOrder = 1
+    end
+  end
+  object OD1: TOpenDialog
+    left = 32
+    top = 224
+  end
+end

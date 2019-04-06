@@ -1,0 +1,89 @@
+object AboutBox: TAboutBox
+  Left = 773
+  Height = 175
+  Top = 204
+  Width = 331
+  BorderStyle = bsDialog
+  ClientHeight = 175
+  ClientWidth = 331
+  Position = poMainFormCenter
+  LCLVersion = '2.0.0.4'
+  object Panel1: TPanel
+    Left = 10
+    Height = 115
+    Top = 9
+    Width = 310
+    BevelInner = bvRaised
+    BevelOuter = bvLowered
+    ClientHeight = 115
+    ClientWidth = 310
+    TabOrder = 0
+    object Image1: TImage
+      Left = 12
+      Height = 34
+      Top = 9
+      Width = 34
+    end
+    object LProductName: TLabel
+      Left = 3
+      Height = 13
+      Top = 10
+      Width = 301
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Product Name'
+      ParentColor = False
+    end
+    object LVersion: TLabel
+      Left = 3
+      Height = 13
+      Top = 30
+      Width = 301
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Version'
+      ParentColor = False
+    end
+    object LUpdate: TLabel
+      Left = 3
+      Height = 13
+      Top = 70
+      Width = 301
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Update'
+      ParentColor = False
+    end
+    object LCopyright: TLabel
+      Left = 3
+      Height = 13
+      Top = 50
+      Width = 301
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Copyright'
+      ParentColor = False
+    end
+    object LWebSite: TLabel
+      Left = 3
+      Height = 13
+      Top = 90
+      Width = 301
+      Alignment = taCenter
+      AutoSize = False
+      Caption = 'Website'
+      ParentColor = False
+    end
+  end
+  object BitBtn1: TBitBtn
+    Left = 120
+    Height = 30
+    Top = 134
+    Width = 75
+    Default = True
+    DefaultCaption = True
+    Kind = bkOK
+    ModalResult = 1
+    TabOrder = 1
+  end
+end

@@ -1,0 +1,128 @@
+﻿ProgramGrpMgr.exe
+
+Version 0.5.0.0 - 06/05/2012
+Première version diffusée
+
+Version 0.5.1.0 - 09/05/2012
+Handle à 0 pour le lancement des programmes, pour que les dialogues éventuels soient au premier plan
+Menu Run as aministrator seulement à partir de Vista
+Utilisation de la touche Suppr/Delete pour effacer des icones de programmes
+Ajout d'un bouton de sauvegarde des modifications.
+Ajout d'un dialogue de préférences
+Ajout d'une routine de recherche de mise à jour
+
+Version 0.5.2.0 -  10/05/2012
+Bug dans la routine de redémarrage runonce.
+Fermeture du programme avant installation ou désinstallation
+
+Version 0.5.3.0 - 14/05/12
+Mise à jour de l'icone dans le dialogue de sauvegarde
+Correction d'un bug lors de la sauvegarde de la config (libération des chaînes
+de langue déplacée dans la routine de fermeture).
+
+Version 0.5.4.0 - 18/05/2012
+Suppression de Label1 et utilisation d'un label existant pour la mesure de longueur de texte
+Affichage de l'icone lors de la sauvegarde de configuration en sortie de programme.
+Ajout de la fonction drag&drop de fichier/raccourci
+Tri ascendant et descendant
+
+Version 0.5.5.0 - 30/05/2012
+Dialogue de propriétés spécifique au programme, possibilité de choisir l'icone, le nom
+et la description
+Actualisation/rafraichissement de la liste
+Tri par nom descriptif au lieu de nom de fichier
+Possibilité de déplacer les icones par drag and drop
+Ajout d'un classement sans tri
+Prise en compte des extensions de fichiers par défaut
+
+Version 0.5.6.0 - 01/06/2012
+Meilleure gestion des extensions inconnues
+Support de détection de Windows 8 et des infos d'OS étendues.
+Correction de bug interdisant l'utilisation sous XP depuis la version 0.5.4.0
+
+Version 0.5.7.0 - 13/06/2012
+Affichage du nom du groupe dans l'icone de la barre des tâches.
+Ajout d'un bouton pour charger, créer ou supprimer un groupe existant
+Centrage des dialogues communs
+Correction d'un bug dans le choix des icones de groupe
+
+Version 0.5.8.0 - 10/07/2012
+Amélioration du dialogue de propriétés, possibilité de changer de cible
+
+Version 0.5.8.1 - 22/07/2012
+Désactivation par défaut du timer de repositionnement (cause un repositionnement d'autres
+dialogues que ceux de l'application
+
+Version 0.5.8.2 - 22/07/2012
+Correction d'un bug dans l'importation de répertoire si l'index d'icone est erronné
+Prise en compte des paramètres lors du lancement des raccourcis
+
+Version 0.5.8.3 - 07/08/2012
+Prise en compte des chemins systèmes 64 bits (sysnative)
+Ajout d'un champ paramètres dans la fenêtre de propriétés
+
+Version 0.5.8.4 - 04/11/2012
+Correction d'un bug dans la champ paramètres (read-only)
+
+Version 0.5.9.0 - 29/11/2012
+Ajout du chemin de démarrage dans les propriétés
+Modification de la fonction de lancement d'une application (Launch -> Exec)
+
+Version 0.6.0.0 - 05/02/2013
+Sauvegarde des configs précédentes, en cas d'absence de xml config, prise de la dernière sauvegarde
+Ajout d'une fonction pour recharger une configuration antérieure en cas d'erreur.
+Sauvegarde de la config d'état uniquement si quelque chose de changé.
+
+Version 0.6.0.1 - 24/02/2013
+Champ cible des propriétés ouvert en écriture
+
+Version 0.6.5.0 - 03/03/2019
+Mise à jour du programme pour un fonctionnement correct avec Windows 10
+
+Version 0.6.6.0 - 06/03/2019
+Ajout d'un bouton Quitter
+Limitation de la largteur de la fenêtre pour ne pas cacher les boutons
+Possibilité de placer l'application dans la zone de notification
+
+Version 0.6.6.1 - 07/03/2019
+Possibilité de ne pas afficher l'application dans la barre des tâches
+Affichage de la date des fichiers bkx pour la récupération d'anciennes configurations
+
+Version 0.6.6.2 - 10/03/2019
+Déplacement de la version de Windows vers le dialog de préférences
+Possibilité de masquer la barre d'outils et la barre de statut,(clic droit en dehors
+  des icones de programmes pour masquer ou afficher ces barres)
+Réutilisation des bitmaps des boutons pour les popup menus
+
+Version 0.6.6.9 - 15/03/2019
+Les raccourcis sont remplacés par les exécutables cibles dans la liste
+Correction d'un bug of Bug empêchant de ne pas sauvegarder les changements de liste
+Correction d'un bug dans la non redirection 64bits/32 bits
+
+Version 0.6.7.0 - 16/03/2019
+Restauration de l'icone dans la zone de notification lors d'un redémarrage du shell
+
+Version 0.6.7.1 - 20/03/2019
+Modification pour s'assurer que la modification de la liste est sauvegardée à la
+fermeture du programme
+
+Version 0.6.7.2 - 21/03/2019
+Modification du processus de restauration de l'icone dans la zone de notification
+qued lexplorer redémarre
+
+Version 0.6.7.3 - 23/03/2019
+Ajout d'une infobulle sur l'icone dans la zone de notification
+
+Version 0.6.8.0 - 26/03/2019
+Utilisation d'un cache disque de la liste des icones pour accélérer le chargement
+du programme.
+
+Version 0.6.8.1 - 27/03/2019
+Amélioration de la génération du cache, prise en compte des icones absentes
+
+Version 0.6.9.0 - 29/03/2019
+Modification du fichier XML, compatibilité avec de futures versions
+
+Version 0.7.0.0 - 05/04/2019
+Portage de l'application sur Lazarus- Free Pascal
+Versions 64 bits et 32 bits

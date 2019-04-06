@@ -1,0 +1,67 @@
+object FLoadGroup: TFLoadGroup
+  Left = 1014
+  Height = 294
+  Top = 122
+  Width = 404
+  Caption = 'FLoadGroup'
+  ClientHeight = 294
+  ClientWidth = 404
+  LCLVersion = '2.0.0.4'
+  object LV1: TListView
+    Left = 0
+    Height = 225
+    Top = 0
+    Width = 404
+    Align = alTop
+    Columns = <    
+      item
+        AutoSize = True
+        Width = 0
+      end>
+    ShowColumnHeaders = False
+    SmallImages = IL1
+    TabOrder = 0
+    ViewStyle = vsReport
+    OnSelectItem = LV1SelectItem
+  end
+  object BtnNew: TButton
+    Left = 32
+    Height = 25
+    Top = 248
+    Width = 75
+    Caption = 'Nouveau'
+    ModalResult = 6
+    TabOrder = 1
+  end
+  object BtnOK: TButton
+    Left = 120
+    Height = 25
+    Top = 248
+    Width = 75
+    Caption = 'OK'
+    ModalResult = 1
+    TabOrder = 2
+  end
+  object BtnDelete: TButton
+    Left = 208
+    Height = 25
+    Top = 248
+    Width = 75
+    Caption = 'Supprimer'
+    ModalResult = 4
+    TabOrder = 3
+  end
+  object BtnCancel: TButton
+    Left = 296
+    Height = 25
+    Top = 247
+    Width = 75
+    Caption = 'Annuler'
+    ModalResult = 2
+    TabOrder = 4
+  end
+  object IL1: TImageList
+    left = 112
+    top = 104
+  end
+end
