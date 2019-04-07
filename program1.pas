@@ -728,6 +728,7 @@ begin
         NewFile.Date:= nodeReadValue(inode, 'date', atDatetime);
         NewFile.IconFile:= nodeReadValue(inode, 'iconfile', atString);
         NewFile.IconIndex:= nodeReadValue(inode, 'iconindex', atInteger);
+        NewFile.OldIcon:= nodeReadValue(inode, 'oldicon', atBoolean);
         ListeFichiers.AddFile(NewFile);
         iNode := iNode.NextSibling;
       end;
@@ -805,6 +806,7 @@ begin
           TDOMElement(FileNode).SetAttribute('date', DateTimeToStr(ListeFichiers.GetItem(i).Date){%H-});
           TDOMElement(FileNode).SetAttribute('iconfile', ListeFichiers.GetItem(i).IconFile {%H-});
           TDOMElement(FileNode).SetAttribute('iconindex', IntToStr(ListeFichiers.GetItem(i).IconIndex){%H-});
+          TDOMElement(FileNode).SetAttribute('oldicon', IntToStr(Integer(ListeFichiers.GetItem(i).OldIcon)){%H-});
           RootNode.Appendchild(FileNode);
         end;
       end;
@@ -1066,7 +1068,8 @@ begin
         // The function doesnt extract properly dll icons
         If (PrivateExtractIcons ( PChar(ListeFichiers.GetItem(i).IconFile), ListeFichiers.GetItem(i).IconIndex,
                      IcoSize, Icosize, @hIcon, @nIconId, 1, LR_LOADFROMFILE) <>0) and (hIcon <> 0) and
-                     (UpperCase(ExtractFileExt(ListeFichiers.GetItem(i).IconFile)) <> 'DLL') then
+                     (UpperCase(ExtractFileExt(ListeFichiers.GetItem(i).IconFile)) <> 'DLL') and
+                     (ListeFichiers.GetItem(i).OldIcon = false) then
         begin
           GetIconInfo(hicon, @IcoInfo);
           ListItem.ImageIndex := ImageList_Add(hnd, IcoInfo.hbmColor, IcoInfo.hbmMask);
@@ -1658,7 +1661,6 @@ var
  OldTarget: String;
  //OldPath: String;
 begin
-
   Item := ListView1.Selected;
   If Item = nil then exit;
   Fproperty.IconDefFile:= IconDefFile;
@@ -1675,6 +1677,7 @@ begin
   Fproperty.EPath.Text:= MyFichier.StartPath;
   //Oldpath:= Fproperty.EPath.Text;
   FProperty.Memo1.Text:= MyFichier.Description;
+  FProperty.PMnuPropsOldIcon.Checked:= MyFichier.OldIcon;
   if FProperty.Showmodal = mrOK then
   begin
       if FProperty.ECible.Text <> OldTarget then
@@ -1689,6 +1692,7 @@ begin
         MyFichier.DisplayName:= FProperty.EDisplayName.Text;
         MyFichier.Description:= FProperty.Memo1.Text;
         MyFichier.Params:= FProperty.EParams.Text;
+        MyFichier.OldIcon:= FProperty.PMnuPropsOldIcon.Checked;
       end;
       ListeFichiers.ModifyFile(Item.Index, MyFichier );
       LVDisplayFiles;
@@ -1838,7 +1842,9 @@ With LangFile do
    FProperty.LCible.Caption:= ReadString(LangStr, 'FProperty.LCible.Caption', FProperty.LCible.Caption);
    FProperty.SBCible.Hint:= ReadString(LangStr, 'FProperty.SBCible.Hint', FProperty.SBCible.Hint);
    FProperty.LParams.Caption:= ReadString(LangStr, 'FProperty.LParams.Caption', FProperty.LParams.Caption);
-   Fproperty.LPath.Caption:= ReadString(LangStr, 'Fproperty.LPath.Caption', FProperty.LPath.Caption);
+   FProperty.LPath.Caption:= ReadString(LangStr, 'Fproperty.LPath.Caption', FProperty.LPath.Caption);
+   FProperty.PMnuSelectIcon.Caption:= ReadString(LangStr, 'FProperty.PMnuSelectIcon.Caption', FProperty.PMnuSelectIcon.Caption);
+   FProperty.PMnuPropsOldIcon.Caption:= ReadString(LangStr, 'FProperty.PMnuPropsOldIcon', FProperty.PMnuPropsOldIcon.Caption);
 
    FLoadGroup.Caption:= SBGroup.Hint;
    FLoadGroup.BtnNew.Caption:= ReadString(LangStr, 'FLoadGroup.BtnNew.Caption', FLoadGroup.BtnNew.Caption);

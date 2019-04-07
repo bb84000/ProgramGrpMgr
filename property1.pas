@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, ExtCtrls,
-  StdCtrls, Buttons, bbutils, shellAPI;
+  StdCtrls, Buttons, Menus, bbutils, shellAPI;
 
 type
 
@@ -27,9 +27,12 @@ type
     LPath: TLabel;
     LTypeName: TLabel;
     Memo1: TMemo;
+    PMnuPropsOldIcon: TMenuItem;
+    PMnuSelectIcon: TMenuItem;
     OD1: TOpenDialog;
     PButtons: TPanel;
     PC1: TPageControl;
+    PMnuIconProps: TPopupMenu;
     SBCible: TSpeedButton;
     TSGeneral: TTabSheet;
     procedure Image1DblClick(Sender: TObject);
@@ -41,7 +44,7 @@ type
     IconFile: String;
     IconIndex: Integer;
     dlgTitle: String;
-
+    OldIcon: Boolean;
   end;
 
 var
@@ -58,6 +61,7 @@ begin
   PickIcon(0, IconFile, IconIndex);
   Image1.Picture.Icon.Handle:= ExtractIcon(Handle, PChar(IconFile), IconIndex);
 end;
+
 
 procedure TFProperty.SBCibleClick(Sender: TObject);
 var

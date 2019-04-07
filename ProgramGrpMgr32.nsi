@@ -24,8 +24,8 @@
 
 ;--------------------------------
 
-  !define MUI_ICON "C:\Users\Bernard\Documents\Lazarus\Programme\ProgramGrpMgr.ico"
-  !define MUI_UNICON "C:\Users\Bernard\Documents\Lazarus\Programme\ProgramGrpMgr.ico"
+  !define MUI_ICON "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\ProgramGrpMgr.ico"
+  !define MUI_UNICON "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\ProgramGrpMgr.ico"
 
 
 ;Language Selection Dialog Settings
@@ -57,8 +57,8 @@
 
 
   ;Licence langage file
-  LicenseLangString Licence ${LANG_ENGLISH} "C:\Users\Bernard\Documents\Lazarus\Programme\license.txt"
-  LicenseLangString Licence ${LANG_FRENCH}  "C:\Users\Bernard\Documents\Lazarus\Programme\licensf.txt"
+  LicenseLangString Licence ${LANG_ENGLISH} "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\license.txt"
+  LicenseLangString Licence ${LANG_FRENCH}  "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\licensf.txt"
 
   ;Language strings for uninstall string
   LangString RemoveStr ${LANG_ENGLISH}  "Program Group Manager (remove only)"
@@ -95,17 +95,16 @@ Section "" ;No components page, name is not important
   ${EndIf}
   SetShellVarContext all
   SetOutPath "$INSTDIR"
-  File "C:\Users\Bernard\Documents\Lazarus\Programme\ProgramGrpMgrwin32.exe"
+  File "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\ProgramGrpMgrwin32.exe"
   ;Dans le cas ou on n'aurait pas pu fermer l'application
   Rename /REBOOTOK "$INSTDIR\ProgramGrpMgrwin64.exe" "$INSTDIR\ProgramGrpMgr.exe"
   ; add files / whatever that need to be installed here.
-  File "C:\Users\Bernard\Documents\Lazarus\Programme\history.txt"
-  File  "C:\Users\Bernard\Documents\Lazarus\Programme\ProgramGrpMgr.txt"
-  File "C:\Users\Bernard\Documents\Lazarus\Programme\ProgramGrpMgr.lng"
-  ;File "C:\Users\Bernard\Delphi\sdtp\Progman\ProgramGrpMgr.exe"
+  File "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\history.txt"
+  File  "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\ProgramGrpMgr.txt"
+  File "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\ProgramGrpMgr.lng"
   Rename /REBOOTOK "$INSTDIR\ProgramGrpMgr.tmp" "$INSTDIR\ProgramGrpMgr.exe"
-  File "C:\Users\Bernard\Documents\Lazarus\Programme\FAQ.txt"
-  !getdllversion  "C:\Users\Bernard\Documents\Lazarus\Programme\ProgramGrpMgrwin64.exe" expv_
+  File "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\FAQ.txt"
+  !getdllversion  "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\ProgramGrpMgrwin64.exe" expv_
   ;Write uninstall in register
   WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "UninstallString" "$INSTDIR\uninst.exe"
   WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "DisplayName" "$(RemoveStr)"

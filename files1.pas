@@ -30,6 +30,7 @@ Type
     Date: TDateTime;
     IconFile: String;
     IconIndex: Integer;
+    OldIcon: Boolean;
   end;
 
  TFichierList = class(TList)
@@ -142,6 +143,7 @@ begin
   K^.Date:= Fichier.Date;
   K^.IconFile:= Fichier.IconFile;
   K^.IconIndex:= Fichier.IconIndex;
+  K^.OldIcon:= Fichier.OldIcon;
   add(K);
   DoSort;
   if Assigned(FOnChange) then FOnChange(Self);
@@ -160,6 +162,7 @@ begin
   TFichier(Items[i]^).Date := Fichier.Date;
   TFichier(Items[i]^).IconFile := Fichier.IconFile;
   TFichier(Items[i]^).IconIndex := Fichier.IconIndex;
+  TFichier(Items[i]^).OldIcon := Fichier.OldIcon;
   DoSort;
   if Assigned(FOnChange) then FOnChange(Self);
 end;

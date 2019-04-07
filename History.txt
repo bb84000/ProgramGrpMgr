@@ -126,3 +126,6 @@ Modification du fichier XML, compatibilité avec de futures versions
 Version 0.7.0.0 - 05/04/2019
 Portage de l'application sur Lazarus- Free Pascal
 Versions 64 bits et 32 bits
+
+Version 0.7.0.1 - 07/04/2019
+Old icons are displayed properly with second displa routine as are dlls

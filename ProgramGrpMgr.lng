@@ -80,6 +80,8 @@ FProperty.LCible.Caption=Target
 FProperty.SBCible.Hint=Change target file
 FProperty.LParams.Caption= Parameters
 Fproperty.LPath.Caption=Start path
+FProperty.PMnuSelectIcon.Caption=Select an icon
+FProperty.PMnuPropsOldIcon.Caption=Improve the icon display
 
 FLoadGroup.BtnNew.Caption=New
 FLoadGroup.BtnDelete.Caption=Delete
@@ -161,6 +163,8 @@ FProperty.LCible.Caption=Cible
 FProperty.SBCible.Hint=Changer le fichier cible
 FProperty.LParams.Caption=Paramètres
 Fproperty.LPath.Caption=Démarrer dans
+FProperty.PMnuSelectIcon.Caption=Choisir une icone
+FProperty.PMnuPropsOldIcon.Caption=Améliorer l'affichage de l'icone
 
 FLoadGroup.BtnNew.Caption=Nouveau
 FLoadGroup.BtnDelete.Caption=Supprimer
