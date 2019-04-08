@@ -10,8 +10,7 @@ unit files1;
 interface
 
 uses
-  Classes, SysUtils;
-
+  Classes, SysUtils, dialogs;
 Type
 
 
@@ -170,7 +169,7 @@ end;
 
 procedure TFichierList.Delete(const i: Integer);
 begin
-inherited delete(i);
+  inherited delete(i);
   DoSort;
   if Assigned(FOnChange) then FOnChange(Self);
 end;

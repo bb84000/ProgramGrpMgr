@@ -128,4 +128,11 @@ Portage de l'application sur Lazarus- Free Pascal
 Versions 64 bits et 32 bits
 
 Version 0.7.0.1 - 07/04/2019
-Old icons are displayed properly with second displa routine as are dlls
+Les anciennes icones sont affichées corectement avec une autre routine
+Menu contectuel sur l'icone dans le dialogue des propriétés
+
+Version 0.7.0.2 - 07/04/2019
+Correction du bug des caractères accentués dans les raccourcis
+
+Version 0.7.0.3 - 08/04/2019
+Les préférences sont stockées dans une classe pour simplifier la détection des modifications

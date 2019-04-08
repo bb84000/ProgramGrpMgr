@@ -12,7 +12,7 @@ uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
   Buttons, StdCtrls,  CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM , laz2_XMLRead, laz2_XMLWrite, files1,
   Registry,  LCLIntf, Menus, ShellAPI, About, SaveCfg1, WinVer, prefs1, property1, inifiles,
-  chknewver, alert, LoadGroup1, LoadConf1;
+  chknewver, alert, LoadGroup1, LoadConf1, Config1;
 
 type
 
@@ -115,30 +115,17 @@ type
     StartMenuPath: String;
     PrgMgrAppsData: string;
     ProgName: String;
+    Settings: Tconfig;
     oldw: array [0..50] of Integer;
-    //ImageList: TImageList;
-    ListeFichiers: TFichierList;
+     ListeFichiers: TFichierList;
     // Config file and values
     ConfigFile: String;
-    GroupName: String;
-    SavSizePos, PrevSavSizePos: Boolean;
-    ListeChange: Bool;
-    WState, PrevWState: String;
-    GrpIconFile, PrevGrpIconFile: String;
-    GrpIconIndex, PrevGrpIconIndex: Integer;
-    IconDisplay, PrevIconDisplay: Integer;
-    IconSort, PrevIconSort: Integer;
+    ListeChange, SettingsChange, WStateChange: Bool;
     AppState : Integer;
-    LastUpdChk, PrevLastUpdChk: TDateTime;
-    NoChkNewVer, PrevNoChkNewVer: Boolean;
-    StartWin, PrevStartWin: Boolean;
-    MiniInTray, PrevMiniInTray: Boolean;
-    HideInTaskBar, PrevHideInTaskBar: Boolean;
-    HideBars, PrevHideBars: Boolean;
     SMnuMaskBars, SMnuShowBars: String;
     langue: Integer;
     LangFile: TiniFile;
-    LangStr, PrevLangStr: String;
+    //LangStr, PrevLangStr: String;
     LangNums: TStringList;
     CurLang: Integer;
     CompileDateTime: TDateTime;
@@ -160,6 +147,7 @@ type
     LastUpdateSearch, LastChkCaption, NextChkCaption: String;
     NoDeleteGroup, DeleteGrpMsg: String;
     Version: String;
+    ImgSavDisabled: TBitmap;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -170,6 +158,8 @@ type
     function PMnuSaveEnable (Enable: Boolean):Boolean;
     function StateChanged: SaveType;
     procedure ListeFichiersOnChange(sender: TObject);
+    procedure SettingsOnChange(sender: TObject);
+    procedure SettingsOnStateChange(sender: TObject);
     procedure ModLangue;
     function ClosestItem(pt: Tpoint; ptArr:array of Tpoint): TlistItem;
     function HidinTaskBar (enable: Boolean): boolean;
@@ -183,17 +173,24 @@ type
   end;
 
  const
-
+   // Message sent to the form by the update function
    WM_INFO_UPDATE = WM_USER + 101;
    WP_NewVersion = 15;
+   // Message sent to a listview to set the sapce between icons
+   LVM_SETICONSPACING =  LVM_FIRST+ 53;
+
 
 var
   FProgram: TFProgram;
   PrevWndProc: WNDPROC;
+
+  // Windows funcrions declarations
   PrivateExtractIcons: function(lpszFile: PChar; nIconIndex, cxIcon, cyIcon: integer;
                                   phicon: PHANDLE; piconid: PDWORD; nicon, flags: DWORD):
                                   DWORD stdcall;
 
+  SHDefExtractIcon: function (pszIconFile:PChar; iIndex:Longint; uFlags:UINT; var phiconLarge:THandle; var phiconSmall:Thandle;
+                              nIconSize:UINT):HRESULT; stdcall;
 
 implementation
 
@@ -210,19 +207,19 @@ var
   reg: TRegistry;
   s: string;
   CurVer, NewVer: Int64;
-
+  NoCheckVersion: Boolean;
 begin
   if uMsg=WM_QUERYENDSESSION then
   begin
-    if not FProgram.StartWin then
+    if not FProgram.Settings.StartWin then
     begin
       reg := TRegistry.Create;
       reg.RootKey := HKEY_CURRENT_USER;
       reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\RunOnce', True) ;
-      reg.WriteString(FProgram.ProgName+'_'+FProgram.GroupName, '"'+Application.ExeName+'" Grp='+FProgram.GroupName) ;
+      reg.WriteString(FProgram.ProgName+'_'+FProgram.Settings.GroupName, '"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName) ;
       reg.CloseKey;
       reg.free;
-      FProgram.SaveConfig(FProgram.GroupName, FProgram.StateChanged);
+      FProgram.SaveConfig(FProgram.Settings.GroupName, FProgram.StateChanged);
       Application.ProcessMessages;
     end;
   end;
@@ -239,8 +236,12 @@ begin
             if NewVer > CurVer then
             begin
               AboutBox.LUpdate.Caption:= StringReplace(FProgram.UpdateAvailable, '%s', s, [rfIgnoreCase]);
-              if FProgram.ShowAlert(FProgram.Caption, FProgram.UpdateAvailable, s, FProgram.NoLongerChkUpdates, FProgram.NoChkNewVer) then
-              FProgram.SBAboutClick(FChkNewVer);
+              NoCheckVersion:= FProgram.Settings.NoChkNewVer;
+              if FProgram.ShowAlert(FProgram.Caption, FProgram.UpdateAvailable, s, FProgram.NoLongerChkUpdates, NoCheckVersion) then
+              begin
+                FProgram.SBAboutClick(FChkNewVer);
+                FProgram.Settings.NoChkNewVer:= NoCheckVersion;
+              end;
             end;
           end;
         end;
@@ -272,8 +273,8 @@ begin
       s1:= StringReplace(s1, #34, '', [rfReplaceAll]);
       param:= StringReplace(s1, #39, '', [rfReplaceAll]);
       p:= Pos('Grp=', param);
-      if p > 0 then GroupName:= AnsiToUTF8(Copy(param, p+4, length(param)));
-     Result := GroupName;
+      if p > 0 then Settings.GroupName:= AnsiToUTF8(Copy(param, p+4, length(param)));
+     Result := Settings.GroupName;
     end;
   end;
 end;
@@ -310,6 +311,7 @@ begin
   // Some things have to be run only on the first form activation
   // so, we set first at true
   Pointer(PrivateExtractIcons) := GetProcAddress(GetModuleHandle('user32.dll'),'PrivateExtractIconsA');
+  Pointer(SHDefExtractIcon) := GetProcAddress(GetModuleHandle('shell32.dll'),'SHDefExtractIconA');
   First:= True;
   // Compilation date/time
   try
@@ -317,10 +319,11 @@ begin
   except
   end;
   ListeFichiers:= TFichierList.Create;
+  Settings:= TConfig.Create;
  // ImageList:= TImageList.Create(self);
   langue:= Lo(GetUserDefaultLangID);
   //langue:=  LANG_ITALIAN;
-  If length(LangStr)= 0 then LangStr:= IntToStr(langue);
+  If length(Settings.LangStr)= 0 then Settings.LangStr:= IntToStr(langue);
   // Fix official program name to avoid trouble if exe name is changed
   ExecName:= ExtractFileName(Application.ExeName);
   ExecPath:= ExtractFilePath(Application.ExeName);
@@ -328,7 +331,7 @@ begin
    // Chargement des chaînes de langue...
   LangFile:= TIniFile.create(ExecPath+ProgName+'.lng');
   LangNums:= TStringList.Create;
-  GroupName:= GetGrpParam;
+  Settings.GroupName:= GetGrpParam;
   SHGetSpecialFolderPath(0, aPath ,CSIDL_APPDATA,false);
   AppDataPath:= aPath;
   SHGetSpecialFolderPath(0,aPath , CSIDL_DESKTOP,false);
@@ -351,7 +354,7 @@ begin
   FreeAndNil(ListeFichiers);
   FreeAndNil(langnums);
   FreeAndNil(langfile);
-
+  FreeAndNil(Settings);
 end;
 
 
@@ -359,10 +362,10 @@ end;
 
 procedure TFProgram.PMnuHideBarsClick(Sender: TObject);
 begin
-  If HideBars then
+  If Settings.HideBars then
   begin
     FMinHeight:= BarsHeight+GetSystemMetrics(SM_CYCAPTION)+142;
-    HideBars:= False;
+    Settings.HideBars:= False;
     PnlTop.Visible:= True;
     PnlStatus.Visible:= True;
     PMnuHideBars.Caption:= SMnuMaskBars;
@@ -370,7 +373,7 @@ begin
   end else
   begin
     FMinHeight:= GetSystemMetrics(SM_CYCAPTION)+142;
-    HideBars:= True;
+    Settings.HideBars:= True;
     PnlTop.Visible:= False;
     PnlStatus.Visible:= False;
     PMnuHideBars.Caption:= SMnuShowBars;
@@ -394,6 +397,7 @@ begin
   CropBitmap(SBGroup.Glyph, PmnuGroup.Bitmap, SBGroup.Enabled);
   CropBitmap(SBFolder.Glyph, PMnuFolder.Bitmap, SBFolder.Enabled);
   CropBitmap(SBAddFile.Glyph, PMnuAddFile.Bitmap, SBAddFile.Enabled);
+  ImgSavDisabled:= PMnuSave.Bitmap;
   PmnuSaveEnable (False);
   CropBitmap(SBPrefs.Glyph, PMnuPrefs.Bitmap, SBPrefs.Enabled);
   CropBitmap(SBLoadConf.Glyph, PMnuLoadConf.Bitmap, SBLoadConf.Enabled);
@@ -402,14 +406,14 @@ begin
   CropBitmap(SBAbout.Glyph, PTrayMnuAbout.Bitmap, SBAbout.Enabled);
   CropBitmap(SBQuit.Glyph, PTrayMnuQuit.Bitmap, SBQuit.Enabled);
   BarsHeight:= ClientHeight-ListView1.Height;
-  GroupName:= GetGrpParam;
+  Settings.GroupName:= GetGrpParam;
   {$IFDEF WIN32}
       OSTarget:= '32 bits';
   {$ENDIF}
   {$IFDEF WIN64}
       OSTarget:= '64 bits';
   {$ENDIF}
-  LoadConfig(GroupName);
+  LoadConfig(Settings.GroupName);
   If (WinVersion.IsWow64) and (OsTarget='32 bits') then
   begin
     ShowMessage('Utilisez la version 64 bits de ce programme');
@@ -426,10 +430,10 @@ var
 begin
   if length(FileNames) > 0 then
   begin
-    For i:= 0 to High(Filenames) do
+    For i:= 0 to High(Filenames)-1 do
       ListeFichiers.AddFile(GetFile(FileNames[i]));
-    ListeChange:= True;
-    LVDisplayFiles;
+      ListeChange:= True;
+      LVDisplayFiles;
   end;
 end;
 
@@ -438,7 +442,7 @@ var
   BorderWidths: Integer;
 begin
   BorderWidths:= Width-ClientWidth;
-  if HideBars then begin
+  if Settings.HideBars then begin
      ShowBarsHeight:= Height+BarsHeight;
       FminWidth:= 250;
      HideBarsHeight:= Height;
@@ -454,10 +458,10 @@ end;
 
 function TFProgram.PMnuSaveEnable (Enable: Boolean):Boolean;
 begin
-  PMnuSave.Enabled:= Enable;
-  If Enabled then CropBitmap(SBSave.Glyph, PMnuSave.Bitmap, Enable)
-  else CropBitmap(SBSave.Glyph, PMnuSave.Bitmap, Enable);
-  result:= Enabled;
+ PMnuSave.Enabled:= Enable;
+ If Enabled then CropBitmap(SBSave.Glyph, PMnuSave.Bitmap, Enable)
+ else CropBitmap(SBSave.Glyph, PMnuSave.Bitmap, Enable);
+  result:= Enable;
 end;
 
 
@@ -467,27 +471,30 @@ var
   hWind: HWND;
   LangFound: Boolean;
 begin
-  GrpIconFile:= '';
-  GrpIconIndex:= 0;
-  GroupName:= GrpName;
+  with Settings do
+  begin
+    GrpIconFile:= '';
+    GrpIconIndex:= 0;
+    GroupName:= GrpName;
+  end;
   ConfigFile:= PrgMgrAppsData+GrpName+'.xml';
   If not FileExists(ConfigFile) then
   begin
-    If FileExists (PrgMgrAppsData+GroupName+'.bk0') then
+    If FileExists (PrgMgrAppsData+Settings.GroupName+'.bk0') then
     begin
-      RenameFile(PrgMgrAppsData+GroupName+'.bk0', ConfigFile);
+      RenameFile(PrgMgrAppsData+Settings.GroupName+'.bk0', ConfigFile);
       For i:= 1 to 5
-      do if FileExists (PrgMgrAppsData+GroupName+'.bk'+IntToStr(i))     // Renomme les précédentes si elles existent
-       then  RenameFile(PrgMgrAppsData+GroupName+'.bk'+IntToStr(i), PrgMgrAppsData+GroupName+'.bk'+IntToStr(i-1));
+      do if FileExists (PrgMgrAppsData+Settings.GroupName+'.bk'+IntToStr(i))     // Renomme les précédentes si elles existent
+       then  RenameFile(PrgMgrAppsData+Settings.GroupName+'.bk'+IntToStr(i), PrgMgrAppsData+Settings.GroupName+'.bk'+IntToStr(i-1));
     end else
     begin
-      SaveConfig(GroupName, all)
+      SaveConfig(Settings.GroupName, all)
     end;
   end;
   LoadCfgFile(ConfigFile);
   // Si le même groupe est déjà actif, on récupère le handle de l'application qui est propriétaire de la fiche
   // In Lazarus, forms have 'Window'Class
-  hWind:= GetWindow(FindWindow (Pchar('Window'), Pchar(GroupName)), GW_OWNER) ;
+  hWind:= GetWindow(FindWindow (Pchar('Window'), Pchar(Settings.GroupName)), GW_OWNER) ;
   If hWind > 0 then
   begin
      ShowWindow(hWind, SW_SHOWNORMAL);
@@ -500,30 +507,29 @@ begin
     For i:= 0 to LangNums.Count-1 do
     begin
       Prefs.CBLangue.Items.Add (LangFile.ReadString(LangNums.Strings[i],'Language', 'Aucune'));
-      If LangNums.Strings[i] = LangStr then LangFound:= True;
+      If LangNums.Strings[i] = Settings.LangStr then LangFound:= True;
     end;
   // Si la langue n'est pas traduite, alors on passe en Anglais
   If not LangFound then
   //If LangFound then
   begin
     langue:= LANG_ENGLISH;
-    LangStr:= IntToStr(langue);
+    Settings.LangStr:= IntToStr(langue);
   end;
-  CurLang:= LangNums.IndexOf(LangStr);
-  PrevLangStr:= LangStr;
+  CurLang:= LangNums.IndexOf(Settings.LangStr);
   Modlangue;
   // Taille et position précédentes
-  if SavSizePos then
+  if Settings.SavSizePos then
   begin
     Try
-      AppState:= StrToInt('$'+Copy(WState,1,4));
-      Top:= StrToInt('$'+Copy(WState,5,4));
-      Left:= StrToInt('$'+Copy(WState,9,4));
-      Height:= StrToInt('$'+Copy(WState,13,4));
-      Width:= StrToInt('$'+Copy(WState,17,4)) ;
+      AppState:= StrToInt('$'+Copy(Settings.WState,1,4));
+      Top:= StrToInt('$'+Copy(Settings.WState,5,4));
+      Left:= StrToInt('$'+Copy(Settings.WState,9,4));
+      Height:= StrToInt('$'+Copy(Settings.WState,13,4));
+      Width:= StrToInt('$'+Copy(Settings.WState,17,4)) ;
     except
     end;
-    TrayProgman.Visible:= MiniInTray;
+    TrayProgman.Visible:= Settings.MiniInTray;
 
     if Appstate = SW_SHOWMINIMIZED then
     begin
@@ -554,25 +560,23 @@ begin
            PTrayMnuMaximize.Enabled:= False;
          end;
     end;
-    HidInTaskBar(HideInTaskBar and MiniInTray);     // ON ne cache que si l'icone est dans la zone de notification !!!
-    PnlTop.Visible:= not HideBars;
-    PnlStatus.Visible:= not HideBars;
-    if HideBars then begin
+    HidInTaskBar(Settings.HideInTaskBar and Settings.MiniInTray);     // ON ne cache que si l'icone est dans la zone de notification !!!
+    PnlTop.Visible:= not Settings.HideBars;
+    PnlStatus.Visible:= not Settings.HideBars;
+    if Settings.HideBars then begin
       PMnuHideBars.Caption:= SMnuShowBars;
     end else
     begin
       PMnuHideBars.Caption:= SMnuMaskBars;
     end;
   end;
-  ListeFichiers.OnChange:=  @ListeFichiersOnChange;
-  CBDisplay.ItemIndex:= IconDisplay;
-  PrevIconDisplay:= IconDisplay;
-  CBSort.ItemIndex:= IconSort;
-  PrevIconSort:= IconSort;
-  Application.Title:= GroupName;
-  Caption:= GroupName;
-  If not FileExists(GrpIconFile) then GrpIconFile:= Application.ExeName;
-  Application.Icon.Handle:= ExtractIconU(handle, GrpIconFile, GrpIconIndex);
+
+  CBDisplay.ItemIndex:= Settings.IconDisplay;
+  CBSort.ItemIndex:= Settings.IconSort;
+  Application.Title:= Settings.GroupName;
+  Caption:= Settings.GroupName;
+  If not FileExists(Settings.GrpIconFile) then Settings.GrpIconFile:= Application.ExeName;
+  Application.Icon.Handle:= ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
   version:= GetVersionInfo.ProductVersion;
   //Version:= '0.5.0.0';
   UpdateUrl:= 'http://www.sdtp.com/versions/version.php?program=programgrpmgr&version=';
@@ -589,16 +593,20 @@ begin
   AboutBox.UrlWebsite:=GetVersionInfo.Comments;
   ChkVersion;
   // Dont want to have the same icon handle
-  ImgPrgSel.Picture.Icon.Handle:=  ExtractIconU(handle, GrpIconFile, GrpIconIndex);
+  ImgPrgSel.Picture.Icon.Handle:=  ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
+
+  ListeFichiers.OnChange:=  @ListeFichiersOnChange;
+  Settings.OnChange:= @SettingsOnChange;
+  Settings.OnStateChange:= @SettingsOnStateChange;
   LVDisplayFiles;
 end;
 
 procedure TFProgram.ChkVersion;
 begin
   //Dernière recherche il y a plus de 7 jours ?
-  if (Trunc(Now) > LastUpdChk+7) and (not NoChkNewVer) then
+  if (Trunc(Now) > Settings.LastUpdChk+7) and (not Settings.NoChkNewVer) then
   begin
-    LastUpdChk:= Trunc(Now);
+    Settings.LastUpdChk:= Trunc(Now);
     FChkNewVer.GetLastVersion (ChkVerURL, 'programgrpmgr', Handle);
   end;
 end;
@@ -688,30 +696,20 @@ begin
     With CfgXML do
     begin
       // Main settings
-      GroupName:= xmlReadValue(CfgXML, 'groupname', atString);
-      SavSizePos:= xmlReadValue(CfgXML, 'savsizepos', atBoolean);
-      PrevSavSizePos:= SavSizePos;
-      WState:=  xmlReadValue(CfgXML, 'wstate', atString);
-      PrevWState:= WState;
-      GrpIconFile:= xmlReadValue(CfgXML, 'grpiconfile', atString);
-      PrevGrpIconFile:= GrpIconFile;
-      GrpIconIndex:= xmlReadValue(CfgXML, 'grpiconindex', atInteger);
-      PrevGrpIconIndex:= GrpIconIndex;
-      IconDisplay:= xmlReadValue(CfgXML, 'icondisplay', atInteger);
-      IconSort:= xmlReadValue(CfgXML, 'iconsort', atInteger);
-      LastUpdChk:= xmlReadValue(CfgXML, 'lastupdchk', atDatetime);
-      PrevLastUpdChk:= LastUpdChk;
-      NoChkNewVer:= xmlReadValue(CfgXML, 'nochknewver', atBoolean);
-      PrevNoChkNewVer:= NoChkNewVer;
-      StartWin:= xmlReadValue(CfgXML, 'startwin', atBoolean);
-      PrevStartWin:= StartWin;
-      MiniInTray:= xmlReadValue(CfgXML, 'miniintray', atBoolean);
-      PrevMiniInTray:= MiniInTray;
-      HideInTaskBar:= xmlReadValue(CfgXML, 'hideintaskbar', atBoolean);
-      PrevHideInTaskBar:= HideInTaskBar;
-      HideBars:= xmlReadValue(CfgXML, 'hidebars', atBoolean);
-      PrevHideBars:= HideBars;
-      LangStr:= xmlReadValue(CfgXML, 'langstr', atString);
+      Settings.GroupName:= xmlReadValue(CfgXML, 'groupname', atString);
+      Settings.SavSizePos:= xmlReadValue(CfgXML, 'savsizepos', atBoolean);
+      Settings.WState:=  xmlReadValue(CfgXML, 'wstate', atString);
+      Settings.GrpIconFile:= xmlReadValue(CfgXML, 'grpiconfile', atString);
+      Settings.GrpIconIndex:= xmlReadValue(CfgXML, 'grpiconindex', atInteger);
+      Settings.IconDisplay:= xmlReadValue(CfgXML, 'icondisplay', atInteger);
+      Settings.IconSort:= xmlReadValue(CfgXML, 'iconsort', atInteger);
+      Settings.LastUpdChk:= xmlReadValue(CfgXML, 'lastupdchk', atDatetime);
+      Settings.NoChkNewVer:= xmlReadValue(CfgXML, 'nochknewver', atBoolean);
+      Settings.StartWin:= xmlReadValue(CfgXML, 'startwin', atBoolean);
+      Settings.MiniInTray:= xmlReadValue(CfgXML, 'miniintray', atBoolean);
+      Settings.HideInTaskBar:= xmlReadValue(CfgXML, 'hideintaskbar', atBoolean);
+      Settings.HideBars:= xmlReadValue(CfgXML, 'hidebars', atBoolean);
+      Settings.LangStr:= xmlReadValue(CfgXML, 'langstr', atString);
 
       // files settings
       iNode := DocumentElement.FirstChild;
@@ -757,17 +755,17 @@ begin
     begin
       // Main config is in root node
       RootNode := CreateElement('config');
-      TDOMElement(RootNode).SetAttribute('groupname', GroupName {%H-});
-      TDOMElement(RootNode).SetAttribute ('savsizepos', IntToStr(Integer(SavSizePos)){%H-});
-      If IconDisplay < 0 then IconDisplay:= 3;
-      TDOMElement(RootNode).SetAttribute ('icondisplay', IntToStr(IconDisplay){%H-});
-      If IconSort < 0 then IconSort:= 0;
-      TDOMElement(RootNode).SetAttribute ('iconsort' , IntToStr(IconSort){%H-});
-      TDOMElement(RootNode).SetAttribute ('miniintray',IntToStr(Integer(MiniInTray)){%H-});
-      TDOMElement(RootNode).SetAttribute ('hideintaskbar', IntToStr(Integer(HideInTaskBar)){%H-});
-      TDOMElement(RootNode).SetAttribute ('hidebars', IntToStr(Integer(HideBars)){%H-});
+      TDOMElement(RootNode).SetAttribute('groupname', Settings.GroupName {%H-});
+      TDOMElement(RootNode).SetAttribute ('savsizepos', IntToStr(Integer(Settings.SavSizePos)){%H-});
+      If Settings.IconDisplay < 0 then Settings.IconDisplay:= 3;
+      TDOMElement(RootNode).SetAttribute ('icondisplay', IntToStr(Settings.IconDisplay){%H-});
+      If Settings.IconSort < 0 then Settings.IconSort:= 0;
+      TDOMElement(RootNode).SetAttribute ('iconsort' , IntToStr(Settings.IconSort){%H-});
+      TDOMElement(RootNode).SetAttribute ('miniintray',IntToStr(Integer(Settings.MiniInTray)){%H-});
+      TDOMElement(RootNode).SetAttribute ('hideintaskbar', IntToStr(Integer(Settings.HideInTaskBar)){%H-});
+      TDOMElement(RootNode).SetAttribute ('hidebars', IntToStr(Integer(Settings.HideBars)){%H-});
       // Window position
-      WState:= '';
+      Settings.WState:= '';
       If WindowState = wsMaximized then
       begin
         AppState :=  SW_SHOWMAXIMIZED;                   // Application is never maximized, only the main form
@@ -781,14 +779,14 @@ begin
       if Left < 0 then WinPos[2]:= 0 else WinPos[2]:= Left;
       WinPos[3]:= Height;
       WinPos[4]:= Width;
-      For i:= 0 to 4 do WState:=WState+IntToHex(WinPos[i], 4);
-      TDOMElement(RootNode).SetAttribute ('wstate', WState {%H-});
-      TDOMElement(RootNode).SetAttribute ('grpiconfile', GrpIconFile {%H-});
-      TDOMElement(RootNode).SetAttribute ('grpiconindex', IntToStr(GrpIconIndex){%H-});
-      TDOMElement(RootNode).SetAttribute ('nochknewver', IntToStr(Integer(NoChkNewVer)){%H-});
-      TDOMElement(RootNode).SetAttribute ('lastupdchk', DateToStr(LastUpdChk){%H-});
-      TDOMElement(RootNode).SetAttribute ('startwin', IntToStr(Integer(StartWin)){%H-});
-      TDOMElement(RootNode).SetAttribute ('langstr', LangStr {%H-});
+      For i:= 0 to 4 do Settings.WState:=Settings.WState+IntToHex(WinPos[i], 4);
+      TDOMElement(RootNode).SetAttribute ('wstate', Settings.WState {%H-});
+      TDOMElement(RootNode).SetAttribute ('grpiconfile', Settings.GrpIconFile {%H-});
+      TDOMElement(RootNode).SetAttribute ('grpiconindex', IntToStr(Settings.GrpIconIndex){%H-});
+      TDOMElement(RootNode).SetAttribute ('nochknewver', IntToStr(Integer(Settings.NoChkNewVer)){%H-});
+      TDOMElement(RootNode).SetAttribute ('lastupdchk', DateToStr(Settings.LastUpdChk){%H-});
+      TDOMElement(RootNode).SetAttribute ('startwin', IntToStr(Integer(Settings.StartWin)){%H-});
+      TDOMElement(RootNode).SetAttribute ('langstr', Settings.LangStr {%H-});
       Appendchild(RootNode);
       If ListeFichiers.Count > 0 Then
       begin
@@ -827,14 +825,14 @@ begin
     Reg:= TRegistry.Create;
     Reg.RootKey:= HKEY_CURRENT_USER;
     Reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\Run', True);
-    if StartWin  then  // Démarrage avec Windows coché
+    if Settings.StartWin  then  // Démarrage avec Windows coché
     begin
-      if not Reg.ValueExists(ProgName+'_'+GroupName) then
-      reg.WriteString(ProgName+'_'+GroupName, '"'+Application.ExeName+'" Grp='+GroupName) ;
+      if not Reg.ValueExists(ProgName+'_'+Settings.GroupName) then
+      reg.WriteString(ProgName+'_'+Settings.GroupName, '"'+Application.ExeName+'" Grp='+Settings.GroupName) ;
       Reg.CloseKey;
-    end else if Reg.ValueExists(ProgName+'_'+GroupName) then
+    end else if Reg.ValueExists(ProgName+'_'+Settings.GroupName) then
     begin
-      Reg.DeleteValue(ProgName+'_'+GroupName);
+      Reg.DeleteValue(ProgName+'_'+Settings.GroupName);
       Reg.CloseKey;
     end;
     Reg.Free;
@@ -847,6 +845,7 @@ var
   WinPos : array [0..10] of Integer;
   i: Integer;
   WindowPlacement: TWindowPlacement;
+  WState: String;
 begin
  If (WindowState = wsMinimized) then
   begin
@@ -856,29 +855,32 @@ begin
     GetWindowPlacement(Handle, @WindowPlacement);
     AppState := WindowPlacement.showCmd;
   end;
- WState:= '';
+  WState:= '';
   WinPos[0]:= AppState;
   if Top < 0 then WinPos[1]:= 0 else WinPos[1]:= Top;
   if Left < 0 then WinPos[2]:= 0 else WinPos[2]:= Left;
   WinPos[3]:= Height;
   WinPos[4]:= Width;
   For i:= 0 to 4 do WState:=WState+IntToHex(WinPos[i], 4);
-  If ((WState<>PrevWState) or
+  Settings.WState:=WState;
+  If ({(WState<>PrevWState) or
            (GrpIconFile<>PrevGrpIconFile) or
            (GrpIconIndex <> PrevGrpIconIndex) or
            (LastUpdChk<>PrevLastUpdChk) or
            (NoChkNewVer<>PrevNoChkNewVer) or
            (StartWin<>PrevStartWin) or
-           (LangStr<>PrevLangStr) or
-           (Prefs.ImgChanged) or
            (MiniInTray <> PrevMiniInTray) or
            (HideInTaskBar <> PrevHideInTaskBar) or
            (HideBars <> PrevHideBars)) or
-           (SavSizePos <> PrevSavSizePos) then
+          (LangStr<>PrevLangStr) or             }
+           (Prefs.ImgChanged) or
+           //(Settings.SavSizePos <> PrevSavSizePos)} then
+            WStateChange) then
    begin
     result:= State ;
   end else
-  If ListeChange then begin
+  If ListeChange or SettingsChange then
+  begin
     result:= all;
   end else
   begin
@@ -888,34 +890,36 @@ end;
 
 procedure TFProgram.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-    If ListeChange then
+  If ListeChange or SettingsChange then
   begin
     if WinVersion.VerMaj > 5 then   // Vista et après
     FSaveCfg.IconDefFile:= SystemRoot+'\system32\imageres.dll' else
     FSaveCfg.IconDefFile:= SystemRoot+'\system32\shell32.dll';
-    FSaveCfg.EGrpName.Text:= GroupName;
+    FSaveCfg.EGrpName.Text:= Settings.GroupName;
     FSaveCfg.ImgGrpIcon.Picture.Icon:= Application.Icon;
     If FSaveCfg.Showmodal = mrOK then
     begin
       if FSaveCfg.RBtnSaveAs.Checked then
       begin
-        if length(FSaveCfg.EGrpName.Text) > 0 then GroupName:= FSaveCfg.EGrpName.Text;
+        if length(FSaveCfg.EGrpName.Text) > 0 then Settings.GroupName:= FSaveCfg.EGrpName.Text;
       end;
 
       if FSaveCfg.CBXShortCut.Checked then
       begin
-        if length(FSaveCfg.IconFile) > 0 then GrpIconFile:= FSaveCfg.IconFile;
-        if FSaveCfg.IconIndex >=0 then GrpIconIndex:= FSaveCfg.IconIndex;
-        CreateShortcut(Application.ExeName, DesktopPath, GroupName, '','', 'Grp='+GroupName,
-                       ShortCutName, GrpIconFile, GrpIconIndex);
+        if length(FSaveCfg.IconFile) > 0 then Settings.GrpIconFile:= FSaveCfg.IconFile;
+        if FSaveCfg.IconIndex >=0 then Settings.GrpIconIndex:= FSaveCfg.IconIndex;
+        CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
+                       ShortCutName, Settings.GrpIconFile, Settings.GrpIconIndex);
 
       end;
-      SaveConfig(GroupName, StateChanged);
+      SaveConfig(Settings.GroupName, StateChanged);
     end;
   end else
   begin
-    SaveConfig(GroupName, StateChanged);
+    SaveConfig(Settings.GroupName, StateChanged);
     ListeChange:= False;
+    SettingsChange:= False;
+    WStateChange:= False;
   end;
 end;
 
@@ -926,6 +930,23 @@ begin
   SBSave.Enabled:= True;
   PMnuSave.Enabled:= True;
   PMnuSaveEnable(True);
+end;
+
+procedure TFProgram.SettingsOnChange(sender: TObject);
+begin
+  SettingsChange:= True;
+  SBSave.Enabled:= True;
+  PMnuSave.Enabled:= True;
+  PMnuSaveEnable(True);
+end;
+
+procedure TFProgram.SettingsOnStateChange(sender: TObject);
+begin
+
+WStateChange:= True;
+  //SBSave.Enabled:= True;
+  //PMnuSave.Enabled:= True;
+  //PMnuSaveEnable(True);
 end;
 
 function TFProgram.GetFile(FileName: string):TFichier;
@@ -962,6 +983,7 @@ begin
    end;
 end;
 
+
 // Procedure to display icons and other in the listview
 
 procedure TFProgram.LVDisplayFiles;
@@ -970,13 +992,13 @@ var
   Flag: Integer;
   //IcoSize: Integer;
   CurIcon: TIcon;
-  hnd: Thandle;
   i: Integer;
   w: Integer;
-  hIcon: Thandle;
+  hIcon, hicons: Thandle;
   nIconId : DWORD;
   ItemPos: Tpoint;
   IcoInfo: TICONINFO;
+
 begin
   if ListeFichiers.Count = 0 then
   begin
@@ -1031,14 +1053,14 @@ begin
          end;
     end;
 
-    ListeFichiers.DoSort;
+     ListeFichiers.DoSort;
     ListView1.Clear;
     ImageList.Clear;
-
     ImageList.Height:= IcoSize;
     ImageList.Width:= IcoSize;
-
-    Application.ProcessMessages; // Application.ProcessM
+    // Set spacing of icons in listview
+    PostMessage(Listview1.Handle,LVM_SETICONSPACING, 0,MakeLParam(-1, -1));
+    Application.ProcessMessages;
 
     // Create a temporary TIcon
     CurIcon := TIcon.Create;
@@ -1046,7 +1068,7 @@ begin
     CurIcon.Width:= IcoSize;
     ListView1.LargeImages:= ImageList;
     // retrieve handle of ImageList
-    hnd:= ImageList.ResolutionByIndex[0].Reference.Handle;
+
     setLength(PtArray, ListeFichiers.Count);
     for i:= 0 to ListeFichiers.Count-1 do
     begin
@@ -1065,22 +1087,23 @@ begin
       begin
         //Function only from W2000, and can be discontinued ?
         // Do not display properly low color depth icons
-        // The function doesnt extract properly dll icons
-        If (PrivateExtractIcons ( PChar(ListeFichiers.GetItem(i).IconFile), ListeFichiers.GetItem(i).IconIndex,
-                     IcoSize, Icosize, @hIcon, @nIconId, 1, LR_LOADFROMFILE) <>0) and (hIcon <> 0) and
-                     (UpperCase(ExtractFileExt(ListeFichiers.GetItem(i).IconFile)) <> 'DLL') and
-                     (ListeFichiers.GetItem(i).OldIcon = false) then
+        if (SHDefExtractIcon(PChar(ListeFichiers.GetItem(i).IconFile), ListeFichiers.GetItem(i).IconIndex,
+                             0, hicon, hicons, IcoSize) = 0) and ( not ListeFichiers.GetItem(i).OldIcon) then
+
+        //If (PrivateExtractIcons ( PChar(ListeFichiers.GetItem(i).IconFile), ListeFichiers.GetItem(i).IconIndex,
+        //             IcoSize, Icosize, @hIcon, @nIconId, 1, LR_LOADFROMFILE) <>0) and (hIcon <> 0) and
+        //             (ListeFichiers.GetItem(i).OldIcon = false) then
         begin
-          GetIconInfo(hicon, @IcoInfo);
-          ListItem.ImageIndex := ImageList_Add(hnd, IcoInfo.hbmColor, IcoInfo.hbmMask);
-          //ListItem.ImageIndex := ImageList_Add(hnd, IcoInfo.hbmmask, 0);
-          // CurIcon.Handle:= hIcon;
-          // ListItem.ImageIndex := ImageList_AddIcon(hnd, CurIcon.Handle);
-          end else
+          //GetIconInfo(hicon, @IcoInfo);
+          //ListItem.ImageIndex := ImageList_Add(ImageList.ResolutionByIndex[0].Reference.Handle, IcoInfo.hbmColor, IcoInfo.hbmMask);
+          CurIcon.Handle:= hicon;
+        end else
         begin
-          GetIconFromFile(ListeFichiers.GetItem(i).IconFile ,CurIcon, Flag,0) ;
-          ListItem.ImageIndex := ImageList_AddIcon(hnd, CurIcon.Handle);
+        // This one only get teh first icon in file
+        GetIconFromFile(ListeFichiers.GetItem(i).IconFile ,CurIcon, Flag,0) ;
         end;
+        ListItem.ImageIndex := ImageList_AddIcon(ImageList.ResolutionByIndex[0].Reference.Handle, CurIcon.Handle);
+
       end;
        // Create an array of items coordinates
       ItemPos.x:= (Listview1.Items.Item[i].Position.x) +(IcoSize div 2);    // center coordinate
@@ -1164,8 +1187,12 @@ end;
 procedure TFProgram.ListView1SelectItem(Sender: TObject; Item: TListItem;
   Selected: Boolean);
 begin
+  try
+    // when llist change generate an error
     ListView1.Hint:= ListeFichiers.GetItem(Item.Index).Description ;
     LPrgSel.Caption:= ListView1.Hint;
+  except
+  end;
 end;
 
 
@@ -1309,7 +1336,7 @@ begin
              ListeFichiersOnChange(Self);
            end;
       // Supprime un groupe
-    mrRetry: if LV1.Selected.Caption = GroupName
+    mrRetry: if LV1.Selected.Caption = Settings.GroupName
                then MsgDlg(Caption, NoDeleteGroup, mtInformation, [mbOK],capt, 0)
                else
                begin
@@ -1353,25 +1380,26 @@ begin
   if WinVersion.VerMaj > 5 then   // Vista et après
   FSaveCfg.IconDefFile:= SystemRoot+'\system32\imageres.dll' else
   FSaveCfg.IconDefFile:= SystemRoot+'\system32\shell32.dll';
-  FSaveCfg.EGrpName.Text:= GroupName;
-  FSaveCfg.ImgGrpIcon.Picture.Icon.Handle:= ExtractIconU(handle, GrpIconFile, GrpIconIndex);
+  FSaveCfg.EGrpName.Text:= Settings.GroupName;
+  FSaveCfg.ImgGrpIcon.Picture.Icon.Handle:= ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
   If FSaveCfg.Showmodal = mrOK then
   begin
     if FSaveCfg.RBtnSaveAs.Checked then
     begin
-      if length(FSaveCfg.EGrpName.Text) > 0 then GroupName:= FSaveCfg.EGrpName.Text;
+      if length(FSaveCfg.EGrpName.Text) > 0 then Settings.GroupName:= FSaveCfg.EGrpName.Text;
     end;
-    if length(FSaveCfg.IconFile) > 0 then GrpIconFile:= FSaveCfg.IconFile;
-    if FSaveCfg.IconIndex >=0 then GrpIconIndex:= FSaveCfg.IconIndex;
+    if length(FSaveCfg.IconFile) > 0 then Settings.GrpIconFile:= FSaveCfg.IconFile;
+    if FSaveCfg.IconIndex >=0 then Settings.GrpIconIndex:= FSaveCfg.IconIndex;
     if FSaveCfg.CBXShortCut.Checked then
     begin
-      if length(FSaveCfg.IconFile) > 0 then GrpIconFile:= FSaveCfg.IconFile;
-      if FSaveCfg.IconIndex >=0 then GrpIconIndex:= FSaveCfg.IconIndex;
-      CreateShortcut(Application.ExeName, DesktopPath, GroupName, '','', 'Grp='+UTF8ToAnsi(GroupName),
-                     ShortCutName, GrpIconFile, GrpIconIndex);
+      if length(FSaveCfg.IconFile) > 0 then Settings.GrpIconFile:= FSaveCfg.IconFile;
+      if FSaveCfg.IconIndex >=0 then Settings.GrpIconIndex:= FSaveCfg.IconIndex;
+      CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
+                     ShortCutName, Settings.GrpIconFile, Settings.GrpIconIndex);
     end;
-    SaveConfig(GroupName, StateChanged);
+    SaveConfig(Settings.GroupName, StateChanged);
     ListeChange:= False;
+    SettingsChange:= False;
     SBSave.Enabled:= False;
     PMnuSave.Enabled:= PMnuSaveEnable(False);
   end ;
@@ -1387,44 +1415,44 @@ begin
     IconDefFile:= SystemRoot+'\system32\shell32.dll';
     ImgGrpIcon.Picture.Icon.Handle:= Application.Icon.Handle;
     CBLangue.ItemIndex:= CurLang;
-    CBStartWin.Checked:= StartWin;
+    CBStartWin.Checked:= Settings.StartWin;
     // CBStartMini.Checked:= StartMini;
-    CBSavSizePos.Checked:= SavSizePos;
-    CBNoChkNewVer.Checked:= NoChkNewVer;
-    CBMiniInTray.Checked:= MiniInTray;
-    CBHideInTaskbar.Enabled:= MiniInTray;
-    CBHideInTaskbar.checked:= HideInTaskbar;
+    CBSavSizePos.Checked:= Settings.SavSizePos;
+    CBNoChkNewVer.Checked:= Settings.NoChkNewVer;
+    CBMiniInTray.Checked:= Settings.MiniInTray;
+    CBHideInTaskbar.Enabled:= Settings.MiniInTray;
+    CBHideInTaskbar.checked:= Settings.HideInTaskbar;
     if ShowModal = mrOK then
     begin
      If CBLangue.ItemIndex <> CurLang then
       begin
         CurLang:= CBLangue.ItemIndex;
-        LangStr:= LangNums[CurLang];
+        Settings.LangStr:= LangNums[CurLang];
         ModLangue;
       end;
-      StartWin:= CBStartWin.Checked;
-      SavSizePos:= CBSavSizePos.Checked;
-      NoChkNewVer:= CBNoChkNewVer.Checked;
-      MiniInTray:= CBMiniInTray.Checked;
+      Settings.StartWin:= CBStartWin.Checked;
+      Settings.SavSizePos:= CBSavSizePos.Checked;
+      Settings.NoChkNewVer:= CBNoChkNewVer.Checked;
+      Settings.MiniInTray:= CBMiniInTray.Checked;
       if ImgChanged then
       begin
         Application.Icon:= ImgGrpIcon.Picture.Icon ;
         Application.ProcessMessages;
-        GrpIconFile:= IconFile;
-        GrpIconIndex:= IconIndex;
+        Settings.GrpIconFile:= IconFile;
+        Settings.GrpIconIndex:= IconIndex;
         SBSave.Enabled:= True;
         PMnuSave.Enabled:= PmnuSaveEnable(True);
         //ImgChanged:= False;
       end;
     end;
-    HideInTaskBar:= CBHideInTaskbar.Checked;
-    HidinTaskBar(HideInTaskBar and MiniInTray);
+    Settings.HideInTaskBar:= CBHideInTaskbar.Checked;
+    HidinTaskBar(Settings.HideInTaskBar and Settings.MiniInTray);
     if CBXShortCut.Checked then
     begin
-      CreateShortcut(Application.ExeName, DesktopPath, GroupName, '','', 'Grp='+GroupName,
-                     ShortCutName, GrpIconFile, GrpIconIndex);
+      CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
+                     ShortCutName, Settings.GrpIconFile, Settings.GrpIconIndex);
     end;
-    TrayProgman.Visible:= MiniInTray;
+    TrayProgman.Visible:= Settings.MiniInTray;
     //SaveConfig(GroupName, StateChanged);
   end;
 end;
@@ -1469,12 +1497,11 @@ end;
 
 procedure TFProgram.SBAboutClick(Sender: TObject);
 begin
-      AboutBox.LastUpdate:= LastUpdChk;
-    AboutBox.LUpdate.Hint:=  LastUpdateSearch+': '+DateToStr(AboutBox.LastUpdate);
-    AboutBox.ShowModal;
-    LastUpdChk:= AboutBox.LastUpdate;
-    exit;
-
+  AboutBox.LastUpdate:= Settings.LastUpdChk;
+  AboutBox.LUpdate.Hint:=  LastUpdateSearch+': '+DateToStr(AboutBox.LastUpdate);
+  AboutBox.ShowModal;
+   Settings.LastUpdChk:= AboutBox.LastUpdate
+  //exit;
 end;
 
 procedure TFProgram.SBQuitClick(Sender: TObject);
@@ -1530,7 +1557,7 @@ begin
 
   liOver:= ListView1.GetItemAt(X, Y);
   ListView1.Hint:='';
-  ImgPrgSel.Picture.Icon.Handle:=  ExtractIconU(handle, GrpIconFile, GrpIconIndex);
+  ImgPrgSel.Picture.Icon.Handle:=  ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
   // We are on an item
   if liOver <> nil then
   begin
@@ -1609,16 +1636,17 @@ end;
 procedure TFProgram.CBDisplayChange(Sender: TObject);
 begin
   ListeChange:= True;
+  SettingsChange:= True;
   LVDisplayFiles;
-  IconDisplay:= CBDisplay.ItemIndex;
-  IconSort:= CBSort.ItemIndex;
+  Settings.IconDisplay:= CBDisplay.ItemIndex;
+  Settings.IconSort:= CBSort.ItemIndex;
   SBSave.Enabled:= True;
   PMnuSave.Enabled:= PMnuSaveEnable(True);
 end;
 
 procedure TFProgram.CBSortChange(Sender: TObject);
 begin
-  IconSort:= CBSort.ItemIndex;
+  Settings.IconSort:= CBSort.ItemIndex;
 end;
 
 
@@ -1744,8 +1772,11 @@ end;
 
 
 procedure TFProgram.ModLangue ;
+var
+  LangStr: String;
 begin
 //ShowMessage(LangStr);
+LangStr:=  Settings.LangStr;
 With LangFile do
  begin
    // MessageBox buttons
@@ -1756,11 +1787,11 @@ With LangFile do
    CBDisplay.Items.Text:= StringReplace(ReadString(LangStr, 'CBDisplay.Items.Text',
                       ''),
                       '%s', #13#10, [rfReplaceAll]);
-   CBDisplay.ItemIndex:= IconDisplay;
+   CBDisplay.ItemIndex:= Settings.IconDisplay;
    CBSort.Items.Text:=  StringReplace(ReadString(LangStr, 'CBSort.Items.Text',
                       'Pas de tri%sTri par nom (ascendant)%sTri par nom (descendant)%sTri par date (ascendant)%sTri par date (descendant)'),
                      '%s', #13#10, [rfReplaceAll]);
-   CBSort.ItemIndex:= IconSort;
+   CBSort.ItemIndex:= Settings.IconSort;
    SDD1.Title:= ReadString(LangStr, 'SDD1.Title', SDD1.Title);
    SBGroup.Hint:= ReadString(LangStr, 'SBGroup.Hint', SBGroup.Hint);
    SBFolder.Hint:= ReadString(LangStr, 'SBFolder.Hint', SBFolder.Hint);
@@ -1792,7 +1823,7 @@ With LangFile do
 
    SMnuMaskBars:= LangFile.ReadString(LangStr, 'PMnuMaskBars','Masquer la barre de boutons');
    SMnuShowBars:= LangFile.ReadString(LangStr, 'PMnuShowBars','Afficher la barre de boutons');
-   if HideBars then PMnuHideBars.Caption:= SMnuShowBars
+   if Settings.HideBars then PMnuHideBars.Caption:= SMnuShowBars
    else PMnuHideBars.Caption:= SMnuMaskBars;
    ShortCutName:= ReadString(LangStr, 'ShortCutName', 'Gestionnaire de groupe de programmes');
 
