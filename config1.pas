@@ -10,7 +10,7 @@ unit Config1;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, laz2_DOM , laz2_XMLRead, bbutils;
 
 type
   TConfig = class
@@ -31,8 +31,9 @@ type
     FHideInTaskBar: Boolean;
     FHideBars: Boolean;
     FLangStr: String;
+    Parent: TObject;
   public
-    constructor Create; overload;
+    constructor Create (Sender: TObject); overload;
     procedure SetGroupName (s: string);
     procedure SetSavSizePos (b: Boolean);
     procedure SetWState (s: string);
@@ -47,14 +48,17 @@ type
     procedure SetHideInTaskBar (b: Boolean);
     procedure SetHideBars (b: Boolean);
     procedure SetLangStr (s: string);
+    function SaveToXMLnode(iNode: TDOMNode): Boolean;
+    function ReadXMLNode(iNode: TDOMNode): Boolean;
+
   published
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property OnStateChange: TNotifyEvent read FOnStateChange write FOnStateChange;
     property GroupName: string read FGroupName write SetGroupName;
-    property SavSizePos: Boolean read FSavSizePos write SetSavSizePos;
-    property WState: string read FWState write SetWState;
     property GrpIconFile: string read FGrpIconFile write SetGrpIconFile ;
     property GrpIconIndex: integer read FGrpIconIndex write SetGrpIconIndex;
+    property SavSizePos: Boolean read FSavSizePos write SetSavSizePos;
+    property WState: string read FWState write SetWState;
     property IconDisplay: integer read FIconDisplay write SetIconDisplay default 3;
     property IconSort: Integer read FIconSort write SetIconSort default 0;
     property LastUpdChk: Tdatetime read FLastUpdChk write SetLastUpdChk;
@@ -69,9 +73,10 @@ type
 
 implementation
 
-constructor TConfig.Create;
+constructor TConfig.Create(Sender: TObject);
 begin
-  inherited;
+  Create;
+  Parent:= Sender;
 end;
 
 procedure TConfig.SetGroupName(s: string);
@@ -199,6 +204,53 @@ begin
     if Assigned(FOnChange) then FOnChange(Self);
   end;
 end;
+
+function TConfig.SaveToXMLnode(iNode: TDOMNode): Boolean;
+begin
+  Try
+    TDOMElement(iNode).SetAttribute('groupname', FGroupName);
+    TDOMElement(iNode).SetAttribute ('grpiconfile', FGrpIconFile);
+    TDOMElement(iNode).SetAttribute ('grpiconindex', IntToStr(FGrpIconIndex));
+    TDOMElement(iNode).SetAttribute ('savsizepos', IntToStr(Integer(FSavSizePos)));
+    TDOMElement(iNode).SetAttribute ('icondisplay', IntToStr(FIconDisplay));
+    TDOMElement(iNode).SetAttribute ('iconsort' , IntToStr(FIconSort));
+    TDOMElement(iNode).SetAttribute ('miniintray',IntToStr(Integer(FMiniInTray)));
+    TDOMElement(iNode).SetAttribute ('hideintaskbar', IntToStr(Integer(FHideInTaskBar)));
+    TDOMElement(iNode).SetAttribute ('hidebars', IntToStr(Integer(FHideBars)));
+    TDOMElement(iNode).SetAttribute ('wstate', FWState);
+    TDOMElement(iNode).SetAttribute ('nochknewver', IntToStr(Integer(FNoChkNewVer)));
+    TDOMElement(iNode).SetAttribute ('lastupdchk', DateToStr(FLastUpdChk));
+    TDOMElement(iNode).SetAttribute ('startwin', IntToStr(Integer(FStartWin)));
+    TDOMElement(iNode).SetAttribute ('langstr', FLangStr);
+    Result:= True;
+  except
+    result:= False;
+  end;
+end;
+
+function TConfig.ReadXMLNode(iNode: TDOMNode): Boolean;
+begin
+  try
+    FGroupName:= TDOMElement(iNode).GetAttribute('groupname');
+    FGrpIconFile:= TDOMElement(iNode).GetAttribute('grpiconfile');
+    FGrpIconIndex:= StrToInt(TDOMElement(iNode).GetAttribute('grpiconindex'));
+    FSavSizePos:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('savsizepos')));
+    FIconDisplay:= StrToInt(TDOMElement(iNode).GetAttribute('icondisplay'));
+    FIconSort:= StrToInt(TDOMElement(iNode).GetAttribute('iconsort'));
+    FMiniInTray:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('miniintray')));
+    FHideInTaskBar:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('hideintaskbar')));
+    FHideBars:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('hidebars')));
+    FWState:= TDOMElement(iNode).GetAttribute('wstate');
+    FNoChkNewVer:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('nochknewver')));
+    FLastUpdChk:= StrToDate(TDOMElement(iNode).GetAttribute('lastupdchk'));
+    FStartWin:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('startwin')));
+    FLangStr:= TDOMElement(iNode).GetAttribute('langstr');
+    Result:= True;
+  except
+    Result:= False;
+  end;
+end;
+
 
 end.
 

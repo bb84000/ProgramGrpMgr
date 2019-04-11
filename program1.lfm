@@ -495,7 +495,6 @@ object FProgram: TFProgram
     Columns = <>
     DragMode = dmAutomatic
     IconOptions.AutoArrange = True
-    LargeImages = ImageList
     ParentShowHint = False
     PopupMenu = LVPMnu
     ReadOnly = True
@@ -35969,12 +35968,5 @@ object FProgram: TFProgram
     Options = [ofOldStyleDialog, ofEnableSizing, ofViewDetail]
     left = 416
     top = 100
-  end
-  object ImageList: TImageList
-    Height = 128
-    ImageType = itMask
-    Width = 128
-    left = 280
-    top = 168
   end
 end

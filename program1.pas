@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - march 2019
+// bb - sdtp - april 2019
 //******************************************************************************
 unit program1;
 
@@ -25,7 +25,6 @@ type
   TFProgram = class(TForm)
     CBDisplay: TComboBox;
     CBSort: TComboBox;
-    ImageList: TImageList;
     ImgPrgSel: TImage;
     LPrgSel: TLabel;
     ListView1: TListView;
@@ -117,7 +116,8 @@ type
     ProgName: String;
     Settings: Tconfig;
     oldw: array [0..50] of Integer;
-     ListeFichiers: TFichierList;
+    ListeFichiers: TFichierList;
+    ImageList: TImageList;
     // Config file and values
     ConfigFile: String;
     ListeChange, SettingsChange, WStateChange: Bool;
@@ -125,7 +125,6 @@ type
     SMnuMaskBars, SMnuShowBars: String;
     langue: Integer;
     LangFile: TiniFile;
-    //LangStr, PrevLangStr: String;
     LangNums: TStringList;
     CurLang: Integer;
     CompileDateTime: TDateTime;
@@ -166,8 +165,8 @@ type
     procedure ChkVersion;
     function ShowAlert(Title, AlertStr, StReplace, NoShow: String; var Alert: Boolean):Boolean;
     function ReadFolder(strPath: string; Directory: Bool): Integer;
-    function xmlReadValue(xmlDoc: TXMLDocument; Attribute: String; typ: AttributeType): variant;
-    function nodeReadValue(inode:  TDOMNode; Attribute: String; typ: AttributeType): variant;
+    procedure EnumerateResourceNames(Instance: THandle; var list: TStringList);
+    procedure GetIconRes(filename: string; index:integer; var Ico: TIcon);
   public
 
   end;
@@ -201,6 +200,7 @@ implementation
 //
 // Windows Callback function to intercept windows messages
 // WM_QUERYENDSESSION
+// WM_INFO_UPDATE  set by update dialog
 //
 function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam; lParam: LParam):LRESULT; stdcall;
 var
@@ -273,8 +273,11 @@ begin
       s1:= StringReplace(s1, #34, '', [rfReplaceAll]);
       param:= StringReplace(s1, #39, '', [rfReplaceAll]);
       p:= Pos('Grp=', param);
-      if p > 0 then Settings.GroupName:= AnsiToUTF8(Copy(param, p+4, length(param)));
-     Result := Settings.GroupName;
+      if p > 0 then
+      begin
+        //Settings.GroupName:= AnsiToUTF8(Copy(param, p+4, length(param)));
+        Result := AnsiToUTF8(Copy(param, p+4, length(param)));
+      end;
     end;
   end;
 end;
@@ -299,8 +302,6 @@ end;
 
 // Form creation
 
-
-
 procedure TFProgram.FormCreate(Sender: TObject);
 var
   aPath : Array[0..MaxPathLen] of Char; //Allocate memory
@@ -317,10 +318,11 @@ begin
   try
     CompileDateTime:= Str2Date({$I %DATE%}, 'YYYY/MM/DD')+StrToTime({$I %TIME%});
   except
+    CompileDateTime:=  now();
   end;
   ListeFichiers:= TFichierList.Create;
   Settings:= TConfig.Create;
- // ImageList:= TImageList.Create(self);
+  ImageList:= TImageList.Create(self);
   langue:= Lo(GetUserDefaultLangID);
   //langue:=  LANG_ITALIAN;
   If length(Settings.LangStr)= 0 then Settings.LangStr:= IntToStr(langue);
@@ -332,6 +334,9 @@ begin
   LangFile:= TIniFile.create(ExecPath+ProgName+'.lng');
   LangNums:= TStringList.Create;
   Settings.GroupName:= GetGrpParam;
+  ListeChange:= False;
+  SettingsChange:= False;
+
   SHGetSpecialFolderPath(0, aPath ,CSIDL_APPDATA,false);
   AppDataPath:= aPath;
   SHGetSpecialFolderPath(0,aPath , CSIDL_DESKTOP,false);
@@ -352,13 +357,14 @@ procedure TFProgram.FormDestroy(Sender: TObject);
 begin
   FreeAndNil(WinVersion);
   FreeAndNil(ListeFichiers);
+  FreeAndNil(ImageList);
   FreeAndNil(langnums);
   FreeAndNil(langfile);
   FreeAndNil(Settings);
 end;
 
 
-
+// Hide tools and status bars
 
 procedure TFProgram.PMnuHideBarsClick(Sender: TObject);
 begin
@@ -383,17 +389,29 @@ begin
 end;
 
 
-
 // Form activation
 
 procedure TFProgram.FormActivate(Sender: TObject);
+var
+    hWind: HWND;
+
 begin
   inherited;
   if not first then exit;
+  Settings.GroupName:= GetGrpParam;
+  // Si le même groupe est déjà actif, on récupère le handle de l'application qui est propriétaire de la fiche
+  // In Lazarus, all forms have 'Window'Class
+  hWind:= GetWindow(FindWindow (Pchar('Window'), Pchar(UTF8ToAnsi(Settings.GroupName))), GW_OWNER) ;
+  If hWind > 0 then
+  begin
+     ShowWindow(hWind, SW_SHOWNORMAL);
+     SetForeGroundWindow(hWind);
+     Close;
+  end;
+
   // We get Windows Version
   WinVersion:= TWinVersion.Create;
-
-  // For popup menu, retrieve bitmap from buttons
+   // For popup menu, retrieve bitmap from buttons
   CropBitmap(SBGroup.Glyph, PmnuGroup.Bitmap, SBGroup.Enabled);
   CropBitmap(SBFolder.Glyph, PMnuFolder.Bitmap, SBFolder.Enabled);
   CropBitmap(SBAddFile.Glyph, PMnuAddFile.Bitmap, SBAddFile.Enabled);
@@ -406,13 +424,15 @@ begin
   CropBitmap(SBAbout.Glyph, PTrayMnuAbout.Bitmap, SBAbout.Enabled);
   CropBitmap(SBQuit.Glyph, PTrayMnuQuit.Bitmap, SBQuit.Enabled);
   BarsHeight:= ClientHeight-ListView1.Height;
-  Settings.GroupName:= GetGrpParam;
+
+
   {$IFDEF WIN32}
       OSTarget:= '32 bits';
   {$ENDIF}
   {$IFDEF WIN64}
       OSTarget:= '64 bits';
   {$ENDIF}
+
   LoadConfig(Settings.GroupName);
   If (WinVersion.IsWow64) and (OsTarget='32 bits') then
   begin
@@ -430,7 +450,7 @@ var
 begin
   if length(FileNames) > 0 then
   begin
-    For i:= 0 to High(Filenames)-1 do
+    For i:= 0 to length(Filenames)-1 do
       ListeFichiers.AddFile(GetFile(FileNames[i]));
       ListeChange:= True;
       LVDisplayFiles;
@@ -464,11 +484,11 @@ begin
   result:= Enable;
 end;
 
+// Load settings data and file list
 
 procedure TFProgram.LoadConfig(GrpName: String);
 var
   i: Integer;
-  hWind: HWND;
   LangFound: Boolean;
 begin
   with Settings do
@@ -478,7 +498,8 @@ begin
     GroupName:= GrpName;
   end;
   ConfigFile:= PrgMgrAppsData+GrpName+'.xml';
-  If not FileExists(ConfigFile) then
+
+ If not FileExists(ConfigFile) then
   begin
     If FileExists (PrgMgrAppsData+Settings.GroupName+'.bk0') then
     begin
@@ -492,15 +513,6 @@ begin
     end;
   end;
   LoadCfgFile(ConfigFile);
-  // Si le même groupe est déjà actif, on récupère le handle de l'application qui est propriétaire de la fiche
-  // In Lazarus, forms have 'Window'Class
-  hWind:= GetWindow(FindWindow (Pchar('Window'), Pchar(Settings.GroupName)), GW_OWNER) ;
-  If hWind > 0 then
-  begin
-     ShowWindow(hWind, SW_SHOWNORMAL);
-     SetForeGroundWindow(hWind);
-     Close;
-  end;
   // Détermination de la langue
   LangFile.ReadSections(LangNums);
   if LangNums.Count > 1 then
@@ -530,19 +542,13 @@ begin
     except
     end;
     TrayProgman.Visible:= Settings.MiniInTray;
-
     if Appstate = SW_SHOWMINIMIZED then
     begin
-
       ShowWindow(Application.Handle, AppState) ; //  Minimize in task bar is done on application, not on main form
     end else
     begin
       ShowWindow(Handle, AppState);  // Maximize is done on main form, not on application
-      //1: normal
-      // 2 : Iconized
-      //3: Maximized
-
-    end;
+     end;
     Case AppState of
       1: begin    // Normal
            PTrayMnuRestore.Enabled:= False;
@@ -570,7 +576,6 @@ begin
       PMnuHideBars.Caption:= SMnuMaskBars;
     end;
   end;
-
   CBDisplay.ItemIndex:= Settings.IconDisplay;
   CBSort.ItemIndex:= Settings.IconSort;
   Application.Title:= Settings.GroupName;
@@ -594,7 +599,7 @@ begin
   ChkVersion;
   // Dont want to have the same icon handle
   ImgPrgSel.Picture.Icon.Handle:=  ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
-
+  // Pointer to files and settings change
   ListeFichiers.OnChange:=  @ListeFichiersOnChange;
   Settings.OnChange:= @SettingsOnChange;
   Settings.OnStateChange:= @SettingsOnStateChange;
@@ -611,6 +616,9 @@ begin
   end;
 end;
 
+
+// Hide the icon in the task bar
+
 function TFProgram.HidinTaskBar (enable: Boolean): boolean;
 begin
   ShowWindow(Application.Handle, SW_HIDE) ;
@@ -625,112 +633,26 @@ begin
   Result:= enable;
 end;
 
-function TFProgram.xmlReadValue(xmlDoc: TXMLDocument; Attribute: String; typ: AttributeType): variant;
-begin
-  Case typ of
-    atString:
-      try
-        result:= xmlDoc.DocumentElement{%H-}.AttribStrings[Attribute];
-      except
-        result:= '';
-      end;
-    atInteger:
-      try
-        result:= StrToInt(xmlDoc.DocumentElement.AttribStrings[Attribute]{%H-})
-      except
-        result:= 0;
-      end;
-    atDatetime:
-      try
-        result:= StrToDate(xmlDoc.DocumentElement.AttribStrings[Attribute]{%H-});
-      except
-        result:= now();
-      end;
-    atBoolean:
-      try
-        result:= Bool(StrToInt(xmlDoc.DocumentElement.AttribStrings[Attribute]{%H-}));
-      except
-        result:= False;
-      end;
-  end;
-end;
-
-function TFProgram.nodeReadValue(inode:  TDOMNode; Attribute: String; typ: AttributeType): variant;
-begin
-  Case typ of
-    atString:
-      try
-        result:= TDOMElement(iNode){%H-}.GetAttribute(Attribute);
-      except
-        result:= '';
-      end;
-    atInteger:
-      try
-        result:= StrToInt(TDOMElement(iNode).GetAttribute(Attribute){%H-});
-      except
-        result:= 0;
-      end;
-   atDatetime:
-      try
-        result:= StrToDateTime(TDOMElement(iNode).GetAttribute(Attribute){%H-});
-      except
-        result:= now();
-      end;
-   atBoolean:
-     try
-       result:= Bool(StrToInt(TDOMElement(iNode).GetAttribute(Attribute){%H-}));
-     except
-       result:= False;
-     end;
-  end;
-end;
+// load the settings file
 
 procedure TFProgram.LoadCfgFile(FileName: String);
 var
   CfgXML: TXMLDocument;
-  inode : TDOMNode;
-  NewFile: TFichier;
+  SettingsNode, FilesNode : TDOMNode;
 begin
-  Try
+Try
     ReadXMLFile(CfgXML, FileName);
     With CfgXML do
     begin
-      // Main settings
-      Settings.GroupName:= xmlReadValue(CfgXML, 'groupname', atString);
-      Settings.SavSizePos:= xmlReadValue(CfgXML, 'savsizepos', atBoolean);
-      Settings.WState:=  xmlReadValue(CfgXML, 'wstate', atString);
-      Settings.GrpIconFile:= xmlReadValue(CfgXML, 'grpiconfile', atString);
-      Settings.GrpIconIndex:= xmlReadValue(CfgXML, 'grpiconindex', atInteger);
-      Settings.IconDisplay:= xmlReadValue(CfgXML, 'icondisplay', atInteger);
-      Settings.IconSort:= xmlReadValue(CfgXML, 'iconsort', atInteger);
-      Settings.LastUpdChk:= xmlReadValue(CfgXML, 'lastupdchk', atDatetime);
-      Settings.NoChkNewVer:= xmlReadValue(CfgXML, 'nochknewver', atBoolean);
-      Settings.StartWin:= xmlReadValue(CfgXML, 'startwin', atBoolean);
-      Settings.MiniInTray:= xmlReadValue(CfgXML, 'miniintray', atBoolean);
-      Settings.HideInTaskBar:= xmlReadValue(CfgXML, 'hideintaskbar', atBoolean);
-      Settings.HideBars:= xmlReadValue(CfgXML, 'hidebars', atBoolean);
-      Settings.LangStr:= xmlReadValue(CfgXML, 'langstr', atString);
-
+      // Main settings, check if old or new config file
+      SettingsNode:= DocumentElement.FindNode('settings');
+      if SettingsNode = nil then SettingsNode:= DocumentElement; //FindNode('config');
+      Settings.ReadXMLNode(SettingsNode);
       // files settings
-      iNode := DocumentElement.FirstChild;
-      while iNode <> nil do
-      begin
-        NewFile.Name:=  nodeReadValue(inode, 'name', atString);
-        NewFile.Path:=  nodeReadValue(inode, 'path', atString);
-        NewFile.DisplayName:= nodeReadValue(inode, 'displayname', atString);
-        NewFile.Size:= nodeReadValue(inode, 'size', atInteger);
-        NewFile.TypeName:= nodeReadValue(inode, 'typename', atString);
-        NewFile.Description:= nodeReadValue(inode, 'description', atString);
-        NewFile.Params:= nodeReadValue(inode, 'params', atString);
-        NewFile.StartPath:= nodeReadValue(inode, 'startpath', atString);
-        NewFile.Date:= nodeReadValue(inode, 'date', atDatetime);
-        NewFile.IconFile:= nodeReadValue(inode, 'iconfile', atString);
-        NewFile.IconIndex:= nodeReadValue(inode, 'iconindex', atInteger);
-        NewFile.OldIcon:= nodeReadValue(inode, 'oldicon', atBoolean);
-        ListeFichiers.AddFile(NewFile);
-        iNode := iNode.NextSibling;
-      end;
-    end;
+      FilesNode:= DocumentElement.FindNode('files');
+      if FilesNode = nil then FilesNode:= DocumentElement;
+      ListeFichiers.ReadXMLNode(FilesNode);
+     end;
   finally
     FreeAndNil(CfgXML);
   end;
@@ -739,8 +661,7 @@ end;
 function TFProgram.SaveConfig(GrpName: String; Typ: SaveType): Bool;
 var
   CfgXML: TXMLDocument;
-  RootNode : TDOMNode;
-  FileNode : TDOMNode;
+  RootNode, SettingsNode, FilesNode :TDOMNode;
   WindowPlacement: TWindowPlacement;
   WinPos : array [0..10] of Integer;
   i: Integer;
@@ -753,18 +674,9 @@ begin
     CfgXML := TXMLDocument.Create;
     With CfgXML do
     begin
-      // Main config is in root node
-      RootNode := CreateElement('config');
-      TDOMElement(RootNode).SetAttribute('groupname', Settings.GroupName {%H-});
-      TDOMElement(RootNode).SetAttribute ('savsizepos', IntToStr(Integer(Settings.SavSizePos)){%H-});
-      If Settings.IconDisplay < 0 then Settings.IconDisplay:= 3;
-      TDOMElement(RootNode).SetAttribute ('icondisplay', IntToStr(Settings.IconDisplay){%H-});
-      If Settings.IconSort < 0 then Settings.IconSort:= 0;
-      TDOMElement(RootNode).SetAttribute ('iconsort' , IntToStr(Settings.IconSort){%H-});
-      TDOMElement(RootNode).SetAttribute ('miniintray',IntToStr(Integer(Settings.MiniInTray)){%H-});
-      TDOMElement(RootNode).SetAttribute ('hideintaskbar', IntToStr(Integer(Settings.HideInTaskBar)){%H-});
-      TDOMElement(RootNode).SetAttribute ('hidebars', IntToStr(Integer(Settings.HideBars)){%H-});
-      // Window position
+     If Settings.IconDisplay < 0 then Settings.IconDisplay:= 3;
+     If Settings.IconSort < 0 then Settings.IconSort:= 0;
+     // Window position
       Settings.WState:= '';
       If WindowState = wsMaximized then
       begin
@@ -780,34 +692,15 @@ begin
       WinPos[3]:= Height;
       WinPos[4]:= Width;
       For i:= 0 to 4 do Settings.WState:=Settings.WState+IntToHex(WinPos[i], 4);
-      TDOMElement(RootNode).SetAttribute ('wstate', Settings.WState {%H-});
-      TDOMElement(RootNode).SetAttribute ('grpiconfile', Settings.GrpIconFile {%H-});
-      TDOMElement(RootNode).SetAttribute ('grpiconindex', IntToStr(Settings.GrpIconIndex){%H-});
-      TDOMElement(RootNode).SetAttribute ('nochknewver', IntToStr(Integer(Settings.NoChkNewVer)){%H-});
-      TDOMElement(RootNode).SetAttribute ('lastupdchk', DateToStr(Settings.LastUpdChk){%H-});
-      TDOMElement(RootNode).SetAttribute ('startwin', IntToStr(Integer(Settings.StartWin)){%H-});
-      TDOMElement(RootNode).SetAttribute ('langstr', Settings.LangStr {%H-});
+     // Main config is in root node
+      RootNode := CreateElement('config');
       Appendchild(RootNode);
-      If ListeFichiers.Count > 0 Then
-      begin
-        For i:= 0 to ListeFichiers.Count-1 do
-        begin
-          FileNode := CreateElement('file');
-          TDOMElement(FileNode).SetAttribute('name',  ListeFichiers.GetItem(i).Name {%H-});
-          TDOMElement(FileNode).SetAttribute('path', ListeFichiers.GetItem(i).Path {%H-});
-          TDOMElement(FileNode).SetAttribute('displayname', ListeFichiers.GetItem(i).DisplayName {%H-});
-          TDOMElement(FileNode).SetAttribute('params', ListeFichiers.GetItem(i).Params {%H-});
-          TDOMElement(FileNode).SetAttribute('startpath', ListeFichiers.GetItem(i).StartPath {%H-});
-          TDOMElement(FileNode).SetAttribute('size', IntToStr(ListeFichiers.GetItem(i).Size){%H-});
-          TDOMElement(FileNode).SetAttribute('typename', ListeFichiers.GetItem(i).TypeName {%H-});
-          TDOMElement(FileNode).SetAttribute('description', ListeFichiers.GetItem(i).Description {%H-});
-          TDOMElement(FileNode).SetAttribute('date', DateTimeToStr(ListeFichiers.GetItem(i).Date){%H-});
-          TDOMElement(FileNode).SetAttribute('iconfile', ListeFichiers.GetItem(i).IconFile {%H-});
-          TDOMElement(FileNode).SetAttribute('iconindex', IntToStr(ListeFichiers.GetItem(i).IconIndex){%H-});
-          TDOMElement(FileNode).SetAttribute('oldicon', IntToStr(Integer(ListeFichiers.GetItem(i).OldIcon)){%H-});
-          RootNode.Appendchild(FileNode);
-        end;
-      end;
+      SettingsNode:= CreateElement('settings');
+      Settings.SaveToXMLnode(SettingsNode);
+      RootNode.Appendchild(SettingsNode);
+      FilesNode:= CreateElement('files');
+      ListeFichiers.SaveToXMLnode(FilesNode);
+      RootNode.Appendchild(FilesNode);
     end;
     // On sauvegarde les versions précédentes
     FilNamWoExt:= TrimFileExt(ConfigFile);
@@ -863,19 +756,7 @@ begin
   WinPos[4]:= Width;
   For i:= 0 to 4 do WState:=WState+IntToHex(WinPos[i], 4);
   Settings.WState:=WState;
-  If ({(WState<>PrevWState) or
-           (GrpIconFile<>PrevGrpIconFile) or
-           (GrpIconIndex <> PrevGrpIconIndex) or
-           (LastUpdChk<>PrevLastUpdChk) or
-           (NoChkNewVer<>PrevNoChkNewVer) or
-           (StartWin<>PrevStartWin) or
-           (MiniInTray <> PrevMiniInTray) or
-           (HideInTaskBar <> PrevHideInTaskBar) or
-           (HideBars <> PrevHideBars)) or
-          (LangStr<>PrevLangStr) or             }
-           (Prefs.ImgChanged) or
-           //(Settings.SavSizePos <> PrevSavSizePos)} then
-            WStateChange) then
+  If (Prefs.ImgChanged or WStateChange) then
    begin
     result:= State ;
   end else
@@ -916,6 +797,8 @@ begin
     end;
   end else
   begin
+ //    ShowMessage (Settings.GroupName);
+
     SaveConfig(Settings.GroupName, StateChanged);
     ListeChange:= False;
     SettingsChange:= False;
@@ -942,11 +825,7 @@ end;
 
 procedure TFProgram.SettingsOnStateChange(sender: TObject);
 begin
-
-WStateChange:= True;
-  //SBSave.Enabled:= True;
-  //PMnuSave.Enabled:= True;
-  //PMnuSaveEnable(True);
+  WStateChange:= True;
 end;
 
 function TFProgram.GetFile(FileName: string):TFichier;
@@ -998,7 +877,6 @@ var
   nIconId : DWORD;
   ItemPos: Tpoint;
   IcoInfo: TICONINFO;
-
 begin
   if ListeFichiers.Count = 0 then
   begin
@@ -1052,27 +930,23 @@ begin
            ListeFichiers.SortType:= cdcDate;
          end;
     end;
-
-     ListeFichiers.DoSort;
+    ListeFichiers.DoSort;
     ListView1.Clear;
     ImageList.Clear;
     ImageList.Height:= IcoSize;
     ImageList.Width:= IcoSize;
     // Set spacing of icons in listview
-    PostMessage(Listview1.Handle,LVM_SETICONSPACING, 0,MakeLParam(-1, -1));
-    Application.ProcessMessages;
-
+    PostMessage(Listview1.Handle,LVM_SETICONSPACING, 0,MakeLParam(Word(-1), Word(-1)));
+    //Application.ProcessMessages;
     // Create a temporary TIcon
+    ListView1.LargeImages:= ImageList;
     CurIcon := TIcon.Create;
     CurIcon.Height:= IcoSize;
     CurIcon.Width:= IcoSize;
-    ListView1.LargeImages:= ImageList;
-    // retrieve handle of ImageList
-
     setLength(PtArray, ListeFichiers.Count);
     for i:= 0 to ListeFichiers.Count-1 do
     begin
-      ListItem := ListView1.Items.Add;
+       ListItem := ListView1.Items.Add;
       ListItem.Caption := ListeFichiers.GetItem(i).DisplayName;
       W:= LPrgSel.Canvas.TextWidth(ListItem.Caption);
       if W > oldw[0] then oldw[0]:= w;
@@ -1089,27 +963,28 @@ begin
         // Do not display properly low color depth icons
         if (SHDefExtractIcon(PChar(ListeFichiers.GetItem(i).IconFile), ListeFichiers.GetItem(i).IconIndex,
                              0, hicon, hicons, IcoSize) = 0) and ( not ListeFichiers.GetItem(i).OldIcon) then
-
-        //If (PrivateExtractIcons ( PChar(ListeFichiers.GetItem(i).IconFile), ListeFichiers.GetItem(i).IconIndex,
-        //             IcoSize, Icosize, @hIcon, @nIconId, 1, LR_LOADFROMFILE) <>0) and (hIcon <> 0) and
-        //             (ListeFichiers.GetItem(i).OldIcon = false) then
+        // Or this one
+        {If (PrivateExtractIcons ( PChar(ListeFichiers.GetItem(i).IconFile), ListeFichiers.GetItem(i).IconIndex,
+                     IcoSize, Icosize, @hIcon, @nIconId, 1, LR_LOADFROMFILE) <>0) and (hIcon <> 0) and
+                     (ListeFichiers.GetItem(i).OldIcon = false) then }
         begin
-          //GetIconInfo(hicon, @IcoInfo);
-          //ListItem.ImageIndex := ImageList_Add(ImageList.ResolutionByIndex[0].Reference.Handle, IcoInfo.hbmColor, IcoInfo.hbmMask);
-          CurIcon.Handle:= hicon;
+           CurIcon.handle:= hicon;
+          GetIconInfo(hicon, @IcoInfo);
+          ListItem.ImageIndex := ImageList_Add(ImageList.ResolutionByIndex[0].Reference.Handle, IcoInfo.hbmColor, IcoInfo.hbmMask);
         end else
         begin
-        // This one only get teh first icon in file
-        GetIconFromFile(ListeFichiers.GetItem(i).IconFile ,CurIcon, Flag,0) ;
+          // This one only get the first icon in file
+          GetIconFromFile(ListeFichiers.GetItem(i).IconFile ,CurIcon, Flag,0) ;
+          //GetIconRes(ListeFichiers.GetItem(i).IconFile, ListeFichiers.GetItem(i).IconIndex, CurIcon);
+          ListItem.ImageIndex := ImageList_AddIcon(ImageList.ResolutionByIndex[0].Reference.Handle, CurIcon.Handle);
         end;
-        ListItem.ImageIndex := ImageList_AddIcon(ImageList.ResolutionByIndex[0].Reference.Handle, CurIcon.Handle);
-
-      end;
+       end;
        // Create an array of items coordinates
       ItemPos.x:= (Listview1.Items.Item[i].Position.x) +(IcoSize div 2);    // center coordinate
       ItemPos.y:= (Listview1.Items.Item[i].Position.y) +(IcoSize div 2);
       PtArray[i]:= ItemPos;
     end;
+    CurIcon.free;
 end;
 
 // Find the closest point
@@ -1137,15 +1012,10 @@ begin
 end;
 
 
-
-
-
-
 procedure TFProgram.ListView1DragDrop(Sender, Source: TObject; X, Y: Integer);
 var
   Pt: Tpoint;
   currentItem, nextItem, dropItem : TListItem;
-
 begin
   // Sans objet si on a un ordre de tri !
   if CBSort.ItemIndex <> 0 then exit;
@@ -1288,6 +1158,7 @@ var
   MyIcon: TIcon;
   s: String;
   capt: array  [0..1] of string;
+  inode: TDOMNode;
 begin
   capt[0]:= YesBtn;
   capt[1]:= NoBtn;
@@ -1307,18 +1178,19 @@ begin
         if FileAttr then
         begin
           ReadXMLFile(GroupXML, PrgMgrAppsData+SearchRec.Name);
-          IconFile:= GroupXML{%H-}.DocumentElement{%H-}.AttribStrings['grpiconfile'];
+          inode:= GroupXML.DocumentElement.FindNode('settings');
+          if inode =  nil then inode:= GroupXML.DocumentElement;
           try
-            IconIndex:= StrToInt(GroupXML.DocumentElement.AttribStrings['grpiconindex']{%H-});
+            s:= TDOMElement(iNode).GetAttribute('groupname');
+            IconFile:= TDOMElement(iNode).GetAttribute('grpiconfile');
+            IconIndex:= StrToInt(TDOMElement(iNode).GetAttribute('grpiconindex'));
           except
             IconIndex:= 0;
           end;
           LI := LV1.Items.Add;
-          s:= GroupXML{%H-}.DocumentElement{%H-}.AttribStrings['groupname'];
-          if length(s) > 0 then LI.Caption := s
-          else LI.Caption:= PrgMgrAppsData+SearchRec.Name;
-          MyIcon.Handle:= ExtractIconU(Handle, PChar(IconFile), IconIndex);
-          if MyIcon.handle > 0 then LI.ImageIndex :=IL1.AddIcon(MyIcon);
+           if length(s) > 0 then LI.Caption := s else LI.Caption:= PrgMgrAppsData+SearchRec.Name;
+           MyIcon.Handle:= ExtractIconU(Handle, PChar(IconFile), IconIndex);
+           if MyIcon.handle > 0 then LI.ImageIndex :=IL1.AddIcon(MyIcon);
          end;
         i := FindNext(SearchRec);
     end;
@@ -1529,22 +1401,6 @@ begin
   else BitBlt(OutBitMap.Canvas.Handle, 0, 0, OutBitmap.Width, OutBitmap.Height, InBitmap.Canvas.Handle, OutBitmap.Height, 0, SRCCOPY);
 end;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // Change display if mouse cursor is on an item or in an other sone of the listview
 
 procedure TFProgram.ListView1MouseMove(Sender: TObject; Shift: TShiftState; X,
@@ -1628,11 +1484,6 @@ begin
 
 end;
 
-
-
-
-
-
 procedure TFProgram.CBDisplayChange(Sender: TObject);
 begin
   ListeChange:= True;
@@ -1648,12 +1499,6 @@ procedure TFProgram.CBSortChange(Sender: TObject);
 begin
   Settings.IconSort:= CBSort.ItemIndex;
 end;
-
-
-
-
-
-
 
 procedure TFProgram.PMnuDeleteClick(Sender: TObject);
 var
@@ -1724,18 +1569,7 @@ begin
       end;
       ListeFichiers.ModifyFile(Item.Index, MyFichier );
       LVDisplayFiles;
-
   end;
-
-
-
-
-
-
-
-
-
-
 end;
 
 procedure TFProgram.PMnuRunAsClick(Sender: TObject);
@@ -1769,7 +1603,7 @@ end;
 
 
 
-
+// Language translation routines
 
 procedure TFProgram.ModLangue ;
 var
@@ -1784,8 +1618,7 @@ With LangFile do
    NoBtn:= ReadString(LangStr, 'NoBtn', 'Non');
    CancelBtn:= ReadString(LangStr, 'CancelBtn', 'Annuler');
    //Form
-   CBDisplay.Items.Text:= StringReplace(ReadString(LangStr, 'CBDisplay.Items.Text',
-                      ''),
+   CBDisplay.Items.Text:= StringReplace(ReadString(LangStr, 'CBDisplay.Items.Text', ''),
                       '%s', #13#10, [rfReplaceAll]);
    CBDisplay.ItemIndex:= Settings.IconDisplay;
    CBSort.Items.Text:=  StringReplace(ReadString(LangStr, 'CBSort.Items.Text',
@@ -1882,21 +1715,52 @@ With LangFile do
    FLoadGroup.BtnDelete.Caption:= ReadString(LangStr, 'FLoadGroup.BtnDelete.Caption', FLoadGroup.BtnDelete.Caption);
    FLoadGroup.BtnCancel.Caption:= CancelBtn; //SBrow1.CancelBtnCaption;
 
-   //FloadConf.Caption:= ReadString(LangStr, 'FloadConf.Caption', FloadConf.Caption);
-   //FLoadConf.BtnApply.Caption:= ReadString(LangStr, 'FLoadConf.BtnApply.Caption', FLoadConf.BtnApply.Caption);
-   //FLoadConf.BtnCancel.Caption:= ReadString(LangStr, 'FLoadConf.BtnCancel.Caption', FLoadConf.BtnCancel.Caption);
+   FloadConf.Caption:= ReadString(LangStr, 'FloadConf.Caption', FloadConf.Caption);
+   FLoadConf.BtnApply.Caption:= ReadString(LangStr, 'FLoadConf.BtnApply.Caption', FLoadConf.BtnApply.Caption);
+   FLoadConf.BtnCancel.Caption:= ReadString(LangStr, 'FLoadConf.BtnCancel.Caption', FLoadConf.BtnCancel.Caption);
  end;
 end;
 
 
+// Callback function for enum resources (Experimental)
+function EnumProc(hModule: HMODULE; lpszType, lpszName: PChar; lParam: nativeInt): BOOL; stdcall;
+begin
+  result:= False;
+  if lpszName <> nil then
+  begin
+    if Is_IntResource(lpszName) then TStrings(lParam).Add( '#' + IntToStr(NativeUInt(lpszName)))
+    else  TStrings(lParam).Add(lpszName);
+    result:= True;
+  end;
+end;
 
+procedure TFProgram.EnumerateResourceNames(Instance: THandle; var list: TStringList);
+begin
+  try
+    EnumResourceNames(Instance, RT_GROUP_ICON, @EnumProc, NativeInt(list));
+   except
+  end;
+end;
 
-
-
-
-
-
-
+procedure TFProgram.GetIconRes(filename: string; index:integer; var ico: TIcon);
+const
+  LOAD_LIBRARY_AS_IMAGE_RESOURCE = $00000020;
+var
+  HInst: THandle;
+  IconList: Tstringlist;
+  s:String;
+begin
+  IconList:= TstringList.Create;
+  HInst := LoadLibraryEx(PChar(filename), 0, LOAD_LIBRARY_AS_DATAFILE or LOAD_LIBRARY_AS_IMAGE_RESOURCE);
+  EnumerateResourceNames(HInst, IconList) ;
+  s:= Iconlist[index];
+   if  s[1]='#' then
+   begin
+   s:= Copy (s, 2, length(s)-1);
+   ico.LoadFromResourceId(hinst, StrToInt(s));
+   end else ico.LoadFromResourceName(hinst,s);
+  FreeAndNil(IconList);
+end;
 
 end.
 

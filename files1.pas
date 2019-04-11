@@ -10,9 +10,9 @@ unit files1;
 interface
 
 uses
-  Classes, SysUtils, dialogs;
+  Classes, SysUtils, dialogs, laz2_DOM , laz2_XMLRead, bbutils, windows;
 Type
-
+  TValues = (aString, aInteger, aDate, aboolean);
 
   TChampsCompare = (cdcNone, cdcDate, cdcName, cdcDisplayName, cdcSize, cdcTypeName);
   TSortDirections = (ascend, descend);
@@ -37,6 +37,8 @@ Type
     FOnChange: TNotifyEvent;
     FSortType: TChampsCompare;
     FSortDirection: TSortDirections;
+    function readIntValue(inode : TDOMNode; Attrib: String): Integer;
+    function readDateValue(inode : TDOMNode; Attrib: String): TDateTime;
   public
     Duplicates : TDuplicates;
     procedure Delete (const i : Integer);
@@ -49,6 +51,8 @@ Type
     procedure ModifyFile (const i: integer; Fichier : TFichier);
     function GetItem(const i: Integer): TFichier;
     procedure DoSort;
+    function SaveToXMLnode(iNode: TDOMNode): Boolean;
+    function ReadXMLNode(iNode: TDOMNode): Boolean;
     //procedure Move(CurIndex,NewIndex:Integer));
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     Property SortType : TChampsCompare read FSortType write FSortType default cdcNone;
@@ -199,6 +203,89 @@ begin
  for i := 0 to Count-1 do
   if Items[i] <> nil then Items[i]:= nil;
  Clear;
+end;
+
+function TFichierList.SaveToXMLnode(iNode: TDOMNode): Boolean;
+var
+  i: Integer;
+  FileNode: TDOMNode;
+begin
+  Result:= True;
+  If Count > 0 Then
+   For i:= 0 to Count-1 do
+   Try
+     FileNode := iNode.OwnerDocument.CreateElement('file');
+     TDOMElement(FileNode).SetAttribute('name', TFichier(Items[i]^).Name);
+     TDOMElement(FileNode).SetAttribute('path', TFichier(Items[i]^).Path );
+     TDOMElement(FileNode).SetAttribute('displayname', TFichier(Items[i]^).DisplayName);
+     TDOMElement(FileNode).SetAttribute('params', TFichier(Items[i]^).Params );
+     TDOMElement(FileNode).SetAttribute('startpath', TFichier(Items[i]^).StartPath );
+     TDOMElement(FileNode).SetAttribute('size', IntToStr(TFichier(Items[i]^).Size));
+     TDOMElement(FileNode).SetAttribute('typename', TFichier(Items[i]^).TypeName );
+     TDOMElement(FileNode).SetAttribute('description', TFichier(Items[i]^).Description );
+     TDOMElement(FileNode).SetAttribute('date', DateTimeToStr(TFichier(Items[i]^).Date));
+     TDOMElement(FileNode).SetAttribute('iconfile', TFichier(Items[i]^).IconFile );
+     TDOMElement(FileNode).SetAttribute('iconindex', IntToStr(TFichier(Items[i]^).IconIndex));
+     TDOMElement(FileNode).SetAttribute('oldicon', IntToStr(Integer(TFichier(Items[i]^).OldIcon)));
+     iNode.Appendchild(FileNode);
+  except
+    Result:= False;
+  end;
+end;
+
+function TFichierList.readIntValue(inode : TDOMNode; Attrib: String): Integer;
+var
+  s: String;
+begin
+  s:= TDOMElement(iNode).GetAttribute(Attrib) ;
+  try
+    result:= StrToInt(s);
+  except
+    result:= 0;
+  end;
+end;
+
+function TFichierList.readDateValue(inode : TDOMNode; Attrib: String): TDateTime;
+var
+  s: String;
+begin
+  s:= TDOMElement(iNode).GetAttribute(Attrib) ;
+  try
+    result:= StrToDateTime(s);
+  except
+    result:= now();
+  end;
+end;
+
+function TFichierList.ReadXMLNode(iNode: TDOMNode): Boolean;
+var
+  i: integer;
+  chNode: TDOMNode;
+  k: PFichier;
+begin
+  chNode := iNode.FirstChild;
+  while (chNode <> nil) and (chnode.NodeName='file')  do
+  begin
+    Try
+      new(K);
+      K^.Name := TDOMElement(chNode).GetAttribute('name');
+      K^.Path := TDOMElement(chNode).GetAttribute('path');
+      K^.DisplayName:= TDOMElement(chNode).GetAttribute('displayname');
+      K^.Params:= TDOMElement(chNode).GetAttribute('params');
+      K^.StartPath:= TDOMElement(chNode).GetAttribute('startpath');
+      K^.Size:= readIntValue(chNode, 'size');
+      K^.TypeName:= TDOMElement(chNode).GetAttribute('typename');
+      K^.Description:= TDOMElement(chNode).GetAttribute('description');
+      K^.Date:= readDateValue(chNode, 'date');
+      K^.IconFile:= TDOMElement(chNode).GetAttribute('iconfile');
+      K^.IconIndex:= readIntValue(chNode, 'iconindex');
+      K^.OldIcon:= Bool(readIntValue(chNode, 'oldicon'));
+      add(K);
+    finally
+      chNode := chNode.NextSibling;
+    end;
+  end;
+
 end;
 
 end.

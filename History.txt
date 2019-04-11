@@ -136,3 +136,10 @@ Correction du bug des caractères accentués dans les raccourcis
 
 Version 0.7.0.3 - 08/04/2019
 Les préférences sont stockées dans une classe pour simplifier la détection des modifications
+
+Version 0.7.1.0 - ??/04/2019
+Modification des routines de sauvegarde de la configuration et des fichiers
+Correction du drag and drop qui ne fonctionnait plus
+Correction de la détection du programme déjà en cours d'exécution lorsque le nom du groupe
+contient des accents
+Corrections diverses
