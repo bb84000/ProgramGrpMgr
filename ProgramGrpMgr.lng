@@ -74,7 +74,7 @@ Prefs.CBHideInTaskBar.Hint=The application is not shown in teh Task Bar. Need to
 
 FPropertyCaption=%s properties
 FProperty.TSGeneral.Caption=General
-FProperty.LFileType.Caption=File type
+FProperty.LFileType.Caption=Type
 FProperty.LDescription.Caption=Description
 FProperty.LCible.Caption=Target
 FProperty.SBCible.Hint=Change target file
@@ -82,6 +82,11 @@ FProperty.LParams.Caption= Parameters
 Fproperty.LPath.Caption=Start path
 FProperty.PMnuSelectIcon.Caption=Select an icon
 FProperty.PMnuPropsOldIcon.Caption=Improve the icon display
+FProperty.FileSizeCaption=Size:
+FProperty.FileSizeByte=Byte(s)
+FProperty.FileSizeKB=KB
+FProperty.FileSizeMB=MB
+FProperty.FileSizeGB=GB
 
 FLoadGroup.BtnNew.Caption=New
 FLoadGroup.BtnDelete.Caption=Delete
@@ -157,7 +162,7 @@ Prefs.ImgPrefs.Hint=Double clic pour changer l'icone
 
 FPropertyCaption=Propriétés de %s
 FProperty.TSGeneral.Caption=Général
-FProperty.LFileType.Caption=Type de fichier
+FProperty.LFileType.Caption=Type
 FProperty.LDescription.Caption=Description
 FProperty.LCible.Caption=Cible
 FProperty.SBCible.Hint=Changer le fichier cible
@@ -165,6 +170,11 @@ FProperty.LParams.Caption=Paramètres
 Fproperty.LPath.Caption=Démarrer dans
 FProperty.PMnuSelectIcon.Caption=Choisir une icone
 FProperty.PMnuPropsOldIcon.Caption=Améliorer l'affichage de l'icone
+FProperty.FileSizeCaption=Taille :
+FProperty.FileSizeByte=octet(s)
+FProperty.FileSizeKB=Ko
+FProperty.FileSizeMB=Mo
+FProperty.FileSizeGB=Go
 
 FLoadGroup.BtnNew.Caption=Nouveau
 FLoadGroup.BtnDelete.Caption=Supprimer

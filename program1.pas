@@ -70,6 +70,7 @@ type
     SBPrefs: TSpeedButton;
     SBSave: TSpeedButton;
     TrayProgman: TTrayIcon;
+
     procedure CBDisplayChange(Sender: TObject);
     procedure CBSortChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
@@ -813,6 +814,7 @@ begin
   SBSave.Enabled:= True;
   PMnuSave.Enabled:= True;
   PMnuSaveEnable(True);
+  LVDisplayFiles;
 end;
 
 procedure TFProgram.SettingsOnChange(sender: TObject);
@@ -830,7 +832,6 @@ end;
 
 function TFProgram.GetFile(FileName: string):TFichier;
 var
-  SearchRec: TSearchRec;
   ExeName : string;
 begin
   ExeName:='';
@@ -851,14 +852,12 @@ begin
     Result.IconFile:= ExeName;
     Result.IconIndex:= 0;
    end;
-   // Initialize file info structure
-   ZeroMemory(@SearchRec, SizeOf(TSearchRec));
-   FindFirst(FileName, faAnyFile, SearchRec);
-   Result.Size:= SearchRec.size;
-   Result.TypeName:= 'Application' ;
+    Result.TypeName:= FileGetType (ExeName);
+    Result.Size:= FileGetSize(ExeName);
    try
-     Result.Date:= FileDateToDateTime(FileAge(ExeName));
+     Result.Date:= FileGetDateTime (ExeName, ftCreate);
    except
+     Result.Date:= Now();
    end;
 end;
 
@@ -937,7 +936,7 @@ begin
     ImageList.Width:= IcoSize;
     // Set spacing of icons in listview
     PostMessage(Listview1.Handle,LVM_SETICONSPACING, 0,MakeLParam(Word(-1), Word(-1)));
-    //Application.ProcessMessages;
+    Application.ProcessMessages;                             // To allow all components to be created instead index off bounds error
     // Create a temporary TIcon
     ListView1.LargeImages:= ImageList;
     CurIcon := TIcon.Create;
@@ -984,7 +983,7 @@ begin
       ItemPos.y:= (Listview1.Items.Item[i].Position.y) +(IcoSize div 2);
       PtArray[i]:= ItemPos;
     end;
-    CurIcon.free;
+    if assigned(CurIcon) then FreeAndNil(CurIcon);
 end;
 
 // Find the closest point
@@ -1098,7 +1097,7 @@ end;
 
 procedure TFProgram.PnlTopResize(Sender: TObject);
 begin
-   CBSort.Left:= PnlTop.Width-CBSort.Width-8;
+  CBSort.Left:= PnlTop.Width-CBSort.Width-8;
   CBDisplay.Left:= CBSort.Left- CBDisplay.Width-6;
 end;
 
@@ -1243,7 +1242,7 @@ begin
   If ODlg1.Execute then
     begin
      ListeFichiers.AddFile(GetFile(ODlg1.FileName));
-     LVDisplayFiles;
+    // LVDisplayFiles;
     end;
 end;
 
@@ -1347,7 +1346,7 @@ begin
      If FileExists(s) then
      begin
        FileList [i,0]:= s;
-       FileList [i,1]:= DateTimeToStr(FileGetDateTime (s, 2));
+       FileList [i,1]:= DateTimeToStr(FileGetDateTime (s, ftLastWrite));
        LB2.Items.Add(ExtractFileName(FileList[i,0])+' - '+FileList [i,1]);
        inc(j);
      end;
@@ -1524,7 +1523,7 @@ begin
       end;
   end;
   ListeChange:= True;
-  LVDisplayFiles;
+  //LVDisplayFiles;
 end;
 
 procedure TFProgram.PMnuPropsClick(Sender: TObject);
@@ -1533,6 +1532,8 @@ var
  MyFichier: TFichier;
  OldTarget: String;
  //OldPath: String;
+ siz: double;
+ unite: string;
 begin
   Item := ListView1.Selected;
   If Item = nil then exit;
@@ -1540,7 +1541,7 @@ begin
   MyFichier:=  ListeFichiers.GetItem(Item.Index);
   Fproperty.IconFile:= MyFichier.IconFile;
   Fproperty.IconIndex:= MyFichier.IconIndex;
-  Fproperty.Image1.Picture.Icon.Handle:= ExtractIconU(Handle, PChar(MyFichier.IconFile), MyFichier.IconIndex);
+  Fproperty.Image1.Picture.Icon.Handle:= ExtractAssociatedIconU(Handle, PChar(MyFichier.IconFile), MyFichier.IconIndex);
   Fproperty.Caption:= Format(FpropertyCaption, [MyFichier.DisplayName]);
   FProperty.EDisplayName.Text:= MyFichier.DisplayName;
   FProperty.LTypeName.Caption:= MyFichier.TypeName;
@@ -1548,7 +1549,15 @@ begin
   FProperty.EParams.Text:= MyFichier.Params;
   OldTarget:= FProperty.ECible.Text;
   Fproperty.EPath.Text:= MyFichier.StartPath;
-  //Oldpath:= Fproperty.EPath.Text;
+  siz:= MyFichier.size;
+  if (siz >= 0) and  (siz < $400) then unite:= Format(Fproperty.FileSizeCaption+' %.0n %s', [siz, Fproperty.FileSizeByte]);     // less 1Ko
+  if (siz >= $400) and  (siz < $100000) then unite:= Format(Fproperty.FileSizeCaption+' %.2n %s', [siz/$400, Fproperty.FileSizeKB]);   // less 1Mo
+  if (siz >= $100000) and  (siz < $40000000) then unite:= Format(Fproperty.FileSizeCaption+'  %.2n %s', [siz/$100000, Fproperty.FileSizeMB]);  // less 1Go
+  if (siz >= $40000000) then unite:=  Format(Fproperty.FileSizeCaption+' %.2n %s', [siz/$40000000, Fproperty.FileSizeGB]);  // less 1Go
+  try
+     FProperty.ECible.Hint:= unite+' - Date: '+DateTimeToStr(MyFichier.Date) ;
+  except
+  end;
   FProperty.Memo1.Text:= MyFichier.Description;
   FProperty.PMnuPropsOldIcon.Checked:= MyFichier.OldIcon;
   if FProperty.Showmodal = mrOK then
@@ -1557,18 +1566,33 @@ begin
       begin
          ZeroMemory(@MyFichier, sizeOf(MyFichier));
          MyFichier:= GetFile(FProperty.ECible.Text);
+         ListeFichiers.ModifyFile(Item.Index, MyFichier );
       end else
       begin
-        MyFichier.StartPath:= Fproperty.EPath.Text;
-        MyFichier.IconFile:= Fproperty.IconFile;
-        MyFichier.IconIndex:= Fproperty.IconIndex;
-        MyFichier.DisplayName:= FProperty.EDisplayName.Text;
-        MyFichier.Description:= FProperty.Memo1.Text;
-        MyFichier.Params:= FProperty.EParams.Text;
-        MyFichier.OldIcon:= FProperty.PMnuPropsOldIcon.Checked;
+        if MyFichier.StartPath <> Fproperty.EPath.Text then
+           ListeFichiers.ModifyField(Item.Index, 'StartPath', Fproperty.EPath.Text);
+        if MyFichier.IconFile <> Fproperty.IconFile then
+           ListeFichiers.ModifyField(Item.Index, 'IconFile', Fproperty.IconFile);
+        if MyFichier.IconIndex <> Fproperty.IconIndex then
+           ListeFichiers.ModifyField(Item.Index, 'IconIndex', Fproperty.IconIndex);
+        if MyFichier.DisplayName <> FProperty.EDisplayName.Text then
+           ListeFichiers.ModifyField(Item.Index, 'DisplayName', FProperty.EDisplayName.Text);
+        if MyFichier.Description <> FProperty.Memo1.Text then
+           ListeFichiers.ModifyField(Item.Index, 'Description', FProperty.Memo1.Text);
+        if MyFichier.Params <> FProperty.EParams.Text then
+           ListeFichiers.ModifyField(Item.Index, 'Params:', FProperty.EParams.Text);
+        if MyFichier.OldIcon <> FProperty.PMnuPropsOldIcon.Checked then
+           ListeFichiers.ModifyField(Item.Index, 'OldIcon', FProperty.PMnuPropsOldIcon.Checked);
+        if MyFichier.TypeName <> FileGetType(MyFichier.Path+MyFichier.Name) then
+           ListeFichiers.ModifyField(Item.Index, 'TypeName', FileGetType(MyFichier.Path+MyFichier.Name));
+        if MyFichier.Size <> FileGetSize(MyFichier.Path+MyFichier.Name) then
+           ListeFichiers.ModifyField(Item.Index, 'Size', FileGetSize(MyFichier.Path+MyFichier.Name));
+        if MyFichier.Date <> FileGetDateTime(MyFichier.Path+MyFichier.Name, ftCreate)then
+           ListeFichiers.ModifyField(Item.Index, 'Date', FileGetDateTime(MyFichier.Path+MyFichier.Name, ftCreate));
       end;
-      ListeFichiers.ModifyFile(Item.Index, MyFichier );
-      LVDisplayFiles;
+      //ListeFichiers.GetItem(Item.Index)
+      //ListeFichiers.ModifyFile(Item.Index, MyFichier );
+      //LVDisplayFiles;     managed with filelist onchange
   end;
 end;
 
@@ -1709,6 +1733,11 @@ With LangFile do
    FProperty.LPath.Caption:= ReadString(LangStr, 'Fproperty.LPath.Caption', FProperty.LPath.Caption);
    FProperty.PMnuSelectIcon.Caption:= ReadString(LangStr, 'FProperty.PMnuSelectIcon.Caption', FProperty.PMnuSelectIcon.Caption);
    FProperty.PMnuPropsOldIcon.Caption:= ReadString(LangStr, 'FProperty.PMnuPropsOldIcon', FProperty.PMnuPropsOldIcon.Caption);
+   FProperty.FileSizeCaption:= ReadString(LangStr, 'FProperty.FileSizeCaption', 'Taille :');
+   FProperty.FileSizeByte:= ReadString(LangStr, 'FProperty.FileSizeByte', 'octet(s)');
+   FProperty.FileSizeKB:= ReadString(LangStr, 'FProperty.FileSizeKB', 'Ko');
+   FProperty.FileSizeMB:= ReadString(LangStr, 'FProperty.FileSizeMB', 'Mo');
+   FProperty.FileSizeGB:= ReadString(LangStr, 'FProperty.FileSizeGB', 'Go');
 
    FLoadGroup.Caption:= SBGroup.Hint;
    FLoadGroup.BtnNew.Caption:= ReadString(LangStr, 'FLoadGroup.BtnNew.Caption', FLoadGroup.BtnNew.Caption);

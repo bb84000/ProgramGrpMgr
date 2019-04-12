@@ -45,6 +45,8 @@ type
     IconIndex: Integer;
     dlgTitle: String;
     OldIcon: Boolean;
+    FileSizeCaption, FileSizeByte, FileSizeKB, FileSizeMB, FileSizeGB:  String;
+
   end;
 
 var

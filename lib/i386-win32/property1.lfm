@@ -1,15 +1,15 @@
 object FProperty: TFProperty
-  Left = 862
-  Height = 330
-  Top = 202
+  Left = 546
+  Height = 309
+  Top = 181
   Width = 469
   Caption = 'FProperty'
-  ClientHeight = 330
+  ClientHeight = 309
   ClientWidth = 469
   LCLVersion = '2.0.0.4'
   object PC1: TPageControl
     Left = 0
-    Height = 289
+    Height = 268
     Top = 0
     Width = 469
     ActivePage = TSGeneral
@@ -18,10 +18,10 @@ object FProperty: TFProperty
     TabOrder = 0
     object TSGeneral: TTabSheet
       Caption = 'General'
-      ClientHeight = 261
+      ClientHeight = 240
       ClientWidth = 461
       object Image1: TImage
-        Left = 16
+        Left = 10
         Height = 32
         Top = 8
         Width = 32
@@ -31,40 +31,44 @@ object FProperty: TFProperty
         ShowHint = True
       end
       object LFileType: TLabel
-        Left = 16
+        Left = 10
         Height = 15
         Top = 48
-        Width = 80
-        Caption = 'Type de fichier '
+        Width = 79
+        AutoSize = False
+        Caption = 'Type'
         ParentColor = False
       end
       object LTypeName: TLabel
-        Left = 100
+        Left = 90
         Height = 15
         Top = 48
-        Width = 62
+        Width = 358
+        AutoSize = False
         Caption = 'LTypeName'
         ParentColor = False
+        ParentShowHint = False
+        ShowHint = True
       end
       object LDescription: TLabel
-        Left = 16
+        Left = 10
         Height = 15
-        Top = 176
-        Width = 60
+        Top = 173
+        Width = 79
         AutoSize = False
         Caption = 'Description'
         ParentColor = False
       end
       object LCible: TLabel
-        Left = 16
+        Left = 10
         Height = 15
-        Top = 80
+        Top = 75
         Width = 27
         Caption = 'Cible'
         ParentColor = False
       end
       object SBCible: TSpeedButton
-        Left = 416
+        Left = 427
         Height = 22
         Hint = 'Changer le fichier cible'
         Top = 72
@@ -89,57 +93,60 @@ object FProperty: TFProperty
         ParentShowHint = False
       end
       object LParams: TLabel
-        Left = 16
+        Left = 10
         Height = 15
-        Top = 112
+        Top = 107
         Width = 59
         Caption = 'Paramètres'
         ParentColor = False
       end
       object LPath: TLabel
-        Left = 16
+        Left = 8
         Height = 15
-        Top = 144
-        Width = 42
-        Caption = 'Chemin'
+        Top = 136
+        Width = 79
+        AutoSize = False
+        Caption = 'Démarrer dans'
         ParentColor = False
       end
       object EDisplayName: TEdit
-        Left = 88
+        Left = 90
         Height = 23
         Top = 12
-        Width = 353
+        Width = 360
         TabOrder = 0
       end
       object Memo1: TMemo
-        Left = 88
+        Left = 90
         Height = 65
         Top = 168
-        Width = 353
+        Width = 360
         Lines.Strings = (
           'Memo1'
         )
         TabOrder = 1
       end
       object ECible: TEdit
-        Left = 88
+        Left = 90
         Height = 23
         Top = 72
-        Width = 321
+        Width = 330
+        ParentShowHint = False
+        ShowHint = True
         TabOrder = 2
       end
       object EParams: TEdit
-        Left = 88
+        Left = 90
         Height = 23
         Top = 104
-        Width = 353
+        Width = 360
         TabOrder = 3
       end
       object EPath: TEdit
-        Left = 88
+        Left = 90
         Height = 23
         Top = 136
-        Width = 353
+        Width = 360
         TabOrder = 4
       end
     end
@@ -147,7 +154,7 @@ object FProperty: TFProperty
   object PButtons: TPanel
     Left = 0
     Height = 41
-    Top = 289
+    Top = 268
     Width = 469
     Align = alBottom
     ClientHeight = 41

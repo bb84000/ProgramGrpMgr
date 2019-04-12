@@ -2,15 +2,15 @@ object AboutBox: TAboutBox
   Left = 773
   Height = 175
   Top = 204
-  Width = 331
+  Width = 329
   BorderStyle = bsDialog
   ClientHeight = 175
-  ClientWidth = 331
+  ClientWidth = 329
   OnActivate = FormActivate
   Position = poMainFormCenter
   LCLVersion = '2.0.0.4'
   object Panel1: TPanel
-    Left = 10
+    Left = 9
     Height = 115
     Top = 9
     Width = 310
@@ -26,8 +26,8 @@ object AboutBox: TAboutBox
       Width = 34
     end
     object LProductName: TLabel
-      Left = 3
-      Height = 13
+      Left = 0
+      Height = 15
       Top = 10
       Width = 301
       Alignment = taCenter
@@ -38,7 +38,7 @@ object AboutBox: TAboutBox
     end
     object LVersion: TLabel
       Left = 3
-      Height = 13
+      Height = 15
       Top = 30
       Width = 301
       Alignment = taCenter
@@ -49,7 +49,7 @@ object AboutBox: TAboutBox
     end
     object LUpdate: TLabel
       Left = 3
-      Height = 13
+      Height = 15
       Top = 70
       Width = 301
       Alignment = taCenter
@@ -69,7 +69,7 @@ object AboutBox: TAboutBox
     end
     object LCopyright: TLabel
       Left = 3
-      Height = 13
+      Height = 15
       Top = 50
       Width = 301
       Alignment = taCenter
@@ -79,7 +79,7 @@ object AboutBox: TAboutBox
     end
     object LWebSite: TLabel
       Left = 3
-      Height = 13
+      Height = 15
       Top = 90
       Width = 301
       Alignment = taCenter
@@ -98,10 +98,11 @@ object AboutBox: TAboutBox
     end
   end
   object BitBtn1: TBitBtn
-    Left = 120
+    Left = 127
     Height = 30
-    Top = 134
+    Top = 136
     Width = 75
+    Anchors = [akTop]
     Default = True
     DefaultCaption = True
     Kind = bkOK

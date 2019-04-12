@@ -24,7 +24,7 @@ Type
     Params: String;
     StartPath: String;
     Description: String;
-    Size: Int64;
+    Size: QWord;
     TypeName: String;
     Date: TDateTime;
     IconFile: String;
@@ -37,7 +37,7 @@ Type
     FOnChange: TNotifyEvent;
     FSortType: TChampsCompare;
     FSortDirection: TSortDirections;
-    function readIntValue(inode : TDOMNode; Attrib: String): Integer;
+    function readIntValue(inode : TDOMNode; Attrib: String): Int64;
     function readDateValue(inode : TDOMNode; Attrib: String): TDateTime;
   public
     Duplicates : TDuplicates;
@@ -49,6 +49,7 @@ Type
     procedure Reset;
     procedure AddFile(Fichier : TFichier);
     procedure ModifyFile (const i: integer; Fichier : TFichier);
+    procedure ModifyField (const i: integer; field: string; value: variant);
     function GetItem(const i: Integer): TFichier;
     procedure DoSort;
     function SaveToXMLnode(iNode: TDOMNode): Boolean;
@@ -170,6 +171,23 @@ begin
   if Assigned(FOnChange) then FOnChange(Self);
 end;
 
+procedure TFichierList.ModifyField (const i: integer; field: string; value: variant);
+begin
+  if field='Name' then TFichier(Items[i]^).Name := value;
+  if field='Path' then TFichier(Items[i]^).Path:= value;
+  if field='DisplayName' then TFichier(Items[i]^).DisplayName:= value;
+  if field='Params' then TFichier(Items[i]^).Params:= value;
+  if field='StartPath' then TFichier(Items[i]^).StartPath:= value;
+  if field='Size' then TFichier(Items[i]^).Size := value;
+  if field='TypeName' then TFichier(Items[i]^).TypeName := value;
+  if field='Description' then TFichier(Items[i]^).Description:= value;
+  if field='Date' then TFichier(Items[i]^).Date :=value;
+  if field='IconFile' then TFichier(Items[i]^).IconFile := value;
+  if field='IconIndex' then TFichier(Items[i]^).IconIndex := value;
+  if field='OldIcon' then TFichier(Items[i]^).OldIcon := value;
+  DoSort;
+  if Assigned(FOnChange) then FOnChange(Self);
+end;
 
 procedure TFichierList.Delete(const i: Integer);
 begin
@@ -233,13 +251,13 @@ begin
   end;
 end;
 
-function TFichierList.readIntValue(inode : TDOMNode; Attrib: String): Integer;
+function TFichierList.readIntValue(inode : TDOMNode; Attrib: String): INt64;
 var
   s: String;
 begin
   s:= TDOMElement(iNode).GetAttribute(Attrib) ;
   try
-    result:= StrToInt(s);
+    result:= StrToInt64(s);
   except
     result:= 0;
   end;

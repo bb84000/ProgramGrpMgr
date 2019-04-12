@@ -137,9 +137,18 @@ Correction du bug des caractères accentués dans les raccourcis
 Version 0.7.0.3 - 08/04/2019
 Les préférences sont stockées dans une classe pour simplifier la détection des modifications
 
-Version 0.7.1.0 - ??/04/2019
+Version 0.7.1.0 - 11/04/2019
 Modification des routines de sauvegarde de la configuration et des fichiers
 Correction du drag and drop qui ne fonctionnait plus
 Correction de la détection du programme déjà en cours d'exécution lorsque le nom du groupe
 contient des accents
 Corrections diverses
+
+Version 0.7.1.1 - 12/04/2019
+Centrage des boutons
+Correction d'un bug dans l'affichage des icones (Application.processMessages nécessaire)
+Ajout de la taille des fichiers dans les propriétés
+Correction de la taille du fichier dans la fonction GetFile dans le cas d'un raccourci
+Correction du calcul de la taille du fichier dans l'unité files
+Correction de la détection du type de fichier
+Mise à jour des propriétés quand un paramètre des fichiers change

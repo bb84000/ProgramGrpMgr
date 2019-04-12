@@ -1,12 +1,12 @@
 object FProgram: TFProgram
-  Left = 938
+  Left = 761
   Height = 304
-  Top = 267
-  Width = 604
+  Top = 240
+  Width = 600
   AllowDropFiles = True
   Caption = 'FProgram'
   ClientHeight = 304
-  ClientWidth = 604
+  ClientWidth = 600
   OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
@@ -19,11 +19,11 @@ object FProgram: TFProgram
     Left = 0
     Height = 40
     Top = 0
-    Width = 604
+    Width = 600
     Align = alTop
     BevelOuter = bvLowered
     ClientHeight = 40
-    ClientWidth = 604
+    ClientWidth = 600
     TabOrder = 0
     OnResize = PnlTopResize
     object SBGroup: TSpeedButton
@@ -89,10 +89,11 @@ object FProgram: TFProgram
       ParentShowHint = False
     end
     object CBDisplay: TComboBox
-      Left = 264
+      Left = 267
       Height = 23
       Top = 8
       Width = 160
+      Anchors = [akTop]
       ItemHeight = 15
       ItemIndex = 0
       Items.Strings = (
@@ -112,6 +113,7 @@ object FProgram: TFProgram
       Height = 23
       Top = 8
       Width = 160
+      Anchors = []
       ItemHeight = 15
       ItemIndex = 0
       Items.Strings = (
@@ -489,7 +491,7 @@ object FProgram: TFProgram
     Left = 0
     Height = 222
     Top = 40
-    Width = 604
+    Width = 600
     Align = alClient
     AutoSort = False
     Columns = <>
@@ -512,12 +514,12 @@ object FProgram: TFProgram
     Left = 0
     Height = 42
     Top = 262
-    Width = 604
+    Width = 600
     Align = alBottom
     BevelInner = bvRaised
     BevelOuter = bvNone
     ClientHeight = 42
-    ClientWidth = 604
+    ClientWidth = 600
     TabOrder = 2
     object PnlImgSel: TPanel
       Left = 1
@@ -18063,17 +18065,17 @@ object FProgram: TFProgram
       Left = 41
       Height = 40
       Top = 1
-      Width = 562
+      Width = 558
       Align = alClient
       BevelOuter = bvLowered
       ClientHeight = 40
-      ClientWidth = 562
+      ClientWidth = 558
       TabOrder = 1
       object LPrgSel: TLabel
         Left = 1
         Height = 38
         Top = 1
-        Width = 560
+        Width = 556
         Align = alClient
         AutoSize = False
         ParentColor = False
