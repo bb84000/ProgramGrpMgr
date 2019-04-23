@@ -118,7 +118,7 @@ type
     Settings: Tconfig;
     oldw: array [0..50] of Integer;
     ListeFichiers: TFichierList;
-    ImageList: TImageList;
+    ImgList: TImageList;
     // Config file and values
     ConfigFile: String;
     ListeChange, SettingsChange, WStateChange: Bool;
@@ -148,6 +148,7 @@ type
     NoDeleteGroup, DeleteGrpMsg: String;
     Version: String;
     ImgSavDisabled: TBitmap;
+    OldConfig: Boolean;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -323,7 +324,7 @@ begin
   end;
   ListeFichiers:= TFichierList.Create;
   Settings:= TConfig.Create;
-  ImageList:= TImageList.Create(self);
+  ImgList:= TImageList.Create(self);
   langue:= Lo(GetUserDefaultLangID);
   //langue:=  LANG_ITALIAN;
   If length(Settings.LangStr)= 0 then Settings.LangStr:= IntToStr(langue);
@@ -358,7 +359,7 @@ procedure TFProgram.FormDestroy(Sender: TObject);
 begin
   FreeAndNil(WinVersion);
   FreeAndNil(ListeFichiers);
-  FreeAndNil(ImageList);
+  FreeAndNil(ImgList);
   FreeAndNil(langnums);
   FreeAndNil(langfile);
   FreeAndNil(Settings);
@@ -499,7 +500,7 @@ begin
     GroupName:= GrpName;
   end;
   ConfigFile:= PrgMgrAppsData+GrpName+'.xml';
-
+  //ShowMessage(Settings.GroupName);
  If not FileExists(ConfigFile) then
   begin
     If FileExists (PrgMgrAppsData+Settings.GroupName+'.bk0') then
@@ -514,6 +515,7 @@ begin
     end;
   end;
   LoadCfgFile(ConfigFile);
+  if Settings.GroupName <> GrpName then Settings.GroupName := GrpName;
   // Détermination de la langue
   LangFile.ReadSections(LangNums);
   if LangNums.Count > 1 then
@@ -647,7 +649,7 @@ Try
     begin
       // Main settings, check if old or new config file
       SettingsNode:= DocumentElement.FindNode('settings');
-      if SettingsNode = nil then SettingsNode:= DocumentElement; //FindNode('config');
+      if SettingsNode = nil then SettingsNode:= DocumentElement;
       Settings.ReadXMLNode(SettingsNode);
       // files settings
       FilesNode:= DocumentElement.FindNode('files');
@@ -664,42 +666,42 @@ var
   CfgXML: TXMLDocument;
   RootNode, SettingsNode, FilesNode :TDOMNode;
   WindowPlacement: TWindowPlacement;
-  WinPos : array [0..10] of Integer;
+  //WinPos : array [0..10] of Integer;
   i: Integer;
   Reg: TRegistry;
   FilNamWoExt: String;
+ // s: string;
 begin
   if Typ= none then  exit;
+  // Current state
+  if Settings.IconDisplay < 0 then Settings.IconDisplay:= 3;
+  if Settings.IconSort < 0 then Settings.IconSort:= 0;
+  // Window position
+  Settings.WState:= '';
+  If WindowState = wsMaximized then
+  begin
+    AppState :=  SW_SHOWMAXIMIZED;                   // Application is never maximized, only the main form
+  end else
+  begin
+    GetWindowPlacement(Application.Handle, @WindowPlacement);
+    AppState := WindowPlacement.showCmd;             // Elsewhere, we use the app placement
+  end;
+  if Top < 0 then Top:= 0;
+  if Left < 0 then Left:= 0;
+  Settings.WState:= IntToHex(AppState, 4)+IntToHex(Top, 4)+IntToHex(Left, 4)+IntToHex(Height, 4)+IntToHex(width, 4);
+  // LOad or create config file
   ConfigFile:= PrgMgrAppsData+GrpName+'.xml';
   try
     CfgXML := TXMLDocument.Create;
     With CfgXML do
     begin
-     If Settings.IconDisplay < 0 then Settings.IconDisplay:= 3;
-     If Settings.IconSort < 0 then Settings.IconSort:= 0;
-     // Window position
-      Settings.WState:= '';
-      If WindowState = wsMaximized then
-      begin
-        AppState :=  SW_SHOWMAXIMIZED;                   // Application is never maximized, only the main form
-      end else
-      begin
-        GetWindowPlacement(Application.Handle, @WindowPlacement);
-        AppState := WindowPlacement.showCmd;             // Elsewhere, we use the app placement
-      end;
-      WinPos[0]:= AppState;
-      if Top < 0 then WinPos[1]:= 0 else WinPos[1]:= Top;
-      if Left < 0 then WinPos[2]:= 0 else WinPos[2]:= Left;
-      WinPos[3]:= Height;
-      WinPos[4]:= Width;
-      For i:= 0 to 4 do Settings.WState:=Settings.WState+IntToHex(WinPos[i], 4);
-     // Main config is in root node
-      RootNode := CreateElement('config');
-      Appendchild(RootNode);
-      SettingsNode:= CreateElement('settings');
-      Settings.SaveToXMLnode(SettingsNode);
+      // Main config is in settings node
+      RootNode := CfgXML.CreateElement('config');
+      CfgXML.Appendchild(RootNode);
+      SettingsNode:= CfgXML.CreateElement('settings');
+      Settings.SaveXMLnode(SettingsNode);
       RootNode.Appendchild(SettingsNode);
-      FilesNode:= CreateElement('files');
+      FilesNode:= CfgXML.CreateElement('files');
       ListeFichiers.SaveToXMLnode(FilesNode);
       RootNode.Appendchild(FilesNode);
     end;
@@ -714,6 +716,13 @@ begin
     then  RenameFile(ConfigFile, FilNamWoExt+'.bk0');
     // Et on sauvegarde la nouvelle config
     writeXMLFile(CfgXML, ConfigFile);
+    if ListeChange then
+    begin
+      SaveImageListToFile(ImgList,PrgMgrAppsData+Settings.GroupName+'.imglst' ) ;
+    end else
+    begin
+      if not Fileexists (PrgMgrAppsData+Settings.GroupName+'.imglst') then SaveImageListToFile(ImgList,PrgMgrAppsData+Settings.GroupName+'.imglst' ) ;
+    end;
   finally
     //On vérifie que ces valeurs sont bien dans le registre
     Reg:= TRegistry.Create;
@@ -736,10 +745,10 @@ end;
 
 function TFProgram.StateChanged : SaveType;
 var
-  WinPos : array [0..10] of Integer;
-  i: Integer;
+  //WinPos : array [0..10] of Integer;
+  //i: Integer;
   WindowPlacement: TWindowPlacement;
-  WState: String;
+  //WState: String;
 begin
  If (WindowState = wsMinimized) then
   begin
@@ -749,19 +758,24 @@ begin
     GetWindowPlacement(Handle, @WindowPlacement);
     AppState := WindowPlacement.showCmd;
   end;
-  WState:= '';
+
+  if Top < 0 then Top:= 0;
+  if Left < 0 then Left:= 0;
+  Settings.WState:= IntToHex(AppState, 4)+IntToHex(Top, 4)+IntToHex(Left, 4)+IntToHex(Height, 4)+IntToHex(width, 4);
+
+  {WState:= '';
   WinPos[0]:= AppState;
   if Top < 0 then WinPos[1]:= 0 else WinPos[1]:= Top;
   if Left < 0 then WinPos[2]:= 0 else WinPos[2]:= Left;
   WinPos[3]:= Height;
   WinPos[4]:= Width;
   For i:= 0 to 4 do WState:=WState+IntToHex(WinPos[i], 4);
-  Settings.WState:=WState;
+  Settings.WState:=WState;    }
   If (Prefs.ImgChanged or WStateChange) then
    begin
     result:= State ;
   end else
-  If ListeChange or SettingsChange then
+  If ListeChange or SettingsChange or (not Fileexists (PrgMgrAppsData+Settings.GroupName+'.imglst')) then
   begin
     result:= all;
   end else
@@ -814,7 +828,7 @@ begin
   SBSave.Enabled:= True;
   PMnuSave.Enabled:= True;
   PMnuSaveEnable(True);
-  LVDisplayFiles;
+  //LVDisplayFiles;
 end;
 
 procedure TFProgram.SettingsOnChange(sender: TObject);
@@ -876,6 +890,8 @@ var
   nIconId : DWORD;
   ItemPos: Tpoint;
   IcoInfo: TICONINFO;
+  cache: Boolean;
+  hnd: THandle;
 begin
   if ListeFichiers.Count = 0 then
   begin
@@ -931,21 +947,37 @@ begin
     end;
     ListeFichiers.DoSort;
     ListView1.Clear;
-    ImageList.Clear;
-    ImageList.Height:= IcoSize;
-    ImageList.Width:= IcoSize;
-    // Set spacing of icons in listview
+    ImgList.Clear;
+    ImgList.Height:= IcoSize;
+    ImgList.Width:= IcoSize;
+     // Set spacing of icons in listview
     PostMessage(Listview1.Handle,LVM_SETICONSPACING, 0,MakeLParam(Word(-1), Word(-1)));
     Application.ProcessMessages;                             // To allow all components to be created instead index off bounds error
+    ListView1.LargeImages:= ImgList;
+    // ImageList in cache
+    // load it and assign the image list to listview
+    // Need to post listview message as listview handle is readonly
+    cache:= false;
+    If (FileExists(PrgMgrAppsData+Settings.GroupName+'.imglst' ) and (not ListeChange)) then
+    begin
+      hnd:= LoadImageListFromFile(PrgMgrAppsData+Settings.GroupName+'.imglst' );
+      if hnd=0 then                                          // wrong cache file, delete it
+      begin
+        DeleteFile(PrgMgrAppsData+Settings.GroupName+'.imglst' );
+      end else
+      begin
+        PostMessage(Listview1.Handle,LVM_SETIMAGELIST, LVSIL_NORMAL, hnd);
+        cache:= true;
+      end;
+    end;
     // Create a temporary TIcon
-    ListView1.LargeImages:= ImageList;
     CurIcon := TIcon.Create;
     CurIcon.Height:= IcoSize;
     CurIcon.Width:= IcoSize;
     setLength(PtArray, ListeFichiers.Count);
     for i:= 0 to ListeFichiers.Count-1 do
     begin
-       ListItem := ListView1.Items.Add;
+      ListItem := ListView1.Items.Add;
       ListItem.Caption := ListeFichiers.GetItem(i).DisplayName;
       W:= LPrgSel.Canvas.TextWidth(ListItem.Caption);
       if W > oldw[0] then oldw[0]:= w;
@@ -956,33 +988,44 @@ begin
       W:= LPrgSel.Canvas.TextWidth(ListItem.SubItems[1]);
       if W > oldw[2] then oldw[2]:= w;
       ListItem.SubItems.Add(DateTimeToStr(ListeFichiers.GetItem(i).Date));
-      If Assigned(PrivateExtractIcons) then
+
+      if cache then
       begin
-        //Function only from W2000, and can be discontinued ?
-        // Do not display properly low color depth icons
-        if (SHDefExtractIcon(PChar(ListeFichiers.GetItem(i).IconFile), ListeFichiers.GetItem(i).IconIndex,
+        ListItem.ImageIndex:= i;
+      end else
+      begin
+        //ShowMessage('Test');
+        If Assigned(SHDefExtractIcon) then
+        begin
+          //Function only from W2000, and can be discontinued ?
+          // Do not display properly low color depth icons
+          if (SHDefExtractIcon(PChar(ListeFichiers.GetItem(i).IconFile), ListeFichiers.GetItem(i).IconIndex,
                              0, hicon, hicons, IcoSize) = 0) and ( not ListeFichiers.GetItem(i).OldIcon) then
-        // Or this one
-        {If (PrivateExtractIcons ( PChar(ListeFichiers.GetItem(i).IconFile), ListeFichiers.GetItem(i).IconIndex,
+          // Or this one
+          {If (PrivateExtractIcons ( PChar(ListeFichiers.GetItem(i).IconFile), ListeFichiers.GetItem(i).IconIndex,
                      IcoSize, Icosize, @hIcon, @nIconId, 1, LR_LOADFROMFILE) <>0) and (hIcon <> 0) and
                      (ListeFichiers.GetItem(i).OldIcon = false) then }
-        begin
-           CurIcon.handle:= hicon;
-          GetIconInfo(hicon, @IcoInfo);
-          ListItem.ImageIndex := ImageList_Add(ImageList.ResolutionByIndex[0].Reference.Handle, IcoInfo.hbmColor, IcoInfo.hbmMask);
-        end else
-        begin
-          // This one only get the first icon in file
-          GetIconFromFile(ListeFichiers.GetItem(i).IconFile ,CurIcon, Flag,0) ;
-          //GetIconRes(ListeFichiers.GetItem(i).IconFile, ListeFichiers.GetItem(i).IconIndex, CurIcon);
-          ListItem.ImageIndex := ImageList_AddIcon(ImageList.ResolutionByIndex[0].Reference.Handle, CurIcon.Handle);
+          begin
+            CurIcon.handle:= hicon;
+            GetIconInfo(hicon, @IcoInfo);
+            ListItem.ImageIndex := ImageList_Add(ImgList.ResolutionByIndex[0].Reference.Handle, IcoInfo.hbmColor, IcoInfo.hbmMask);
+            //ListItem.ImageIndex :=  i;
+          end else
+          begin
+            // This one only get the first icon in file
+            GetIconFromFile(ListeFichiers.GetItem(i).IconFile ,CurIcon, Flag,0) ;
+            //GetIconRes(ListeFichiers.GetItem(i).IconFile, ListeFichiers.GetItem(i).IconIndex, CurIcon);
+            ListItem.ImageIndex := ImageList_AddIcon(ImgList.ResolutionByIndex[0].Reference.Handle, CurIcon.Handle);
+          end;
         end;
-       end;
+      end;
        // Create an array of items coordinates
       ItemPos.x:= (Listview1.Items.Item[i].Position.x) +(IcoSize div 2);    // center coordinate
       ItemPos.y:= (Listview1.Items.Item[i].Position.y) +(IcoSize div 2);
       PtArray[i]:= ItemPos;
     end;
+    //SaveImageListToFile(ImgList, 'ImageList.dat') ;
+    //ShowMessage('Test');
     if assigned(CurIcon) then FreeAndNil(CurIcon);
 end;
 
@@ -1187,7 +1230,7 @@ begin
             IconIndex:= 0;
           end;
           LI := LV1.Items.Add;
-           if length(s) > 0 then LI.Caption := s else LI.Caption:= PrgMgrAppsData+SearchRec.Name;
+           if length(s) > 0 then LI.Caption := s else LI.Caption:= TrimFileExt(ExtractFileName(PrgMgrAppsData+SearchRec.Name));
            MyIcon.Handle:= ExtractIconU(Handle, PChar(IconFile), IconIndex);
            if MyIcon.handle > 0 then LI.ImageIndex :=IL1.AddIcon(MyIcon);
          end;
@@ -1554,8 +1597,9 @@ begin
   if (siz >= $400) and  (siz < $100000) then unite:= Format(Fproperty.FileSizeCaption+' %.2n %s', [siz/$400, Fproperty.FileSizeKB]);   // less 1Mo
   if (siz >= $100000) and  (siz < $40000000) then unite:= Format(Fproperty.FileSizeCaption+'  %.2n %s', [siz/$100000, Fproperty.FileSizeMB]);  // less 1Go
   if (siz >= $40000000) then unite:=  Format(Fproperty.FileSizeCaption+' %.2n %s', [siz/$40000000, Fproperty.FileSizeGB]);  // less 1Go
+  FProperty.LFileSize.Caption:= unite;
   try
-     FProperty.ECible.Hint:= unite+' - Date: '+DateTimeToStr(MyFichier.Date) ;
+     FProperty.LFiledate.Caption:= FProperty.FileDateCaption+' '+DateTimeToStr(MyFichier.Date) ;
   except
   end;
   FProperty.Memo1.Text:= MyFichier.Description;
@@ -1580,7 +1624,7 @@ begin
         if MyFichier.Description <> FProperty.Memo1.Text then
            ListeFichiers.ModifyField(Item.Index, 'Description', FProperty.Memo1.Text);
         if MyFichier.Params <> FProperty.EParams.Text then
-           ListeFichiers.ModifyField(Item.Index, 'Params:', FProperty.EParams.Text);
+           ListeFichiers.ModifyField(Item.Index, 'Params', FProperty.EParams.Text);
         if MyFichier.OldIcon <> FProperty.PMnuPropsOldIcon.Checked then
            ListeFichiers.ModifyField(Item.Index, 'OldIcon', FProperty.PMnuPropsOldIcon.Checked);
         if MyFichier.TypeName <> FileGetType(MyFichier.Path+MyFichier.Name) then
@@ -1592,7 +1636,7 @@ begin
       end;
       //ListeFichiers.GetItem(Item.Index)
       //ListeFichiers.ModifyFile(Item.Index, MyFichier );
-      //LVDisplayFiles;     managed with filelist onchange
+      If ListeChange then LVDisplayFiles;
   end;
 end;
 
@@ -1734,6 +1778,7 @@ With LangFile do
    FProperty.PMnuSelectIcon.Caption:= ReadString(LangStr, 'FProperty.PMnuSelectIcon.Caption', FProperty.PMnuSelectIcon.Caption);
    FProperty.PMnuPropsOldIcon.Caption:= ReadString(LangStr, 'FProperty.PMnuPropsOldIcon', FProperty.PMnuPropsOldIcon.Caption);
    FProperty.FileSizeCaption:= ReadString(LangStr, 'FProperty.FileSizeCaption', 'Taille :');
+   FProperty.FileDateCaption:= ReadString(LangStr, 'FProperty.FileDateCaption', 'Date :');
    FProperty.FileSizeByte:= ReadString(LangStr, 'FProperty.FileSizeByte', 'octet(s)');
    FProperty.FileSizeKB:= ReadString(LangStr, 'FProperty.FileSizeKB', 'Ko');
    FProperty.FileSizeMB:= ReadString(LangStr, 'FProperty.FileSizeMB', 'Mo');

@@ -152,3 +152,18 @@ Correction de la taille du fichier dans la fonction GetFile dans le cas d'un rac
 Correction du calcul de la taille du fichier dans l'unité files
 Correction de la détection du type de fichier
 Mise à jour des propriétés quand un paramètre des fichiers change
+
+Version 0.7.1.2 - 13/04/2019
+Compatibilité avec les plus anciennes versions du programme (attribut du nom de groupe avec
+des majuscules)
+
+Version 0.7.1.3 - 16/04/2019
+Modification de l'unité config pour éviter les erreurs de conversion chaîne/Entier
+
+Version 0.7.1.4 - 23/04/2019
+Correction du bug dfes propriétés: modification des paramètres non prises en compte
+Utilisation du paquet HTTP natif au lieu de Indy pour la détection de nouvelle version
+Interception de l'exception en cas de non connexion internet
+Correction du bug lorsque le nom du groupe de programme ne peut pas être lu
+Ajout d'un cache pour accélérer l'affichage lorsque la liste de fichiers n'est pas changée
+

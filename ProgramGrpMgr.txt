@@ -1,4 +1,4 @@
-ProgramGrpMgr.exe - Version 0.7.0.0
+ProgramGrpMgr.exe - Version 0.7.1.4
 
 English description at the end of french description
 
@@ -100,5 +100,5 @@ editor.
 Names and logos used in the program are the property of their respective owners.
 
 
-SDTP - bb95 - March 2019
+SDTP - bb95 - April 2019
 Web : http://www.sdtp.com

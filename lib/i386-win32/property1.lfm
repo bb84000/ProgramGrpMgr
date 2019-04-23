@@ -3,9 +3,11 @@ object FProperty: TFProperty
   Height = 309
   Top = 181
   Width = 469
+  BorderStyle = bsDialog
   Caption = 'FProperty'
   ClientHeight = 309
   ClientWidth = 469
+  Position = poMainFormCenter
   LCLVersion = '2.0.0.4'
   object PC1: TPageControl
     Left = 0
@@ -23,7 +25,7 @@ object FProperty: TFProperty
       object Image1: TImage
         Left = 10
         Height = 32
-        Top = 8
+        Top = 6
         Width = 32
         OnDblClick = Image1DblClick
         ParentShowHint = False
@@ -33,7 +35,7 @@ object FProperty: TFProperty
       object LFileType: TLabel
         Left = 10
         Height = 15
-        Top = 48
+        Top = 43
         Width = 79
         AutoSize = False
         Caption = 'Type'
@@ -42,7 +44,7 @@ object FProperty: TFProperty
       object LTypeName: TLabel
         Left = 90
         Height = 15
-        Top = 48
+        Top = 43
         Width = 358
         AutoSize = False
         Caption = 'LTypeName'
@@ -62,7 +64,7 @@ object FProperty: TFProperty
       object LCible: TLabel
         Left = 10
         Height = 15
-        Top = 75
+        Top = 88
         Width = 27
         Caption = 'Cible'
         ParentColor = False
@@ -71,7 +73,7 @@ object FProperty: TFProperty
         Left = 427
         Height = 22
         Hint = 'Changer le fichier cible'
-        Top = 72
+        Top = 85
         Width = 23
         Glyph.Data = {
           76010000424D7601000000000000760000002800000020000000100000000100
@@ -95,7 +97,7 @@ object FProperty: TFProperty
       object LParams: TLabel
         Left = 10
         Height = 15
-        Top = 107
+        Top = 115
         Width = 59
         Caption = 'Paramètres'
         ParentColor = False
@@ -103,7 +105,7 @@ object FProperty: TFProperty
       object LPath: TLabel
         Left = 8
         Height = 15
-        Top = 136
+        Top = 144
         Width = 79
         AutoSize = False
         Caption = 'Démarrer dans'
@@ -112,7 +114,7 @@ object FProperty: TFProperty
       object EDisplayName: TEdit
         Left = 90
         Height = 23
-        Top = 12
+        Top = 10
         Width = 360
         TabOrder = 0
       end
@@ -129,7 +131,7 @@ object FProperty: TFProperty
       object ECible: TEdit
         Left = 90
         Height = 23
-        Top = 72
+        Top = 85
         Width = 330
         ParentShowHint = False
         ShowHint = True
@@ -138,16 +140,35 @@ object FProperty: TFProperty
       object EParams: TEdit
         Left = 90
         Height = 23
-        Top = 104
+        Top = 113
         Width = 360
         TabOrder = 3
       end
       object EPath: TEdit
         Left = 90
         Height = 23
-        Top = 136
+        Top = 140
         Width = 360
         TabOrder = 4
+      end
+      object LFileSize: TLabel
+        Left = 90
+        Height = 15
+        Top = 64
+        Width = 142
+        AutoSize = False
+        Caption = 'LFilesize'
+        ParentColor = False
+      end
+      object LFiledate: TLabel
+        Left = 240
+        Height = 15
+        Top = 64
+        Width = 210
+        Alignment = taRightJustify
+        AutoSize = False
+        Caption = 'LFiledate'
+        ParentColor = False
       end
     end
   end

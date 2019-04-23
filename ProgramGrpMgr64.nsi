@@ -85,6 +85,15 @@
   LangString Check_box ${LANG_ENGLISH} "Install a shortcut on the desktop"
   LangString Check_box ${LANG_FRENCH} "Installer un raccourci sur le bureau"
 
+  ;Cannot install
+  LangString No_Install ${LANG_ENGLISH} "The application cannot be installed on a 32bit system"
+  LangString No_Install ${LANG_FRENCH} "Cette application ne peut pas être installée sur un système 32bits"
+  
+  ; Language styring for remove old install
+  LangString Remove_Old ${LANG_ENGLISH} "Install will remove a previous installation."
+  LangString Remove_Old ${LANG_FRENCH} "Install va supprimer une ancienne installation."
+
+
 ;Page instfiles
 
 ;--------------------------------
@@ -93,9 +102,9 @@
 Section "" ;No components page, name is not important
   ${If} ${RunningX64}
     SetRegView 64    ; change registry entries and install dir for 64 bit
-  ${Else}
-     MessageBox MB_OK "Cette application ne peut pas être isntallée sur ce système"
-     Quit
+  ;${Else}
+  ;   MessageBox MB_OK "Cette application ne peut pas être isntallée sur ce système"
+  ;   Quit
   ${EndIf}
   SetShellVarContext all
   SetOutPath "$INSTDIR"
@@ -164,4 +173,21 @@ SectionEnd ; end of uninstall section
 
 Function inst_shortcut
   CreateShortCut "$DESKTOP\$(ProgramLnkStr)" "$INSTDIR\ProgramGrpMgr.exe"
+FunctionEnd
+
+Function .onInit
+  ${If} ${RunningX64}
+    SetRegView 64    ; change registry entries and install dir for 64 bit
+  ${Else}
+     MessageBox MB_OK "$(No_Install)"
+     Quit
+  ${EndIf}
+  SetShellVarContext all
+  ReadRegStr $R0 HKLM "SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "UninstallString"
+   ${If} $R0 == ""
+        Goto Done
+   ${EndIf}
+  MessageBox MB_OK "$(Remove_Old)"
+  ExecWait $R0
+  Done:
 FunctionEnd

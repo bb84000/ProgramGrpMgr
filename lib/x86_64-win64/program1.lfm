@@ -1,11 +1,11 @@
 object FProgram: TFProgram
   Left = 761
-  Height = 304
-  Top = 240
+  Height = 303
+  Top = 241
   Width = 600
   AllowDropFiles = True
   Caption = 'FProgram'
-  ClientHeight = 304
+  ClientHeight = 303
   ClientWidth = 600
   OnActivate = FormActivate
   OnClose = FormClose
@@ -489,7 +489,7 @@ object FProgram: TFProgram
   end
   object ListView1: TListView
     Left = 0
-    Height = 222
+    Height = 221
     Top = 40
     Width = 600
     Align = alClient
@@ -513,7 +513,7 @@ object FProgram: TFProgram
   object PnlStatus: TPanel
     Left = 0
     Height = 42
-    Top = 262
+    Top = 261
     Width = 600
     Align = alBottom
     BevelInner = bvRaised

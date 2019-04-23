@@ -6,6 +6,8 @@
 ;Russian [25], Serbo Croatian [26], Slovak [27], Swedish [29], Turkish [31]
 
 ;Save this file in a secure place if you change it, it will be replaced by any update !
+;you wiill probably need to add some items.
+;Submit your translation on my site or GitHub
 
 ;English
 [9]
@@ -70,7 +72,7 @@ Prefs.LLangue.Caption=Language
 Prefs.CBMiniInTray.Caption=Minimize in tray area
 Prefs.CBMiniInTray.Hint=The application icon is not shown in the task bar, instead in the tray area
 Prefs.CBHideInTaskBar.Caption=Do not show the application in the Task bar
-Prefs.CBHideInTaskBar.Hint=The application is not shown in teh Task Bar. Need to be minimized in the tray
+Prefs.CBHideInTaskBar.Hint=The application is not shown in the Task Bar. Need to be minimized in the tray
 
 FPropertyCaption=%s properties
 FProperty.TSGeneral.Caption=General
@@ -83,6 +85,7 @@ Fproperty.LPath.Caption=Start path
 FProperty.PMnuSelectIcon.Caption=Select an icon
 FProperty.PMnuPropsOldIcon.Caption=Improve the icon display
 FProperty.FileSizeCaption=Size:
+FProperty.FileDateCaption=Date:
 FProperty.FileSizeByte=Byte(s)
 FProperty.FileSizeKB=KB
 FProperty.FileSizeMB=MB
@@ -171,6 +174,7 @@ Fproperty.LPath.Caption=Démarrer dans
 FProperty.PMnuSelectIcon.Caption=Choisir une icone
 FProperty.PMnuPropsOldIcon.Caption=Améliorer l'affichage de l'icone
 FProperty.FileSizeCaption=Taille :
+FProperty.FileDateCaption=Date :
 FProperty.FileSizeByte=octet(s)
 FProperty.FileSizeKB=Ko
 FProperty.FileSizeMB=Mo

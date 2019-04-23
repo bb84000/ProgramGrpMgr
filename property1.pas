@@ -20,6 +20,8 @@ type
     EParams: TEdit;
     EPath: TEdit;
     Image1: TImage;
+    LFiledate: TLabel;
+    LFileSize: TLabel;
     LCible: TLabel;
     LDescription: TLabel;
     LFileType: TLabel;
@@ -45,7 +47,7 @@ type
     IconIndex: Integer;
     dlgTitle: String;
     OldIcon: Boolean;
-    FileSizeCaption, FileSizeByte, FileSizeKB, FileSizeMB, FileSizeGB:  String;
+    FileSizeCaption, FileDateCaption, FileSizeByte, FileSizeKB, FileSizeMB, FileSizeGB:  String;
 
   end;
 

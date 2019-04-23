@@ -10,7 +10,7 @@ unit Config1;
 interface
 
 uses
-  Classes, SysUtils, laz2_DOM , laz2_XMLRead, bbutils;
+  Classes, SysUtils, laz2_DOM , laz2_XMLRead, bbutils, dialogs;
 
 type
   TConfig = class
@@ -32,6 +32,9 @@ type
     FHideBars: Boolean;
     FLangStr: String;
     Parent: TObject;
+    function readIntValue(inode : TDOMNode; Attrib: String): Int64;
+    function readDateValue(inode : TDOMNode; Attrib: String): TDateTime;
+
   public
     constructor Create (Sender: TObject); overload;
     procedure SetGroupName (s: string);
@@ -48,7 +51,7 @@ type
     procedure SetHideInTaskBar (b: Boolean);
     procedure SetHideBars (b: Boolean);
     procedure SetLangStr (s: string);
-    function SaveToXMLnode(iNode: TDOMNode): Boolean;
+    function SaveXMLnode(iNode: TDOMNode): Boolean;
     function ReadXMLNode(iNode: TDOMNode): Boolean;
 
   published
@@ -205,7 +208,7 @@ begin
   end;
 end;
 
-function TConfig.SaveToXMLnode(iNode: TDOMNode): Boolean;
+function TConfig.SaveXMLnode(iNode: TDOMNode): Boolean;
 begin
   Try
     TDOMElement(iNode).SetAttribute('groupname', FGroupName);
@@ -228,24 +231,49 @@ begin
   end;
 end;
 
+
+function TConfig.readIntValue(inode : TDOMNode; Attrib: String): INt64;
+var
+  s: String;
+begin
+  s:= TDOMElement(iNode).GetAttribute(Attrib) ;
+  try
+    result:= StrToInt64(s);
+  except
+    result:= 0;
+  end;
+end;
+
+function TConfig.readDateValue(inode : TDOMNode; Attrib: String): TDateTime;
+var
+  s: String;
+begin
+  s:= TDOMElement(iNode).GetAttribute(Attrib) ;
+  try
+    result:= StrToDateTime(s);
+  except
+    result:= now();
+  end;
+end;
+
 function TConfig.ReadXMLNode(iNode: TDOMNode): Boolean;
 begin
   try
     FGroupName:= TDOMElement(iNode).GetAttribute('groupname');
     FGrpIconFile:= TDOMElement(iNode).GetAttribute('grpiconfile');
-    FGrpIconIndex:= StrToInt(TDOMElement(iNode).GetAttribute('grpiconindex'));
-    FSavSizePos:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('savsizepos')));
-    FIconDisplay:= StrToInt(TDOMElement(iNode).GetAttribute('icondisplay'));
-    FIconSort:= StrToInt(TDOMElement(iNode).GetAttribute('iconsort'));
-    FMiniInTray:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('miniintray')));
-    FHideInTaskBar:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('hideintaskbar')));
-    FHideBars:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('hidebars')));
+    FGrpIconIndex:= readIntValue(iNode, 'grpiconindex');   //StrToInt(TDOMElement(iNode).GetAttribute('grpiconindex'));
+    FSavSizePos:= Boolean(readIntValue(iNode, 'savsizepos'));    //StrToInt(TDOMElement(iNode).GetAttribute('savsizepos')));
+    FIconDisplay:= readIntValue(iNode, 'icondisplay'); //StrToInt(TDOMElement(iNode).GetAttribute('icondisplay'));
+    FIconSort:=  readIntValue(iNode, 'iconsort');   //StrToInt(TDOMElement(iNode).GetAttribute('iconsort'));
+    FMiniInTray:= Boolean(readIntValue(iNode, 'miniintray'));               //StrToInt(TDOMElement(iNode).GetAttribute('miniintray')));
+    FHideInTaskBar:= Boolean(readIntValue(iNode, 'hideintaskbar')); //StrToInt(TDOMElement(iNode).GetAttribute('hideintaskbar')));
+    FHideBars:= Boolean(readIntValue(iNode, 'hidebars'));  //StrToInt(TDOMElement(iNode).GetAttribute('hidebars')));
     FWState:= TDOMElement(iNode).GetAttribute('wstate');
-    FNoChkNewVer:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('nochknewver')));
-    FLastUpdChk:= StrToDate(TDOMElement(iNode).GetAttribute('lastupdchk'));
-    FStartWin:= Boolean(StrToInt(TDOMElement(iNode).GetAttribute('startwin')));
+    FNoChkNewVer:= Boolean(readIntValue(iNode, 'nochknewver')); //StrToInt(TDOMElement(iNode).GetAttribute('nochknewver')));
+    FLastUpdChk:= readDateValue(iNode, 'lastupdchk');  //StrToDate(TDOMElement(iNode).GetAttribute('lastupdchk'));
+    FStartWin:= Boolean(readIntValue(iNode, 'startwin')); //StrToInt(TDOMElement(iNode).GetAttribute('startwin')));
     FLangStr:= TDOMElement(iNode).GetAttribute('langstr');
-    Result:= True;
+    result:= true;
   except
     Result:= False;
   end;
