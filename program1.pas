@@ -89,10 +89,10 @@ type
     procedure ListView1SelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure LVPMnuPopup(Sender: TObject);
+    procedure N1Click(Sender: TObject);
     procedure PMnuDeleteClick(Sender: TObject);
     procedure PMnuHideBarsClick(Sender: TObject);
     procedure PMnuPropsClick(Sender: TObject);
-    procedure PMnuRunAsClick(Sender: TObject);
     procedure PMnuRunClick(Sender: TObject);
     procedure PnlTopResize(Sender: TObject);
     procedure PTrayMnuMaximizeClick(Sender: TObject);
@@ -146,9 +146,9 @@ type
     LUpdateCaption, UpdateURL, ChkVerURL: String;
     LastUpdateSearch, LastChkCaption, NextChkCaption: String;
     NoDeleteGroup, DeleteGrpMsg: String;
+    OldConfig: Boolean;
     Version: String;
     ImgSavDisabled: TBitmap;
-    OldConfig: Boolean;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -277,7 +277,6 @@ begin
       p:= Pos('Grp=', param);
       if p > 0 then
       begin
-        //Settings.GroupName:= AnsiToUTF8(Copy(param, p+4, length(param)));
         Result := AnsiToUTF8(Copy(param, p+4, length(param)));
       end;
     end;
@@ -475,7 +474,6 @@ begin
       if (Width < FMinWidth) then Width:= FMinWidth;
      ShowBarsHeight:= Height;
   end;
-
 end;
 
 function TFProgram.PMnuSaveEnable (Enable: Boolean):Boolean;
@@ -511,7 +509,7 @@ begin
        then  RenameFile(PrgMgrAppsData+Settings.GroupName+'.bk'+IntToStr(i), PrgMgrAppsData+Settings.GroupName+'.bk'+IntToStr(i-1));
     end else
     begin
-      SaveConfig(Settings.GroupName, all)
+      SaveConfig(Settings.GroupName, All)
     end;
   end;
   LoadCfgFile(ConfigFile);
@@ -644,12 +642,17 @@ var
   SettingsNode, FilesNode : TDOMNode;
 begin
 Try
-    ReadXMLFile(CfgXML, FileName);
+  OldConfig:= False;
+  ReadXMLFile(CfgXML, FileName);
     With CfgXML do
     begin
       // Main settings, check if old or new config file
       SettingsNode:= DocumentElement.FindNode('settings');
-      if SettingsNode = nil then SettingsNode:= DocumentElement;
+      if SettingsNode = nil then
+      begin
+        SettingsNode:= DocumentElement;
+        oldConfig:= True;
+      end;
       Settings.ReadXMLNode(SettingsNode);
       // files settings
       FilesNode:= DocumentElement.FindNode('files');
@@ -666,13 +669,12 @@ var
   CfgXML: TXMLDocument;
   RootNode, SettingsNode, FilesNode :TDOMNode;
   WindowPlacement: TWindowPlacement;
-  //WinPos : array [0..10] of Integer;
   i: Integer;
   Reg: TRegistry;
   FilNamWoExt: String;
- // s: string;
 begin
-  if Typ= none then  exit;
+  if OldConfig then Typ:= All;                        // always save to new cvonfig if it is old one
+  if (Typ= None) then exit;
   // Current state
   if Settings.IconDisplay < 0 then Settings.IconDisplay:= 3;
   if Settings.IconSort < 0 then Settings.IconSort:= 0;
@@ -692,15 +694,29 @@ begin
   // LOad or create config file
   ConfigFile:= PrgMgrAppsData+GrpName+'.xml';
   try
-    CfgXML := TXMLDocument.Create;
-    With CfgXML do
+     // If oldconfig, then create a new file, else read existing config file
+    if FileExists(ConfigFile) and (not OldConfig) then
     begin
-      // Main config is in settings node
+      ReadXMLFile(CfgXml, ConfigFile);
+      RootNode := CfgXML.DocumentElement;
+    end else
+    begin
+      CfgXML := TXMLDocument.Create;
       RootNode := CfgXML.CreateElement('config');
       CfgXML.Appendchild(RootNode);
+    end;
+    if (Typ= State) or (Typ = All) then
+    begin
+      SettingsNode:= RootNode.FindNode('settings');
+      if SettingsNode <> nil then RootNode.RemoveChild(SettingsNode);
       SettingsNode:= CfgXML.CreateElement('settings');
       Settings.SaveXMLnode(SettingsNode);
       RootNode.Appendchild(SettingsNode);
+    end;
+    if (Typ = All) then
+    begin
+      FilesNode:= RootNode.FindNode('files');
+      if FilesNode <> nil then RootNode.RemoveChild(FilesNode);
       FilesNode:= CfgXML.CreateElement('files');
       ListeFichiers.SaveToXMLnode(FilesNode);
       RootNode.Appendchild(FilesNode);
@@ -716,12 +732,14 @@ begin
     then  RenameFile(ConfigFile, FilNamWoExt+'.bk0');
     // Et on sauvegarde la nouvelle config
     writeXMLFile(CfgXML, ConfigFile);
+    // Sauvegarde du cache
     if ListeChange then
     begin
       SaveImageListToFile(ImgList,PrgMgrAppsData+Settings.GroupName+'.imglst' ) ;
     end else
     begin
-      if not Fileexists (PrgMgrAppsData+Settings.GroupName+'.imglst') then SaveImageListToFile(ImgList,PrgMgrAppsData+Settings.GroupName+'.imglst' ) ;
+      if not Fileexists(PrgMgrAppsData+Settings.GroupName+'.imglst')then
+          SaveImageListToFile(ImgList,PrgMgrAppsData+Settings.GroupName+'.imglst' ) ;
     end;
   finally
     //On vérifie que ces valeurs sont bien dans le registre
@@ -745,10 +763,7 @@ end;
 
 function TFProgram.StateChanged : SaveType;
 var
-  //WinPos : array [0..10] of Integer;
-  //i: Integer;
   WindowPlacement: TWindowPlacement;
-  //WState: String;
 begin
  If (WindowState = wsMinimized) then
   begin
@@ -758,29 +773,21 @@ begin
     GetWindowPlacement(Handle, @WindowPlacement);
     AppState := WindowPlacement.showCmd;
   end;
-
   if Top < 0 then Top:= 0;
   if Left < 0 then Left:= 0;
-  Settings.WState:= IntToHex(AppState, 4)+IntToHex(Top, 4)+IntToHex(Left, 4)+IntToHex(Height, 4)+IntToHex(width, 4);
-
-  {WState:= '';
-  WinPos[0]:= AppState;
-  if Top < 0 then WinPos[1]:= 0 else WinPos[1]:= Top;
-  if Left < 0 then WinPos[2]:= 0 else WinPos[2]:= Left;
-  WinPos[3]:= Height;
-  WinPos[4]:= Width;
-  For i:= 0 to 4 do WState:=WState+IntToHex(WinPos[i], 4);
-  Settings.WState:=WState;    }
+  // seulement si on veut sauvegarder la taille et la position
+  if Settings.SavSizePos then
+     Settings.WState:= IntToHex(AppState, 4)+IntToHex(Top, 4)+IntToHex(Left, 4)+IntToHex(Height, 4)+IntToHex(width, 4);
   If (Prefs.ImgChanged or WStateChange) then
    begin
     result:= State ;
   end else
   If ListeChange or SettingsChange or (not Fileexists (PrgMgrAppsData+Settings.GroupName+'.imglst')) then
   begin
-    result:= all;
+    result:= All;
   end else
   begin
-    result:= none;
+    result:= None;
   end;
 end;
 
@@ -887,7 +894,6 @@ var
   i: Integer;
   w: Integer;
   hIcon, hicons: Thandle;
-  nIconId : DWORD;
   ItemPos: Tpoint;
   IcoInfo: TICONINFO;
   cache: Boolean;
@@ -1024,8 +1030,6 @@ begin
       ItemPos.y:= (Listview1.Items.Item[i].Position.y) +(IcoSize div 2);
       PtArray[i]:= ItemPos;
     end;
-    //SaveImageListToFile(ImgList, 'ImageList.dat') ;
-    //ShowMessage('Test');
     if assigned(CurIcon) then FreeAndNil(CurIcon);
 end;
 
@@ -1285,7 +1289,7 @@ begin
   If ODlg1.Execute then
     begin
      ListeFichiers.AddFile(GetFile(ODlg1.FileName));
-    // LVDisplayFiles;
+     LVDisplayFiles;
     end;
 end;
 
@@ -1356,7 +1360,6 @@ begin
         Settings.GrpIconIndex:= IconIndex;
         SBSave.Enabled:= True;
         PMnuSave.Enabled:= PmnuSaveEnable(True);
-        //ImgChanged:= False;
       end;
     end;
     Settings.HideInTaskBar:= CBHideInTaskbar.Checked;
@@ -1367,7 +1370,6 @@ begin
                      ShortCutName, Settings.GrpIconFile, Settings.GrpIconIndex);
     end;
     TrayProgman.Visible:= Settings.MiniInTray;
-    //SaveConfig(GroupName, StateChanged);
   end;
 end;
 
@@ -1400,7 +1402,6 @@ begin
     begin
       if LB2.ItemIndex >= 0 then
       begin
-        //ShowMessage(FileList[LB2.ItemIndex,0]);
         ListeFichiers.Reset;
         LoadCfgFile(FileList[LB2.ItemIndex,0]);
         LVDisplayFiles;
@@ -1526,6 +1527,11 @@ begin
 
 end;
 
+procedure TFProgram.N1Click(Sender: TObject);
+begin
+
+end;
+
 procedure TFProgram.CBDisplayChange(Sender: TObject);
 begin
   ListeChange:= True;
@@ -1566,17 +1572,16 @@ begin
       end;
   end;
   ListeChange:= True;
-  //LVDisplayFiles;
+  LVDisplayFiles;
 end;
 
 procedure TFProgram.PMnuPropsClick(Sender: TObject);
 var
- Item : TListItem;
- MyFichier: TFichier;
- OldTarget: String;
- //OldPath: String;
- siz: double;
- unite: string;
+  Item : TListItem;
+  MyFichier: TFichier;
+  OldTarget: String;
+  siz: double;
+  unite: string;
 begin
   Item := ListView1.Selected;
   If Item = nil then exit;
@@ -1634,18 +1639,9 @@ begin
         if MyFichier.Date <> FileGetDateTime(MyFichier.Path+MyFichier.Name, ftCreate)then
            ListeFichiers.ModifyField(Item.Index, 'Date', FileGetDateTime(MyFichier.Path+MyFichier.Name, ftCreate));
       end;
-      //ListeFichiers.GetItem(Item.Index)
-      //ListeFichiers.ModifyFile(Item.Index, MyFichier );
-      If ListeChange then LVDisplayFiles;
+       If ListeChange then LVDisplayFiles;
   end;
 end;
-
-procedure TFProgram.PMnuRunAsClick(Sender: TObject);
-begin
-
-end;
-
-
 
 procedure TFProgram.FormWindowStateChange(Sender: TObject);
 begin

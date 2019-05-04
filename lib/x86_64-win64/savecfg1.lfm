@@ -1,7 +1,7 @@
 object FSaveCfg: TFSaveCfg
-  Left = 807
+  Left = 399
   Height = 178
-  Top = 173
+  Top = 164
   Width = 402
   BorderStyle = bsDialog
   Caption = 'Enregistrement des modifications'

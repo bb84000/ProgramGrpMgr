@@ -35715,6 +35715,7 @@ object FProgram: TFProgram
     end
     object N1: TMenuItem
       Caption = '-'
+      OnClick = N1Click
     end
     object PMnuDelete: TMenuItem
       Caption = 'Supprimer'

@@ -167,3 +167,7 @@ Interception de l'exception en cas de non connexion internet
 Correction du bug lorsque le nom du groupe de programme ne peut pas être lu
 Ajout d'un cache pour accélérer l'affichage lorsque la liste de fichiers n'est pas changée
 
+Version 0.7.1.5 - 04/05/2019
+Correction d'un bug empêchant l'ajout ou la suppression d'un programme
+Optimisation de la sauvegarde de la configuration
+

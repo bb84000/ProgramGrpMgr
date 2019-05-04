@@ -1,7 +1,7 @@
 object Prefs: TPrefs
-  Left = 624
+  Left = 803
   Height = 223
-  Top = 259
+  Top = 164
   Width = 582
   BorderStyle = bsDialog
   Caption = 'Prefs'
