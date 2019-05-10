@@ -33,14 +33,16 @@ R. Dans la liste des programmes, cliquez avec le bouton droit de la souris sur l
    le bouton gauche sur "Plus " et cliquez sur le choix "Emplacement de l'application", ce qui ouvre l'explorateur de fichier 
    et affiche le raccourci? Vou pouvez glisser ce dernier vers la fenêtre du gestionnaire de programmes.
   
- Q. Comment cacher la barre d'outils et la barre de statut ?
+Q. Comment cacher la barre d'outils et la barre de statut ?
  
- R. Cliquez avec le bouton droit de la souris en dehors des icones de programmes. Choisissez "Masquer les barres d'outils et
+R. Cliquez avec le bouton droit de la souris en dehors des icones de programmes. Choisissez "Masquer les barres d'outils et
     de statut". Même opération pour les réafficher lorsqu'elles sont masquées.
 
- Q. Certaines icones sont mal affichées
+Q. Certaines icones sont mal affichées
 
- R. Les icones ayant un ancien format de couleur peuvent ne pas s'afficher correctement. Vérifiez
+R. Les icones ayant un ancien format de couleur peuvent ne pas s'afficher correctement. Vérifiez
     s'il existe une nouvelle version du programme en question.
 
- 
+Q. Le charbement des icones est très lent
+
+R. Dans les préférences, cochez l'option "Activer le cache des icones"

@@ -15,6 +15,7 @@ type
     BtnCancel: TButton;
     BtnOK: TButton;
     CBHideInTaskBar: TCheckBox;
+    CBIconCache: TCheckBox;
     CBLangue: TComboBox;
     CBMiniInTray: TCheckBox;
     CBNoChkNewVer: TCheckBox;

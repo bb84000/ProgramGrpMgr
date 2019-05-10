@@ -171,3 +171,8 @@ Version 0.7.1.5 - 04/05/2019
 Correction d'un bug empêchant l'ajout ou la suppression d'un programme
 Optimisation de la sauvegarde de la configuration
 
+Version 0.7.1.6 - 10/05/2019
+Ajout de l'icone et de la taille de l'installation dans la ligne de désinstallation
+Correction de l'installateur pour la prise en compte au redémarrage
+Arrêt des instances en cours avant l'installation
+Ajout d'une option pour activer ou désactiver le cache des icones

@@ -964,7 +964,7 @@ begin
     // load it and assign the image list to listview
     // Need to post listview message as listview handle is readonly
     cache:= false;
-    If (FileExists(PrgMgrAppsData+Settings.GroupName+'.imglst' ) and (not ListeChange)) then
+    If (FileExists(PrgMgrAppsData+Settings.GroupName+'.imglst' ) and (not ListeChange) and (settings.IconCache)) then
     begin
       hnd:= LoadImageListFromFile(PrgMgrAppsData+Settings.GroupName+'.imglst' );
       if hnd=0 then                                          // wrong cache file, delete it
@@ -1340,6 +1340,7 @@ begin
     CBMiniInTray.Checked:= Settings.MiniInTray;
     CBHideInTaskbar.Enabled:= Settings.MiniInTray;
     CBHideInTaskbar.checked:= Settings.HideInTaskbar;
+    CBIconcache.Checked:= Settings.IconCache;
     if ShowModal = mrOK then
     begin
      If CBLangue.ItemIndex <> CurLang then
@@ -1352,6 +1353,7 @@ begin
       Settings.SavSizePos:= CBSavSizePos.Checked;
       Settings.NoChkNewVer:= CBNoChkNewVer.Checked;
       Settings.MiniInTray:= CBMiniInTray.Checked;
+      Settings.IconCache:= CBIconCache.Checked;
       if ImgChanged then
       begin
         Application.Icon:= ImgGrpIcon.Picture.Icon ;

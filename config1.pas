@@ -29,6 +29,7 @@ type
     FStartWin: Boolean;
     FMiniInTray: Boolean;
     FHideInTaskBar: Boolean;
+    FIconCache: Boolean;
     FHideBars: Boolean;
     FLangStr: String;
     Parent: TObject;
@@ -49,6 +50,7 @@ type
     procedure SetStartWin (b: Boolean);
     procedure SetMiniInTray (b: Boolean);
     procedure SetHideInTaskBar (b: Boolean);
+    procedure SetIconCache (b: Boolean);
     procedure SetHideBars (b: Boolean);
     procedure SetLangStr (s: string);
     function SaveXMLnode(iNode: TDOMNode): Boolean;
@@ -69,6 +71,7 @@ type
     property StartWin: Boolean read FStartWin write SetStartWin;
     property MiniInTray: Boolean read FMiniInTray write SetMiniInTray;
     property HideInTaskBar: Boolean read FHideInTaskBar write SetHideInTaskBar;
+    property IconCache: Boolean read FIconCache write SetIconCache;
     property HideBars: Boolean read FHideBars write SetHideBars;
     property LangStr: String read FLangStr write SetLangStr;
   end;
@@ -183,16 +186,25 @@ end;
 
 procedure TConfig.SetHideInTaskBar (b: Boolean);
 begin
-   if HideInTaskbar <> b then
+   if FHideInTaskbar <> b then
    begin
      FHideInTaskbar:= b;
      if Assigned(FOnStateChange) then FOnStateChange(Self);
    end;
 end;
 
+procedure TConfig.SetIconCache (b: Boolean);
+begin
+  if FIconCache <> b then
+  begin
+    FIconCache:=  b;
+    if Assigned(FOnChange) then FOnChange(Self);
+  end;
+end;
+
 procedure TConfig.SetHideBars (b: Boolean);
 begin
-  if HideBars <> b then
+  if FHideBars <> b then
   begin
     FHideBars:= b;
     if Assigned(FOnStateChange) then FOnStateChange(Self);
@@ -219,6 +231,7 @@ begin
     TDOMElement(iNode).SetAttribute ('iconsort' , IntToStr(FIconSort));
     TDOMElement(iNode).SetAttribute ('miniintray',IntToStr(Integer(FMiniInTray)));
     TDOMElement(iNode).SetAttribute ('hideintaskbar', IntToStr(Integer(FHideInTaskBar)));
+    TDOMElement(iNode).SetAttribute ('iconcache', IntToStr(Integer(FIconCache)));
     TDOMElement(iNode).SetAttribute ('hidebars', IntToStr(Integer(FHideBars)));
     TDOMElement(iNode).SetAttribute ('wstate', FWState);
     TDOMElement(iNode).SetAttribute ('nochknewver', IntToStr(Integer(FNoChkNewVer)));
@@ -267,6 +280,7 @@ begin
     FIconSort:=  readIntValue(iNode, 'iconsort');   //StrToInt(TDOMElement(iNode).GetAttribute('iconsort'));
     FMiniInTray:= Boolean(readIntValue(iNode, 'miniintray'));               //StrToInt(TDOMElement(iNode).GetAttribute('miniintray')));
     FHideInTaskBar:= Boolean(readIntValue(iNode, 'hideintaskbar')); //StrToInt(TDOMElement(iNode).GetAttribute('hideintaskbar')));
+    FIconCache:=  Boolean(readIntValue(iNode, 'iconcache'));
     FHideBars:= Boolean(readIntValue(iNode, 'hidebars'));  //StrToInt(TDOMElement(iNode).GetAttribute('hidebars')));
     FWState:= TDOMElement(iNode).GetAttribute('wstate');
     FNoChkNewVer:= Boolean(readIntValue(iNode, 'nochknewver')); //StrToInt(TDOMElement(iNode).GetAttribute('nochknewver')));

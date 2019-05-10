@@ -9,6 +9,7 @@
   !include "MUI2.nsh"
   !include "${NSISDIR}\Contrib\Modern UI\BB.nsh"
   !include x64.nsh
+  !include FileFunc.nsh
 
   ;General
   Name "Program Group Manager"
@@ -62,8 +63,8 @@
   LicenseLangString Licence ${LANG_FRENCH}  "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\licensf.txt"
 
   ;Language strings for uninstall string
-  LangString RemoveStr ${LANG_ENGLISH}  "Program Group Manager (remove only)"
-  LangString RemoveStr ${LANG_FRENCH} "Gestionnaire de groupe de programmes (désinstallation seulement)"
+  LangString RemoveStr ${LANG_ENGLISH}  "Program Group Manager"
+  LangString RemoveStr ${LANG_FRENCH} "Gestionnaire de groupe de programmes"
 
   ;Language string for links
   LangString ProgramLnkStr ${LANG_ENGLISH} "Program Group Manager.lnk"
@@ -102,33 +103,38 @@
 Section "" ;No components page, name is not important
   ${If} ${RunningX64}
     SetRegView 64    ; change registry entries and install dir for 64 bit
-  ;${Else}
-  ;   MessageBox MB_OK "Cette application ne peut pas être isntallée sur ce système"
-  ;   Quit
   ${EndIf}
   SetShellVarContext all
   SetOutPath "$INSTDIR"
+  
+  
+  !getdllversion  "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\ProgramGrpMgrwin64.exe" expv_
+  ; Dans le cas ou on n'aurait pas pu fermer l'application
+  Delete /REBOOTOK "$INSTDIR\ProgramGrpMgr.exe"
   File "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\ProgramGrpMgrwin64.exe"
-  ;Dans le cas ou on n'aurait pas pu fermer l'application
-  Rename /REBOOTOK "$INSTDIR\ProgramGrpMgrwin64.exe" "$INSTDIR\ProgramGrpMgr.exe"
   ; add files / whatever that need to be installed here.
   File "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\history.txt"
   File  "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\ProgramGrpMgr.txt"
   File "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\ProgramGrpMgr.lng"
-  Rename /REBOOTOK "$INSTDIR\ProgramGrpMgr64.exe" "$INSTDIR\ProgramGrpMgr.exe"
   File "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\FAQ.txt"
-  !getdllversion  "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr\ProgramGrpMgrwin64.exe" expv_
+  Rename /REBOOTOK "$INSTDIR\ProgramGrpMgrwin64.exe" "$INSTDIR\ProgramGrpMgr.exe"
+
+  ; write out uninstaller
+  WriteUninstaller "$INSTDIR\uninst.exe"
+  ; Get install folder size
+  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
   ;Write uninstall in register
   WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "UninstallString" "$INSTDIR\uninst.exe"
+  WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "DisplayIcon" "$INSTDIR\uninst.exe"
   WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "DisplayName" "$(RemoveStr)"
   WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "DisplayVersion" "${expv_1}.${expv_2}.${expv_3}.${expv_4}"
+  WriteRegDWORD HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "EstimatedSize" "$0"
   WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "Publisher" "SDTP"
   WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "URLInfoAbout" "www.sdtp.com"
   WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "HelpLink" "www.sdtp.com"
   ;Store install folder
   WriteRegStr HKCU "Software\SDTP\ProgramGrpMgr" "InstallDir" $INSTDIR
-  ; write out uninstaller
-  WriteUninstaller "$INSTDIR\uninst.exe"
+
 SectionEnd ; end the section
 
 ; Install shortcuts, language dependant
@@ -183,6 +189,14 @@ Function .onInit
      Quit
   ${EndIf}
   SetShellVarContext all
+  ; Close all apps instance
+  FindProcDLL::FindProc "$INSTDIR\ProgramGrpMgr.exe"
+  ${While} $R0 > 0
+    FindProcDLL::KillProc "$INSTDIR\ProgramGrpMgr.exe"
+    FindProcDLL::WaitProcEnd "$INSTDIR\ProgramGrpMgr.exe" -1
+    FindProcDLL::FindProc "$INSTDIR\ProgramGrpMgr.exe"
+  ${EndWhile}
+  ; See if there is old program
   ReadRegStr $R0 HKLM "SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "UninstallString"
    ${If} $R0 == ""
         Goto Done
