@@ -6,6 +6,7 @@ USER LICENCE
 
 This software can be used fee of charge for a non commercial use.
 
-This software cannot be copied, duplicated, distributed, transfered, offered to download without writen authorization of the author or the editor.
+Software source is available at : https://github.com/bb84000/ProgramGrpMgr
 
 Contact: www.sdtp.com
+

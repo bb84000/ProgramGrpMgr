@@ -1,4 +1,4 @@
-ProgramGrpMgr.exe - Version 0.7.1.6
+ProgramGrpMgr.exe - Version 0.7.1.8
 
 English description at the end of french description
 
@@ -45,8 +45,7 @@ gestionnaire de groupe de programmes ne supprime pas le raccourci ni le programm
 NOTICE
 Le logiciel ProgramGrpMgr peut être utilisé gratuitement pour une utilisation non commerciale.
 
-Le logiciel ProgramGrpMgr ne peut pas être copié, distribué, transféré, proposé
-au téléchargement sans l'autorisation écrite de l'auteur ou de l'éditeur.
+La source du logiciel est disponible à : https://github.com/bb84000/ProgramGrpMgr
 
 Les noms et logos utilisés dans ce programme sont la propriété de leurs détenteurs
 respectifs.
@@ -93,12 +92,11 @@ don't delete the sortcut or the program.
 NOTICE
 ProgramGrpMgr software can be used fee of charge for a non commercial use.
 
-ProgramGrpMgr software cannot be copied, duplicated, distributed, transfered,
-offered to download without writen authorization of the author or the
-editor.
+Software source is available at : https://github.com/bb84000/ProgramGrpMgr
 
 Names and logos used in the program are the property of their respective owners.
 
 
 SDTP - bb95 - May 2019
 Web : http://www.sdtp.com
+

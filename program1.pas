@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - april 2019
+// bb - sdtp - may 2019
 //******************************************************************************
 unit program1;
 
@@ -149,6 +149,7 @@ type
     OldConfig: Boolean;
     Version: String;
     ImgSavDisabled: TBitmap;
+    cache: Boolean;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -192,6 +193,8 @@ var
 
   SHDefExtractIcon: function (pszIconFile:PChar; iIndex:Longint; uFlags:UINT; var phiconLarge:THandle; var phiconSmall:Thandle;
                               nIconSize:UINT):HRESULT; stdcall;
+
+  function EnumWindowsProc(WHandle: HWND; LParM: LParam): LongBool;StdCall;Export;
 
 implementation
 
@@ -252,7 +255,21 @@ begin
   result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
 end;
 
- // retrieve command line parameters
+// Enumerate Windows to search a previous instance with the same group name
+function EnumWindowsProc(WHandle: HWND; LParM: LParam): LongBool;StdCall;Export;
+var Title,ClassName:array[0..128] of char;
+    sTitle,sClass,Linia:STRING ;
+begin
+ Result:=True;
+ GetWindowText(wHandle, Title,128);
+ GetClassName(wHandle, ClassName,128);
+ if IsWindowVisible(wHandle) then
+ begin
+   if (AnsiToUTF8(Title)=FProgram.GetGrpParam) and (ClassName='Window') then Application.Terminate;
+  end;
+end;
+
+// retrieve command line parameters
 
 function TFProgram.GetGrpParam: String;
 var
@@ -308,6 +325,7 @@ var
   aPath : Array[0..MaxPathLen] of Char; //Allocate memory
 begin
   inherited;
+  EnumWindows(@EnumWindowsProc,0);
   // Instanciate windows callback
   PrevWndProc:={%H-}Windows.WNDPROC(SetWindowLongPtr(Self.Handle,GWL_WNDPROC,{%H-}PtrInt(@WndCallback)));
   // Some things have to be run only on the first form activation
@@ -400,16 +418,6 @@ begin
   inherited;
   if not first then exit;
   Settings.GroupName:= GetGrpParam;
-  // Si le même groupe est déjà actif, on récupère le handle de l'application qui est propriétaire de la fiche
-  // In Lazarus, all forms have 'Window'Class
-  hWind:= GetWindow(FindWindow (Pchar('Window'), Pchar(UTF8ToAnsi(Settings.GroupName))), GW_OWNER) ;
-  If hWind > 0 then
-  begin
-     ShowWindow(hWind, SW_SHOWNORMAL);
-     SetForeGroundWindow(hWind);
-     Close;
-  end;
-
   // We get Windows Version
   WinVersion:= TWinVersion.Create;
    // For popup menu, retrieve bitmap from buttons
@@ -425,8 +433,6 @@ begin
   CropBitmap(SBAbout.Glyph, PTrayMnuAbout.Bitmap, SBAbout.Enabled);
   CropBitmap(SBQuit.Glyph, PTrayMnuQuit.Bitmap, SBQuit.Enabled);
   BarsHeight:= ClientHeight-ListView1.Height;
-
-
   {$IFDEF WIN32}
       OSTarget:= '32 bits';
   {$ENDIF}
@@ -720,7 +726,10 @@ begin
       FilesNode:= CfgXML.CreateElement('files');
       ListeFichiers.SaveToXMLnode(FilesNode);
       RootNode.Appendchild(FilesNode);
+      // Sauvegarde du cache seulement si on a modifié la liste
+      if (cache=false and Settings.IconCache) then SaveImageListToFile(ImgList,PrgMgrAppsData+Settings.GroupName+'.imglst' ) ;
     end;
+
     // On sauvegarde les versions précédentes
     FilNamWoExt:= TrimFileExt(ConfigFile);
     if FileExists (FilNamWoExt+'.bk5')                   // Efface la plus ancienne
@@ -732,15 +741,6 @@ begin
     then  RenameFile(ConfigFile, FilNamWoExt+'.bk0');
     // Et on sauvegarde la nouvelle config
     writeXMLFile(CfgXML, ConfigFile);
-    // Sauvegarde du cache
-    if ListeChange then
-    begin
-      SaveImageListToFile(ImgList,PrgMgrAppsData+Settings.GroupName+'.imglst' ) ;
-    end else
-    begin
-      if not Fileexists(PrgMgrAppsData+Settings.GroupName+'.imglst')then
-          SaveImageListToFile(ImgList,PrgMgrAppsData+Settings.GroupName+'.imglst' ) ;
-    end;
   finally
     //On vérifie que ces valeurs sont bien dans le registre
     Reg:= TRegistry.Create;
@@ -765,7 +765,8 @@ function TFProgram.StateChanged : SaveType;
 var
   WindowPlacement: TWindowPlacement;
 begin
- If (WindowState = wsMinimized) then
+  result:= none;
+  If (WindowState = wsMinimized) then
   begin
     AppState := SW_SHOWMINIMIZED
   end else
@@ -779,15 +780,12 @@ begin
   if Settings.SavSizePos then
      Settings.WState:= IntToHex(AppState, 4)+IntToHex(Top, 4)+IntToHex(Left, 4)+IntToHex(Height, 4)+IntToHex(width, 4);
   If (Prefs.ImgChanged or WStateChange) then
-   begin
+  begin
     result:= State ;
-  end else
+  end;
   If ListeChange or SettingsChange or (not Fileexists (PrgMgrAppsData+Settings.GroupName+'.imglst')) then
   begin
     result:= All;
-  end else
-  begin
-    result:= None;
   end;
 end;
 
@@ -896,7 +894,7 @@ var
   hIcon, hicons: Thandle;
   ItemPos: Tpoint;
   IcoInfo: TICONINFO;
-  cache: Boolean;
+
   hnd: THandle;
 begin
   if ListeFichiers.Count = 0 then
@@ -951,6 +949,8 @@ begin
            ListeFichiers.SortType:= cdcDate;
          end;
     end;
+    if (ListeChange and FileExists(PrgMgrAppsData+Settings.GroupName+'.imglst' ))
+    then DeleteFile(PrgMgrAppsData+Settings.GroupName+'.imglst' );
     ListeFichiers.DoSort;
     ListView1.Clear;
     ImgList.Clear;
@@ -964,7 +964,7 @@ begin
     // load it and assign the image list to listview
     // Need to post listview message as listview handle is readonly
     cache:= false;
-    If (FileExists(PrgMgrAppsData+Settings.GroupName+'.imglst' ) and (not ListeChange) and (settings.IconCache)) then
+    If (FileExists(PrgMgrAppsData+Settings.GroupName+'.imglst' ) and (settings.IconCache)) then
     begin
       hnd:= LoadImageListFromFile(PrgMgrAppsData+Settings.GroupName+'.imglst' );
       if hnd=0 then                                          // wrong cache file, delete it
@@ -1810,7 +1810,7 @@ procedure TFProgram.EnumerateResourceNames(Instance: THandle; var list: TStringL
 begin
   try
     EnumResourceNames(Instance, RT_GROUP_ICON, @EnumProc, NativeInt(list));
-   except
+  except
   end;
 end;
 

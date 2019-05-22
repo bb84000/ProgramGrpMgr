@@ -176,3 +176,12 @@ Ajout de l'icone et de la taille de l'installation dans la ligne de désinstalla
 Correction de l'installateur pour la prise en compte au redémarrage
 Arrêt des instances en cours avant l'installation
 Ajout d'une option pour activer ou désactiver le cache des icones
+
+Version 0.7.1.7 - 16/05/2019
+Effacement du cache à chaque changement de la liste des programmes
+Correction d'un bug lors de la fermeture de l'application, certaines modifications n'étaient
+pas prises en compte
+
+Version 0.7.1.8 - 22/05/2019
+Modification de la détection d'une instance de l'application avec le même groupe de programmes
+

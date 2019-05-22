@@ -8,8 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, program1,  about, SaveCfg1, prefs1, Property1,
-  ChkNewVer, alert, LoadGroup1, LoadConf1 //, config1, files1
-  { you can add units after this };
+  ChkNewVer, alert, LoadGroup1, LoadConf1 ;
 
 {$R *.res}
 

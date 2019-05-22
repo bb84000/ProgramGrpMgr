@@ -4,14 +4,15 @@
     <PathDelim Value="\"/>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="58">
+    <Units Count="61">
       <Unit0>
         <Filename Value="program.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ProgramGrpMgr"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="36" Y="10"/>
+        <EditorIndex Value="3"/>
+        <CursorPos Y="31"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="program1.pas"/>
@@ -19,18 +20,17 @@
         <ComponentName Value="FProgram"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="947"/>
-        <CursorPos X="113" Y="967"/>
+        <TopLine Value="412"/>
+        <CursorPos Y="436"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="..\bbunits\bbutils.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="766"/>
-        <CursorPos X="18" Y="791"/>
+        <TopLine Value="742"/>
+        <CursorPos X="17" Y="756"/>
         <UsageCount Value="200"/>
       </Unit2>
       <Unit3>
@@ -49,7 +49,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="26"/>
-        <CursorPos X="32" Y="42"/>
+        <CursorPos X="22" Y="26"/>
         <UsageCount Value="200"/>
       </Unit4>
       <Unit5>
@@ -70,11 +70,9 @@
         <ComponentName Value="Prefs"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="71" Y="22"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="property1.pas"/>
@@ -98,7 +96,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="40"/>
         <CursorPos X="2" Y="76"/>
-        <UsageCount Value="174"/>
+        <UsageCount Value="177"/>
       </Unit8>
       <Unit9>
         <Filename Value="..\bbunits\alert.pas"/>
@@ -108,7 +106,7 @@
         <UnitName Value="Alert"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="48" Y="38"/>
-        <UsageCount Value="173"/>
+        <UsageCount Value="176"/>
       </Unit9>
       <Unit10>
         <Filename Value="loadgroup1.pas"/>
@@ -121,7 +119,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="4"/>
         <CursorPos X="63" Y="21"/>
-        <UsageCount Value="168"/>
+        <UsageCount Value="171"/>
       </Unit10>
       <Unit11>
         <Filename Value="loadconf1.pas"/>
@@ -133,17 +131,16 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="4"/>
         <CursorPos X="32" Y="13"/>
-        <UsageCount Value="142"/>
+        <UsageCount Value="145"/>
       </Unit11>
       <Unit12>
         <Filename Value="config1.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Config1"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="257"/>
         <CursorPos X="61" Y="283"/>
-        <UsageCount Value="124"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="127"/>
       </Unit12>
       <Unit13>
         <Filename Value="..\unit1.pas"/>
@@ -376,9 +373,9 @@
       </Unit43>
       <Unit44>
         <Filename Value="History.txt"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="138"/>
-        <CursorPos X="8" Y="178"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="147"/>
+        <CursorPos Y="187"/>
         <UsageCount Value="38"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
@@ -394,8 +391,7 @@
       <Unit46>
         <Filename Value="ProgramGrpMgr.txt"/>
         <IsVisibleTab Value="True"/>
-        <EditorIndex Value="4"/>
-        <TopLine Value="64"/>
+        <EditorIndex Value="2"/>
         <CursorPos X="36"/>
         <UsageCount Value="16"/>
         <Loaded Value="True"/>
@@ -479,19 +475,41 @@
         <WindowIndex Value="-1"/>
         <UsageCount Value="10"/>
       </Unit57>
+      <Unit58>
+        <Filename Value="license.txt"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="10"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="licensf.txt"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="25" Y="10"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="C:\lazarus\fpc\3.0.4\source\packages\winunits-base\src\commctrl.pp"/>
+        <UnitName Value="CommCtrl"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="724"/>
+        <CursorPos X="10" Y="744"/>
+        <UsageCount Value="10"/>
+      </Unit60>
     </Units>
     <JumpHistory Count="3" HistoryIndex="2">
       <Position1>
-        <Filename Value="prefs1.pas"/>
-        <Caret Line="4" Column="25"/>
+        <Filename Value="program1.pas"/>
+        <Caret Line="409" Column="8" TopLine="375"/>
       </Position1>
       <Position2>
         <Filename Value="program1.pas"/>
-        <Caret Line="778" Column="63" TopLine="749"/>
+        <Caret Line="269" Column="37" TopLine="249"/>
       </Position2>
       <Position3>
         <Filename Value="program1.pas"/>
-        <Caret Line="967" Column="101" TopLine="943"/>
+        <Caret Line="654" Column="26" TopLine="634"/>
       </Position3>
     </JumpHistory>
     <RunParams>
