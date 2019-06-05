@@ -1,4 +1,4 @@
-ProgramGrpMgr.exe - Version 0.7.1.8
+ProgramGrpMgr.exe - Version 0.8.0.0
 
 English description at the end of french description
 
@@ -8,14 +8,8 @@ OBJET
 Création de groupes de programmes dans une fenêtre sur le bureau.
 
 INSTALLATION
-Exécuter le programme d'installation contenu dans l'archive correspondant à votre version
-de Windows :
-
-InstallPrgGrpMgr64.exe pour Windows 64 bits.
-InstallPrgGrpMgr32.exe pour Windows 32 bits.
-
-Un message d'avertissement apparaît si la version à installer ne correspond pas à
-votre version de Windows.
+Exécuter le programme d'installation contenu dans l'archive, l'installateur choisit 
+la version 32bit ou 64 bit selon l'OS.
 
 UTILISATION
 Pour créer un groupe de programmes à partir de raccourcis et/ou de fichiers contenus
@@ -58,13 +52,8 @@ OBJECT
 Creates programs groups in a window on the desktop.
 
 INSTALLATION
-Run the setup program in the archive corresponding to your Windows veersion :
+Run the setup program in the archive, the installer uses the proper 32 bit or 64 bit version corresponding to your OS.
 
-InstallPrgGrpMgr64.exe on 64 bit Windows.
-InstallPrgGrpMgr32.exe on 32 bit Windows.
-
-A warning message is displayed if the version you want install does'nt fit with
-your Windows version.
 
 USAGE
 To create a programs group from shortcuts and/or files containend in a folder,

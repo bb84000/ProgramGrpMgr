@@ -9,10 +9,9 @@
         <Filename Value="program.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ProgramGrpMgr"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <CursorPos Y="31"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="program1.pas"/>
@@ -20,10 +19,10 @@
         <ComponentName Value="FProgram"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="412"/>
-        <CursorPos Y="436"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1716"/>
+        <CursorPos X="47" Y="1737"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="..\bbunits\bbutils.pas"/>
@@ -373,11 +372,10 @@
       </Unit43>
       <Unit44>
         <Filename Value="History.txt"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="147"/>
-        <CursorPos Y="187"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="150"/>
+        <CursorPos X="44" Y="190"/>
         <UsageCount Value="38"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit44>
       <Unit45>
@@ -391,10 +389,9 @@
       <Unit46>
         <Filename Value="ProgramGrpMgr.txt"/>
         <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="36"/>
         <UsageCount Value="16"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit46>
       <Unit47>
@@ -498,20 +495,10 @@
         <UsageCount Value="10"/>
       </Unit60>
     </Units>
-    <JumpHistory Count="3" HistoryIndex="2">
-      <Position1>
-        <Filename Value="program1.pas"/>
-        <Caret Line="409" Column="8" TopLine="375"/>
-      </Position1>
-      <Position2>
-        <Filename Value="program1.pas"/>
-        <Caret Line="269" Column="37" TopLine="249"/>
-      </Position2>
-      <Position3>
-        <Filename Value="program1.pas"/>
-        <Caret Line="654" Column="26" TopLine="634"/>
-      </Position3>
-    </JumpHistory>
+    <General>
+      <ActiveWindowIndexAtStart Value="-1"/>
+    </General>
+    <JumpHistory HistoryIndex="-1"/>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes Count="1" ActiveMode="default">

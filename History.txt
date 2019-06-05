@@ -185,3 +185,6 @@ pas prises en compte
 Version 0.7.1.8 - 22/05/2019
 Modification de la détection d'une instance de l'application avec le même groupe de programmes
 
+Version 0.8.0.0 - 25/05/2019
+Correction d'un bug dans la création des clés de registre pour le lancement du programme
+(noms des fichiers en UTF8 au lieu de ANSI)

@@ -213,6 +213,7 @@ var
   s: string;
   CurVer, NewVer: Int64;
   NoCheckVersion: Boolean;
+  RunRegKeyVal, RunRegKeySz: string;
 begin
   if uMsg=WM_QUERYENDSESSION then
   begin
@@ -221,7 +222,9 @@ begin
       reg := TRegistry.Create;
       reg.RootKey := HKEY_CURRENT_USER;
       reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\RunOnce', True) ;
-      reg.WriteString(FProgram.ProgName+'_'+FProgram.Settings.GroupName, '"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName) ;
+      RunRegKeyVal:= UTF8ToAnsi(FProgram.ProgName+'_'+FProgram.Settings.GroupName);
+      RunRegKeySz:= UTF8ToAnsi('"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName);
+      reg.WriteString(RunRegKeyVal, RunRegKeySz) ;
       reg.CloseKey;
       reg.free;
       FProgram.SaveConfig(FProgram.Settings.GroupName, FProgram.StateChanged);
@@ -678,6 +681,7 @@ var
   i: Integer;
   Reg: TRegistry;
   FilNamWoExt: String;
+  RunRegKeyVal, RunRegKeySz: String;
 begin
   if OldConfig then Typ:= All;                        // always save to new cvonfig if it is old one
   if (Typ= None) then exit;
@@ -746,14 +750,16 @@ begin
     Reg:= TRegistry.Create;
     Reg.RootKey:= HKEY_CURRENT_USER;
     Reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\Run', True);
+    RunRegKeyVal:= UTF8ToAnsi(ProgName+'_'+Settings.GroupName);
+    RunRegKeySz:= UTF8ToAnsi('"'+Application.ExeName+'" Grp='+Settings.GroupName);
     if Settings.StartWin  then  // Démarrage avec Windows coché
     begin
-      if not Reg.ValueExists(ProgName+'_'+Settings.GroupName) then
-      reg.WriteString(ProgName+'_'+Settings.GroupName, '"'+Application.ExeName+'" Grp='+Settings.GroupName) ;
+      if not Reg.ValueExists(RunRegKeyVal) then
+      reg.WriteString(RunRegKeyVal, RunRegKeySz);
       Reg.CloseKey;
-    end else if Reg.ValueExists(ProgName+'_'+Settings.GroupName) then
+    end else if Reg.ValueExists(RunRegKeyVal) then
     begin
-      Reg.DeleteValue(ProgName+'_'+Settings.GroupName);
+      Reg.DeleteValue(RunRegKeyVal);
       Reg.CloseKey;
     end;
     Reg.Free;
