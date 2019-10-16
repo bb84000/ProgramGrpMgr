@@ -188,3 +188,6 @@ Modification de la détection d'une instance de l'application avec le même grou
 Version 0.8.0.0 - 25/05/2019
 Correction d'un bug dans la création des clés de registre pour le lancement du programme
 (noms des fichiers en UTF8 au lieu de ANSI)
+
+Version 0.8.1.0 - 16/10/2019
+Utilisation d'une unité spécifique pour la version de l'OS

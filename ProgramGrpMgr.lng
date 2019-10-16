@@ -98,6 +98,9 @@ FloadConf.Caption=Load a previous list
 FLoadConf.BtnApply.Caption=Apply
 FLoadConf.BtnCancel.Caption=Cancel
 
+use64bitcaption=Use the 64bit version of the program
+
+
 ;Français
 [12]
 ;General
@@ -186,3 +189,5 @@ FLoadGroup.BtnDelete.Caption=Supprimer
 FloadConf.Caption=Charge une liste antérieure
 FLoadConf.BtnApply.Caption=Appliquer
 FLoadConf.BtnCancel.Caption=Annuler
+use64bitcaption=Utilisez la version 64 bits de ce programme
+

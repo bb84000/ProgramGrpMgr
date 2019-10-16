@@ -11,8 +11,8 @@ interface
 uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
   Buttons, StdCtrls,  CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM , laz2_XMLRead, laz2_XMLWrite, files1,
-  Registry,  LCLIntf, Menus, ShellAPI, About, SaveCfg1, WinVer, prefs1, property1, inifiles,
-  chknewver, alert, LoadGroup1, LoadConf1, Config1;
+  Registry,  LCLIntf, Menus, ShellAPI, About, SaveCfg1, prefs1, property1, inifiles,
+  chknewver, alert, LoadGroup1, LoadConf1, Config1, lazbbosversion;
 
 type
 
@@ -132,7 +132,7 @@ type
     IconDefFile: String;
     SystemRoot: String;
     ShortCutName: String;
-    WinVersion: TWinVersion;
+    WinVersion: TOSInfo;//TWinVersion;
     YesBtn, NoBtn, CancelBtn: String;
     ExecName, ExecPath: String;
     FPropertyCaption: string;
@@ -150,6 +150,7 @@ type
     Version: String;
     ImgSavDisabled: TBitmap;
     cache: Boolean;
+    use64bitcaption: string;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -377,7 +378,6 @@ end;
 
 procedure TFProgram.FormDestroy(Sender: TObject);
 begin
-  FreeAndNil(WinVersion);
   FreeAndNil(ListeFichiers);
   FreeAndNil(ImgList);
   FreeAndNil(langnums);
@@ -422,8 +422,9 @@ begin
   if not first then exit;
   Settings.GroupName:= GetGrpParam;
   // We get Windows Version
-  WinVersion:= TWinVersion.Create;
-   // For popup menu, retrieve bitmap from buttons
+  // WinVersion:= TWinVersion.Create;
+  GetSysInfo(WinVersion);
+  // For popup menu, retrieve bitmap from buttons
   CropBitmap(SBGroup.Glyph, PmnuGroup.Bitmap, SBGroup.Enabled);
   CropBitmap(SBFolder.Glyph, PMnuFolder.Bitmap, SBFolder.Enabled);
   CropBitmap(SBAddFile.Glyph, PMnuAddFile.Bitmap, SBAddFile.Enabled);
@@ -444,9 +445,9 @@ begin
   {$ENDIF}
 
   LoadConfig(Settings.GroupName);
-  If (WinVersion.IsWow64) and (OsTarget='32 bits') then
+  If (WinVersion.Architecture= 'x86_64') and  (OsTarget='32 bits') then
   begin
-    ShowMessage('Utilisez la version 64 bits de ce programme');
+    ShowMessage(use64bitcaption);
   end;
 
 end;
@@ -1754,6 +1755,8 @@ With LangFile do
    FSaveCfg.ImgGrpIcon.Hint:= ReadString(LangStr, 'FSaveCfg.ImgGrpIcon.Hint', FSaveCfg.ImgGrpIcon.Hint);
    FSaveCfg.BtnCancel.Caption:= CancelBtn;
    AboutBox.Caption:= SBAbout.Hint;
+
+   use64bitcaption:= ReadString(LangStr, 'use64bitcaption', 'Utilisez la version 64 bits de ce programme');
 
    Prefs.Caption:= ReadString(LangStr, 'Prefs.Caption', Prefs.Caption);
    Prefs.CBStartWin.Caption:= ReadString(LangStr, 'Prefs.CBStartWin.Caption', prefs.CBStartWin.Caption);
