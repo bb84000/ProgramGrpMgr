@@ -12,7 +12,7 @@ uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
   Buttons, StdCtrls,  CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM , laz2_XMLRead, laz2_XMLWrite, files1,
   Registry,  LCLIntf, Menus, ShellAPI, About, SaveCfg1, prefs1, property1, inifiles,
-  chknewver, alert, LoadGroup1, LoadConf1, Config1, lazbbosversion;
+  chknewver, LoadGroup1, LoadConf1, Config1, lazbbosversion, lazbbutils;
 
 type
 
@@ -145,6 +145,7 @@ type
     UpdateAvailable, NoLongerChkUpdates: String;
     LUpdateCaption, UpdateURL, ChkVerURL: String;
     LastUpdateSearch, LastChkCaption, NextChkCaption: String;
+    CheckVerChanged: Boolean;
     NoDeleteGroup, DeleteGrpMsg: String;
     OldConfig: Boolean;
     Version: String;
@@ -167,7 +168,6 @@ type
     function ClosestItem(pt: Tpoint; ptArr:array of Tpoint): TlistItem;
     function HidinTaskBar (enable: Boolean): boolean;
     procedure ChkVersion;
-    function ShowAlert(Title, AlertStr, StReplace, NoShow: String; var Alert: Boolean):Boolean;
     function ReadFolder(strPath: string; Directory: Bool): Integer;
     procedure EnumerateResourceNames(Instance: THandle; var list: TStringList);
     procedure GetIconRes(filename: string; index:integer; var Ico: TIcon);
@@ -246,7 +246,9 @@ begin
             begin
               AboutBox.LUpdate.Caption:= StringReplace(FProgram.UpdateAvailable, '%s', s, [rfIgnoreCase]);
               NoCheckVersion:= FProgram.Settings.NoChkNewVer;
-              if FProgram.ShowAlert(FProgram.Caption, FProgram.UpdateAvailable, s, FProgram.NoLongerChkUpdates, NoCheckVersion) then
+              //if FProgram.ShowAlert(FProgram.Caption, FProgram.UpdateAvailable, s, FProgram.NoLongerChkUpdates, NoCheckVersion) then
+              if AlertDlg(FProgram.Caption, FProgram.UpdateAvailable , ['OK', FProgram.CancelBtn,  FProgram.NoLongerChkUpdates],
+                  NoCheckVersion  , mtError)= mrYesToAll then
               begin
                 FProgram.SBAboutClick(FChkNewVer);
                 FProgram.Settings.NoChkNewVer:= NoCheckVersion;
@@ -304,22 +306,6 @@ begin
   end;
 end;
 
-
-function TFProgram.ShowAlert(Title, AlertStr, StReplace, NoShow: String; var Alert: Boolean):Boolean;
-begin
-  Result:= False;
-  With AlertBox do
-  begin
-    Caption:= Title;
-    Image1.Picture.Icon:= Application.Icon;
-    MAlert.Text:= StringReplace(AlertStr, '%s', stReplace, [rfIgnoreCase, rfReplaceAll]);
-    CBNoShowAlert.Caption:= NoShow;
-    CBNoShowAlert.Checked:= Alert;
-    if not Alert then
-   if  ShowModal = mrOK then result:= True;
-    Alert:= CBNoShowAlert.Checked;
-  end;
-end;
 
 
 // Form creation
@@ -596,7 +582,7 @@ begin
   version:= GetVersionInfo.ProductVersion;
   //Version:= '0.5.0.0';
   UpdateUrl:= 'http://www.sdtp.com/versions/version.php?program=programgrpmgr&version=';
-  ChkVerURL:= 'http://www.sdtp.com/versions/versions.csv';
+  ChkVerURL:= 'https://www.sdtp.com/versions/versions.csv';
 
   // Aboutbox
   AboutBox.Caption:= 'A propos du Gestionnaire de Groupe de Programmes';
@@ -624,6 +610,7 @@ begin
   begin
     Settings.LastUpdChk:= Trunc(Now);
     FChkNewVer.GetLastVersion (ChkVerURL, 'programgrpmgr', Handle);
+    CheckVerChanged:= true;
   end;
 end;
 
@@ -786,7 +773,7 @@ begin
   // seulement si on veut sauvegarder la taille et la position
   if Settings.SavSizePos then
      Settings.WState:= IntToHex(AppState, 4)+IntToHex(Top, 4)+IntToHex(Left, 4)+IntToHex(Height, 4)+IntToHex(width, 4);
-  If (Prefs.ImgChanged or WStateChange) then
+  If (Prefs.ImgChanged or WStateChange or CheckVerChanged) then
   begin
     result:= State ;
   end;

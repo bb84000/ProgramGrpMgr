@@ -1,4 +1,4 @@
-ProgramGrpMgr.exe - Version 0.8.1.0
+ProgramGrpMgr.exe - Version 0.8.1.1
 
 English description at the end of french description
 
@@ -40,6 +40,8 @@ NOTICE
 Le logiciel ProgramGrpMgr peut être utilisé gratuitement pour une utilisation non commerciale.
 
 La source du logiciel est disponible à : https://github.com/bb84000/ProgramGrpMgr
+
+OpenSSL : Lire OpenSSL License.txt
 
 Les noms et logos utilisés dans ce programme sont la propriété de leurs détenteurs
 respectifs.
@@ -83,9 +85,11 @@ ProgramGrpMgr software can be used fee of charge for a non commercial use.
 
 Software source is available at : https://github.com/bb84000/ProgramGrpMgr
 
+OpenSSL: See OpenSSL License.txt
+
 Names and logos used in the program are the property of their respective owners.
 
 
-SDTP - bb95 - May 2019
+SDTP - bb95 - November 2019
 Web : http://www.sdtp.com
 

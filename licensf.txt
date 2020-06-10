@@ -7,4 +7,6 @@ Le logiciel peut être utilisé librement dans le cadre d'une utilisation non comm
 
 Les sources de ce logiciel sont disponibles à : https://github.com/bb84000/ProgramGrpMgr
 
+OpenSSL: Lire OpenSSL License.txt
+
 Contact: www.sdtp.com

@@ -14,7 +14,7 @@ object FProgram: TFProgram
   OnDropFiles = FormDropFiles
   OnResize = FormResize
   OnWindowStateChange = FormWindowStateChange
-  LCLVersion = '2.0.0.4'
+  LCLVersion = '2.0.6.0'
   object PnlTop: TPanel
     Left = 0
     Height = 40

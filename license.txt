@@ -8,5 +8,7 @@ This software can be used fee of charge for a non commercial use.
 
 Software source is available at : https://github.com/bb84000/ProgramGrpMgr
 
+OpenSSL : See OpenSSL License.txt
+
 Contact: www.sdtp.com
 

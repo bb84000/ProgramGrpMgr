@@ -20,9 +20,10 @@
       <UseVersionInfo Value="True"/>
       <MinorVersionNr Value="8"/>
       <RevisionNr Value="1"/>
+      <BuildNr Value="2"/>
       <Language Value="040C"/>
       <Attributes pvaPreRelease="True"/>
-      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp - 2019" LegalTrademarks="bb - sdtp - 2019" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="0.8.1.0"/>
+      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp - 2019" LegalTrademarks="bb - sdtp - 2019" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="0.8.1.2"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -35,16 +36,13 @@
       <FormatVersion Value="2"/>
       <Modes Count="0"/>
     </RunParams>
-    <RequiredPackages Count="3">
+    <RequiredPackages Count="2">
       <Item1>
         <PackageName Value="indylaz"/>
       </Item1>
       <Item2>
-        <PackageName Value="BBComponents"/>
-      </Item2>
-      <Item3>
         <PackageName Value="LCL"/>
-      </Item3>
+      </Item2>
     </RequiredPackages>
     <Units Count="13">
       <Unit0>
@@ -106,32 +104,30 @@
         <UnitName Value="ChkNewVer"/>
       </Unit8>
       <Unit9>
-        <Filename Value="..\bbunits\alert.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="AlertBox"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="Alert"/>
-      </Unit9>
-      <Unit10>
         <Filename Value="loadgroup1.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FLoadGroup"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="LoadGroup1"/>
-      </Unit10>
-      <Unit11>
+      </Unit9>
+      <Unit10>
         <Filename Value="loadconf1.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FLoadConf"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="LoadConf1"/>
-      </Unit11>
-      <Unit12>
+      </Unit10>
+      <Unit11>
         <Filename Value="config1.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Config1"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="..\lazbbunits\lazbbchknewver.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="lazbbChkNewVer"/>
       </Unit12>
     </Units>
   </ProjectOptions>

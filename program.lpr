@@ -8,7 +8,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, program1,  about, SaveCfg1, prefs1, Property1,
-  ChkNewVer, alert, LoadGroup1, LoadConf1 ;
+  ChkNewVer, LoadGroup1, LoadConf1, lazbbChkNewVer ;
 
 {$R *.res}
 
@@ -23,8 +23,7 @@ begin
   Application.CreateForm(TPrefs, Prefs);
   Application.CreateForm(TFProperty, FProperty);
   Application.CreateForm(TFChkNewVer, FChkNewVer);
-  Application.CreateForm(TAlertBox, AlertBox);
-  Application.CreateForm(TFLoadGroup, FLoadGroup);
+   Application.CreateForm(TFLoadGroup, FLoadGroup);
   Application.CreateForm(TFLoadConf, FLoadConf);
 
   Application.Run;

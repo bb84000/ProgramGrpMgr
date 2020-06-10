@@ -191,3 +191,9 @@ Correction d'un bug dans la création des clés de registre pour le lancement du
 
 Version 0.8.1.0 - 16/10/2019
 Utilisation d'une unité spécifique pour la version de l'OS
+
+Version 0.8.1.1 - 08/11/2019
+Support SSL pour la vérification de version
+
+Version 0.8.1.2
+- Support de Windows 10 May 2020 et H2 2020
