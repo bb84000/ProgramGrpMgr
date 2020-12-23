@@ -388,8 +388,8 @@
       <Unit45>
         <Filename Value="History.txt"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="168"/>
-        <CursorPos X="29" Y="198"/>
+        <TopLine Value="171"/>
+        <CursorPos Y="202"/>
         <UsageCount Value="38"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
@@ -405,8 +405,7 @@
       <Unit47>
         <Filename Value="ProgramGrpMgr.txt"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="63"/>
-        <CursorPos Y="95"/>
+        <CursorPos X="36"/>
         <UsageCount Value="16"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
