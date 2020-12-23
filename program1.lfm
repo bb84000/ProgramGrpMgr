@@ -4,6 +4,7 @@ object FProgram: TFProgram
   Top = 241
   Width = 600
   AllowDropFiles = True
+  BorderStyle = bsSingle
   Caption = 'FProgram'
   ClientHeight = 303
   ClientWidth = 600
@@ -14,7 +15,7 @@ object FProgram: TFProgram
   OnDropFiles = FormDropFiles
   OnResize = FormResize
   OnWindowStateChange = FormWindowStateChange
-  LCLVersion = '2.0.6.0'
+  LCLVersion = '2.0.10.0'
   object PnlTop: TPanel
     Left = 0
     Height = 40
@@ -35605,18 +35606,18 @@ object FProgram: TFProgram
       0000C0030000C0030000C0030000E0070000
     }
     OnDblClick = TrayProgmanDblClick
-    left = 208
-    top = 104
+    Left = 208
+    Top = 104
   end
   object ODlg1: TOpenDialog
     Title = 'Ajouter un raccourci ou un fichier'
-    left = 352
-    top = 96
+    Left = 352
+    Top = 96
   end
   object LVPMnu: TPopupMenu
     OnPopup = LVPMnuPopup
-    left = 73
-    top = 104
+    Left = 73
+    Top = 104
     object PMnuRun: TMenuItem
       Caption = 'Executer'
       Bitmap.Data = {
@@ -35854,8 +35855,8 @@ object FProgram: TFProgram
     end
   end
   object TrayMnu: TPopupMenu
-    left = 144
-    top = 104
+    Left = 144
+    Top = 104
     object PTrayMnuRestore: TMenuItem
       Caption = 'Restaurer'
       Bitmap.Data = {
@@ -35969,7 +35970,7 @@ object FProgram: TFProgram
   end
   object SDD1: TSelectDirectoryDialog
     Options = [ofOldStyleDialog, ofEnableSizing, ofViewDetail]
-    left = 416
-    top = 100
+    Left = 416
+    Top = 100
   end
 end

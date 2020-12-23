@@ -10,7 +10,7 @@ unit Config1;
 interface
 
 uses
-  Classes, SysUtils, laz2_DOM , laz2_XMLRead, bbutils, dialogs;
+  Classes, SysUtils, laz2_DOM , laz2_XMLRead, bbutils, dialogs, graphics;
 
 type
   TConfig = class
@@ -33,6 +33,7 @@ type
     FHideBars: Boolean;
     FLangStr: String;
     Parent: TObject;
+    FBkgrndColor: TColor;
     function readIntValue(inode : TDOMNode; Attrib: String): Int64;
     function readDateValue(inode : TDOMNode; Attrib: String): TDateTime;
 
@@ -53,6 +54,7 @@ type
     procedure SetIconCache (b: Boolean);
     procedure SetHideBars (b: Boolean);
     procedure SetLangStr (s: string);
+    procedure SetBkgrndColor(cl: Tcolor);
     function SaveXMLnode(iNode: TDOMNode): Boolean;
     function ReadXMLNode(iNode: TDOMNode): Boolean;
 
@@ -74,6 +76,7 @@ type
     property IconCache: Boolean read FIconCache write SetIconCache;
     property HideBars: Boolean read FHideBars write SetHideBars;
     property LangStr: String read FLangStr write SetLangStr;
+    property BkgrndColor: TColor read FBkgrndColor write SetBkgrndColor;
   end;
 
 
@@ -220,6 +223,15 @@ begin
   end;
 end;
 
+procedure TConfig.SetBkgrndColor(cl: TColor);
+begin
+  if FBkgrndColor <> cl then
+  begin
+    FBkgrndColor:= cl;
+    if Assigned(FOnChange) then FOnChange(Self);
+  end;
+end;
+
 function TConfig.SaveXMLnode(iNode: TDOMNode): Boolean;
 begin
   Try
@@ -238,6 +250,7 @@ begin
     TDOMElement(iNode).SetAttribute ('lastupdchk', DateToStr(FLastUpdChk));
     TDOMElement(iNode).SetAttribute ('startwin', IntToStr(Integer(FStartWin)));
     TDOMElement(iNode).SetAttribute ('langstr', FLangStr);
+    TDOMElement(iNode).SetAttribute ('bkgrndcolor', ColorToString(FBkgrndColor));
     Result:= True;
   except
     result:= False;
@@ -287,6 +300,7 @@ begin
     FLastUpdChk:= readDateValue(iNode, 'lastupdchk');  //StrToDate(TDOMElement(iNode).GetAttribute('lastupdchk'));
     FStartWin:= Boolean(readIntValue(iNode, 'startwin')); //StrToInt(TDOMElement(iNode).GetAttribute('startwin')));
     FLangStr:= TDOMElement(iNode).GetAttribute('langstr');
+    FBkgrndColor:= StringToColor(TDOMElement(iNode).GetAttribute('bkgrndcolor'));
     result:= true;
   except
     Result:= False;

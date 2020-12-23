@@ -263,8 +263,9 @@ end;
 
 // Enumerate Windows to search a previous instance with the same group name
 function EnumWindowsProc(WHandle: HWND; LParM: LParam): LongBool;StdCall;Export;
-var Title,ClassName:array[0..128] of char;
-    sTitle,sClass,Linia:STRING ;
+var
+  Title, ClassName:array[0..128] of char;
+
 begin
  Result:=True;
  GetWindowText(wHandle, Title,128);
@@ -527,6 +528,8 @@ begin
   end;
   CurLang:= LangNums.IndexOf(Settings.LangStr);
   Modlangue;
+  // bakground colour
+  ListView1.Color:= Settings.BkgrndColor;
   // Taille et position précédentes
   if Settings.SavSizePos then
   begin
@@ -568,9 +571,11 @@ begin
     PnlStatus.Visible:= not Settings.HideBars;
     if Settings.HideBars then begin
       PMnuHideBars.Caption:= SMnuShowBars;
+
     end else
     begin
       PMnuHideBars.Caption:= SMnuMaskBars;
+
     end;
   end;
   CBDisplay.ItemIndex:= Settings.IconDisplay;
@@ -689,6 +694,7 @@ begin
   if Top < 0 then Top:= 0;
   if Left < 0 then Left:= 0;
   Settings.WState:= IntToHex(AppState, 4)+IntToHex(Top, 4)+IntToHex(Left, 4)+IntToHex(Height, 4)+IntToHex(width, 4);
+  Settings.BkgrndColor:= ListView1.Color;
   // LOad or create config file
   ConfigFile:= PrgMgrAppsData+GrpName+'.xml';
   try
@@ -1335,6 +1341,7 @@ begin
     CBHideInTaskbar.Enabled:= Settings.MiniInTray;
     CBHideInTaskbar.checked:= Settings.HideInTaskbar;
     CBIconcache.Checked:= Settings.IconCache;
+    ColorPicker1.color:= Settings.BkgrndColor;
     if ShowModal = mrOK then
     begin
      If CBLangue.ItemIndex <> CurLang then
@@ -1348,6 +1355,8 @@ begin
       Settings.NoChkNewVer:= CBNoChkNewVer.Checked;
       Settings.MiniInTray:= CBMiniInTray.Checked;
       Settings.IconCache:= CBIconCache.Checked;
+      Settings.BkgrndColor:= ColorPicker1.color;
+      ListView1.Color:= ColorPicker1.color;
       if ImgChanged then
       begin
         Application.Icon:= ImgGrpIcon.Picture.Icon ;
@@ -1791,7 +1800,7 @@ end;
 
 
 // Callback function for enum resources (Experimental)
-function EnumProc(hModule: HMODULE; lpszType, lpszName: PChar; lParam: nativeInt): BOOL; stdcall;
+function EnumProc(hModule: HMODULE; lpszType, lpszName: PChar; lParam: PtrInt): BOOL; stdcall;
 begin
   result:= False;
   if lpszName <> nil then
@@ -1805,7 +1814,7 @@ end;
 procedure TFProgram.EnumerateResourceNames(Instance: THandle; var list: TStringList);
 begin
   try
-    EnumResourceNames(Instance, RT_GROUP_ICON, @EnumProc, NativeInt(list));
+    EnumResourceNames(Instance, RT_GROUP_ICON, @EnumProc, PtrInt(list));
   except
   end;
 end;

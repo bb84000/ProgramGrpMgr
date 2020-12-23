@@ -5,7 +5,8 @@ unit prefs1;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,  BBUtils, ShellAPI;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
+  BBUtils, lazbbcontrols, ShellAPI;
 
 type
 
@@ -22,7 +23,9 @@ type
     CBSavSizePos: TCheckBox;
     CBStartWin: TCheckBox;
     CBXShortCut: TCheckBox;
+    ColorPicker1: TColorPicker;
     ImgGrpIcon: TImage;
+    Label1: TLabel;
     LWinVer: TLabel;
     LGrpIcon: TLabel;
     LLangue: TLabel;

@@ -1,4 +1,4 @@
-ProgramGrpMgr.exe - Version 0.8.1.1
+ProgramGrpMgr.exe - Version 0.8.1.2
 
 English description at the end of french description
 
@@ -90,6 +90,6 @@ OpenSSL: See OpenSSL License.txt
 Names and logos used in the program are the property of their respective owners.
 
 
-SDTP - bb95 - November 2019
-Web : http://www.sdtp.com
+SDTP - bb95 - December 2020
+Web : https://www.sdtp.com
 
