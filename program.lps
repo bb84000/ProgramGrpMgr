@@ -19,7 +19,6 @@
         <ComponentName Value="FProgram"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="1801"/>
         <CursorPos X="65" Y="1817"/>
@@ -388,8 +387,8 @@
       <Unit45>
         <Filename Value="History.txt"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="171"/>
-        <CursorPos Y="202"/>
+        <TopLine Value="175"/>
+        <CursorPos Y="207"/>
         <UsageCount Value="38"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
@@ -404,6 +403,7 @@
       </Unit46>
       <Unit47>
         <Filename Value="ProgramGrpMgr.txt"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
         <CursorPos X="36"/>
         <UsageCount Value="16"/>
