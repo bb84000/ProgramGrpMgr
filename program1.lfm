@@ -4,7 +4,6 @@ object FProgram: TFProgram
   Top = 241
   Width = 600
   AllowDropFiles = True
-  BorderStyle = bsSingle
   Caption = 'FProgram'
   ClientHeight = 303
   ClientWidth = 600

@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - may 2019
+// bb - sdtp - december 2020
 //******************************************************************************
 unit program1;
 
@@ -1527,9 +1527,7 @@ begin
     PMnuAbout.Visible:= True;
     N5.Visible:= True;
     PMnuQuit.Visible:= True;
-
   end;
-
 end;
 
 procedure TFProgram.N1Click(Sender: TObject);

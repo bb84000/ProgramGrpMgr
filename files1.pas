@@ -277,7 +277,6 @@ end;
 
 function TFichierList.ReadXMLNode(iNode: TDOMNode): Boolean;
 var
-  i: integer;
   chNode: TDOMNode;
   k: PFichier;
 begin
