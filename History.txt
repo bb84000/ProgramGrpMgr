@@ -211,3 +211,7 @@ Version 0.8.1.5 - 20/01/2021
 Version 0.8.2.0 - 06/02/2021
 - Corection d'un bug : erreur avec une liste de programmes vide
 - Ajout d'un raccourci dans le menu contextuel du bureau
+
+Version 0.8.0.1 - 06/02/2021
+- Correction d'un bug de ColorPicker
+
