@@ -43,6 +43,15 @@ Q. Certaines icones sont mal affichées
 R. Les icones ayant un ancien format de couleur peuvent ne pas s'afficher correctement. Vérifiez
     s'il existe une nouvelle version du programme en question.
 
-Q. Le charbement des icones est très lent
+Q. Le chargement des icones est très lent
 
 R. Dans les préférences, cochez l'option "Activer le cache des icones"
+
+Q. Dans les préférences, comment fonctionne l'option "Ajouter au menu contextuel du bureau ?
+
+R. Cette option ajoute une commande "Gestionnaire de Groupe de programmes" dans le menu contextuel du bureau, c'est à dire
+   quand on clique avec le bouton droit de la souris. Cette commande permet de créer une nouvelle fenêtre du Gestionnaire
+   de Groupe de programmes pour y insérer des icones de programmes. Une fois cette opération effectuer, ne pas oublier de
+   changer le nom du groupe (tout nouveau groupe s'appelle "Defaut") et de cocher la case permettant de placer un raccourci 
+   de ce nouveau groupe sur le bureau.
+   

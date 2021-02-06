@@ -23,6 +23,7 @@ type
     CBSavSizePos: TCheckBox;
     CBStartWin: TCheckBox;
     CBXShortCut: TCheckBox;
+    CBXDesktopMnu: TCheckBox;
     ColorPicker1: TColorPicker;
     ImgGrpIcon: TImage;
     Label1: TLabel;

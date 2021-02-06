@@ -31,6 +31,7 @@ type
     FHideInTaskBar: Boolean;
     FIconCache: Boolean;
     FHideBars: Boolean;
+    FDeskTopMnu: Boolean;
     FLangStr: String;
     Parent: TObject;
     FBkgrndColor: TColor;
@@ -53,6 +54,7 @@ type
     procedure SetHideInTaskBar (b: Boolean);
     procedure SetIconCache (b: Boolean);
     procedure SetHideBars (b: Boolean);
+    procedure SetDeskTopMnu (b: Boolean);
     procedure SetLangStr (s: string);
     procedure SetBkgrndColor(cl: Tcolor);
     function SaveXMLnode(iNode: TDOMNode): Boolean;
@@ -75,6 +77,7 @@ type
     property HideInTaskBar: Boolean read FHideInTaskBar write SetHideInTaskBar;
     property IconCache: Boolean read FIconCache write SetIconCache;
     property HideBars: Boolean read FHideBars write SetHideBars;
+    property DeskTopMnu: Boolean read FDeskTopMnu write SetDeskTopMnu;
     property LangStr: String read FLangStr write SetLangStr;
     property BkgrndColor: TColor read FBkgrndColor write SetBkgrndColor;
   end;
@@ -214,6 +217,15 @@ begin
   end;
 end;
 
+procedure TConfig.SetDeskTopMnu  (b: Boolean);
+begin
+  if FDeskTopMnu <> b then
+  begin
+    FDeskTopMnu:= b;
+    if Assigned(FOnStateChange) then FOnStateChange(Self);
+  end;
+end;
+
 procedure TConfig.SetLangStr (s: string);
 begin
   if FLangStr <> s then
@@ -249,6 +261,7 @@ begin
     TDOMElement(iNode).SetAttribute ('nochknewver', IntToStr(Integer(FNoChkNewVer)));
     TDOMElement(iNode).SetAttribute ('lastupdchk', DateToStr(FLastUpdChk));
     TDOMElement(iNode).SetAttribute ('startwin', IntToStr(Integer(FStartWin)));
+    TDOMElement(iNode).SetAttribute ('desktopmnu', IntToStr(Integer(FDeskTopMnu)));
     TDOMElement(iNode).SetAttribute ('langstr', FLangStr);
     TDOMElement(iNode).SetAttribute ('bkgrndcolor', ColorToString(FBkgrndColor));
     Result:= True;
@@ -299,6 +312,7 @@ begin
     FNoChkNewVer:= Boolean(readIntValue(iNode, 'nochknewver')); //StrToInt(TDOMElement(iNode).GetAttribute('nochknewver')));
     FLastUpdChk:= readDateValue(iNode, 'lastupdchk');  //StrToDate(TDOMElement(iNode).GetAttribute('lastupdchk'));
     FStartWin:= Boolean(readIntValue(iNode, 'startwin')); //StrToInt(TDOMElement(iNode).GetAttribute('startwin')));
+    FDeskTopMnu:= Boolean(readIntValue(iNode, 'desktopmnu'));
     FLangStr:= TDOMElement(iNode).GetAttribute('langstr');
     FBkgrndColor:= StringToColor(TDOMElement(iNode).GetAttribute('bkgrndcolor'));
     result:= true;

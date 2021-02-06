@@ -115,6 +115,7 @@ type
     StartMenuPath: String;
     PrgMgrAppsData: string;
     ProgName: String;
+    LocalizedName: String;
     Settings: Tconfig;
     oldw: array [0..50] of Integer;
     ListeFichiers: TFichierList;
@@ -340,6 +341,7 @@ begin
   ExecName:= ExtractFileName(Application.ExeName);
   ExecPath:= ExtractFilePath(Application.ExeName);
   ProgName:= 'ProgramGrpMgr';
+  LocalizedName:= 'Gestionnaire de Groupe de Programmes';
    // Chargement des chaînes de langue...
   LangFile:= TIniFile.create(ExecPath+ProgName+'.lng');
   LangNums:= TStringList.Create;
@@ -403,7 +405,8 @@ end;
 procedure TFProgram.FormActivate(Sender: TObject);
 var
     hWind: HWND;
-
+    reg: Tregistry;
+    RunRegKeyVal, RunRegKeySz: string;
 begin
   inherited;
   if not first then exit;
@@ -430,13 +433,18 @@ begin
   {$IFDEF WIN64}
       OSTarget:= '64 bits';
   {$ENDIF}
-
   LoadConfig(Settings.GroupName);
+  // check if desktop context menu enabled and change settings checkbox according.
+  reg := TRegistry.Create;
+  reg.RootKey := HKEY_CLASSES_ROOT;
+  Settings.DeskTopMnu:= reg.KeyExists('Directory\Background\shell\ProgramGrpMgr');
+  Prefs.CBXDesktopMnu.Checked:= Settings.DeskTopMnu;
+  reg.CloseKey;
+  reg.free;
   If (WinVersion.Architecture= 'x86_64') and  (OsTarget='32 bits') then
   begin
     ShowMessage(use64bitcaption);
   end;
-
 end;
 
 // Form drop files
@@ -495,9 +503,10 @@ begin
     GroupName:= GrpName;
   end;
   ConfigFile:= PrgMgrAppsData+GrpName+'.xml';
-  //ShowMessage(Settings.GroupName);
+
  If not FileExists(ConfigFile) then
   begin
+
     If FileExists (PrgMgrAppsData+Settings.GroupName+'.bk0') then
     begin
       RenameFile(PrgMgrAppsData+Settings.GroupName+'.bk0', ConfigFile);
@@ -506,9 +515,11 @@ begin
        then  RenameFile(PrgMgrAppsData+Settings.GroupName+'.bk'+IntToStr(i), PrgMgrAppsData+Settings.GroupName+'.bk'+IntToStr(i-1));
     end else
     begin
+
       SaveConfig(Settings.GroupName, All)
     end;
   end;
+  //    ShowMessage(Settings.GroupName);
   LoadCfgFile(ConfigFile);
   if Settings.GroupName <> GrpName then Settings.GroupName := GrpName;
   // Détermination de la langue
@@ -696,6 +707,7 @@ begin
   Settings.WState:= IntToHex(AppState, 4)+IntToHex(Top, 4)+IntToHex(Left, 4)+IntToHex(Height, 4)+IntToHex(width, 4);
   Settings.BkgrndColor:= ListView1.Color;
   // LOad or create config file
+
   ConfigFile:= PrgMgrAppsData+GrpName+'.xml';
   try
      // If oldconfig, then create a new file, else read existing config file
@@ -705,6 +717,7 @@ begin
       RootNode := CfgXML.DocumentElement;
     end else
     begin
+      Settings.IconCache:= false;
       CfgXML := TXMLDocument.Create;
       RootNode := CfgXML.CreateElement('config');
       CfgXML.Appendchild(RootNode);
@@ -725,8 +738,12 @@ begin
       ListeFichiers.SaveToXMLnode(FilesNode);
       RootNode.Appendchild(FilesNode);
       // Sauvegarde du cache seulement si on a modifié la liste
-      if (cache=false and Settings.IconCache) then SaveImageListToFile(ImgList,PrgMgrAppsData+Settings.GroupName+'.imglst' ) ;
+      try
+        if (cache=false and Settings.IconCache) then SaveImageListToFile(ImgList,PrgMgrAppsData+Settings.GroupName+'.imglst' ) ;
+      except
+      end;
     end;
+
 
     // On sauvegarde les versions précédentes
     FilNamWoExt:= TrimFileExt(ConfigFile);
@@ -966,7 +983,10 @@ begin
     cache:= false;
     If (FileExists(PrgMgrAppsData+Settings.GroupName+'.imglst' ) and (settings.IconCache)) then
     begin
-      hnd:= LoadImageListFromFile(PrgMgrAppsData+Settings.GroupName+'.imglst' );
+      try
+        hnd:= LoadImageListFromFile(PrgMgrAppsData+Settings.GroupName+'.imglst' );
+      except
+      end;
       if hnd=0 then                                          // wrong cache file, delete it
       begin
         DeleteFile(PrgMgrAppsData+Settings.GroupName+'.imglst' );
@@ -1324,6 +1344,10 @@ begin
 end;
 
 procedure TFProgram.SBPrefsClick(Sender: TObject);
+var
+  OldDSKMnu: Boolean;
+  Reg: TRegistry;
+  DskCtxKey: String;
 begin
   With Prefs do
   begin
@@ -1340,6 +1364,8 @@ begin
     CBMiniInTray.Checked:= Settings.MiniInTray;
     CBHideInTaskbar.Enabled:= Settings.MiniInTray;
     CBHideInTaskbar.checked:= Settings.HideInTaskbar;
+    CBXDesktopMnu.Checked:= Settings.DeskTopMnu;
+    OldDSKMnu:= Settings.DeskTopMnu;
     CBIconcache.Checked:= Settings.IconCache;
     ColorPicker1.color:= Settings.BkgrndColor;
     if ShowModal = mrOK then
@@ -1355,6 +1381,7 @@ begin
       Settings.NoChkNewVer:= CBNoChkNewVer.Checked;
       Settings.MiniInTray:= CBMiniInTray.Checked;
       Settings.IconCache:= CBIconCache.Checked;
+      Settings.DeskTopMnu:= CBXDesktopMnu.Checked;
       Settings.BkgrndColor:= ColorPicker1.color;
       ListView1.Color:= ColorPicker1.color;
       if ImgChanged then
@@ -1373,6 +1400,35 @@ begin
     begin
       CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
                      ShortCutName, Settings.GrpIconFile, Settings.GrpIconIndex);
+    end;
+    // Program in desktop context menu has changed
+    if Settings.DeskTopMnu <> OldDSKMnu then
+    begin
+      reg := TRegistry.Create(KEY_WRITE);
+      reg.RootKey := HKEY_CLASSES_ROOT;
+      reg.Access:= KEY_ALL_ACCESS;
+      DskCtxKey:= 'Directory\Background\shell\ProgramGrpMgr';
+      if Settings.DeskTopMnu then
+      begin
+        Reg.CreateKey(DskCtxKey);
+        Reg.CreateKey(DskCtxKey+'\command');
+        Reg.OpenKey(DskCtxKey, true);
+        Reg.WriteString('',LocalizedName);
+        reg.CloseKey;
+        Reg.OpenKey(DskCtxKey+'\command', true);
+        Reg.WriteString('',Application.ExeName) ;
+      end else
+      begin
+        Reg.OpenKey(DskCtxKey+'\command', False);
+        Reg.DeleteValue('');
+        reg.CloseKey;
+        Reg.OpenKey(DskCtxKey, False);
+        Reg.DeleteValue('');
+        reg.CloseKey;
+        reg.DeleteKey(DskCtxKey+'\command');
+        reg.DeleteKey(DskCtxKey);
+      end;
+      reg.free;
     end;
     TrayProgman.Visible:= Settings.MiniInTray;
   end;
@@ -1684,6 +1740,7 @@ With LangFile do
    YesBtn:= ReadString(LangStr, 'YesBtn', 'Oui');
    NoBtn:= ReadString(LangStr, 'NoBtn', 'Non');
    CancelBtn:= ReadString(LangStr, 'CancelBtn', 'Annuler');
+   LocalizedName:= ReadString(LangStr, 'LocalizedName', LocalizedName);
    //Form
    CBDisplay.Items.Text:= StringReplace(ReadString(LangStr, 'CBDisplay.Items.Text', ''),
                       '%s', #13#10, [rfReplaceAll]);
@@ -1765,6 +1822,11 @@ With LangFile do
    Prefs.ImgGrpIcon.Hint:= FSaveCfg.ImgGrpIcon.Hint;
    Prefs.LGrpIcon.Caption:= FSaveCfg.LGrpIcon.Caption;
    Prefs.CBXShortCut.Caption:= FSaveCfg.CBXShortCut.Caption;
+   Prefs.CBXDesktopMnu.Caption:= ReadString(LangStr, 'Prefs.CBXDesktopMnu.Caption',  Prefs.CBXDesktopMnu.Caption);
+   Prefs.CBXDesktopMnu.Hint:= StringReplace(ReadString(LangStr, 'Prefs.CBXDesktopMnu.Hint', Prefs.CBXDesktopMnu.Hint),
+                               '%s', #13#10, [rfReplaceAll]);
+
+
    FPropertyCaption:= ReadString(LangStr, 'FPropertyCaption', 'Propriétés de %s');
    FProperty.TSGeneral.Caption:= ReadString(LangStr, 'FProperty.TSGeneral.Caption', FProperty.TSGeneral.Caption);
    FProperty.LFileType.Caption:= ReadString(LangStr, 'FProperty.LFileType.Caption', FProperty.LFileType.Caption);
