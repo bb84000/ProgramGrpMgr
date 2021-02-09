@@ -1,3 +1,7 @@
+//******************************************************************************
+// Settings  dialog unit for ProgramGrpManager (Lazarus)
+// bb - sdtp - february 2021
+//******************************************************************************
 unit prefs1;
 
 {$mode objfpc}{$H+}
@@ -22,11 +26,18 @@ type
     CBNoChkNewVer: TCheckBox;
     CBSavSizePos: TCheckBox;
     CBStartWin: TCheckBox;
-    CBXShortCut: TCheckBox;
     CBXDesktopMnu: TCheckBox;
-    ColorPicker1: TColorPicker;
+    CBXShortCut: TCheckBox;
+    CBBold: TCheckBox;
+    CBItal: TCheckBox;
+    CBUnder: TCheckBox;
+    ColorPickerBkgnd: TColorPicker;
+    ColorPickerFont: TColorPicker;
+    ESize: TEdit;
     ImgGrpIcon: TImage;
-    Label1: TLabel;
+    LTextStyle: TLabel;
+    LBkgndColor: TLabel;
+    LTextColor: TLabel;
     LWinVer: TLabel;
     LGrpIcon: TLabel;
     LLangue: TLabel;
@@ -43,6 +54,7 @@ type
     IconFile: String;
     IconIndex: Integer;
     ImgChanged: Boolean;
+
   end;
 
 var
@@ -56,7 +68,8 @@ implementation
 
 procedure TPrefs.FormCreate(Sender: TObject);
 begin
-     IconFile:= '';
+   Inherited;
+   IconFile:= '';
    IconIndex:= -1;
    ImgChanged:= False;
 

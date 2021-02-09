@@ -1,6 +1,6 @@
 //******************************************************************************
-// config1 Unit
-// Main settings values
+// Settings data unit for ProgramGrpManager (Lazarus)
+// bb - sdtp - february 2021
 //******************************************************************************
 
 unit Config1;
@@ -33,8 +33,12 @@ type
     FHideBars: Boolean;
     FDeskTopMnu: Boolean;
     FLangStr: String;
+    FBkgrndImage: String;
     Parent: TObject;
     FBkgrndColor: TColor;
+    FTextColor: TColor;
+    FTextStyle: String;
+    FTextSize: Integer;
     function readIntValue(inode : TDOMNode; Attrib: String): Int64;
     function readDateValue(inode : TDOMNode; Attrib: String): TDateTime;
 
@@ -56,7 +60,11 @@ type
     procedure SetHideBars (b: Boolean);
     procedure SetDeskTopMnu (b: Boolean);
     procedure SetLangStr (s: string);
+    procedure SetBkgrndImage(s: string);
     procedure SetBkgrndColor(cl: Tcolor);
+    procedure SetTextColor(cl: Tcolor);
+    procedure SetTextStyle(s: string);
+    procedure SetTextSize(i: Integer);
     function SaveXMLnode(iNode: TDOMNode): Boolean;
     function ReadXMLNode(iNode: TDOMNode): Boolean;
 
@@ -80,6 +88,10 @@ type
     property DeskTopMnu: Boolean read FDeskTopMnu write SetDeskTopMnu;
     property LangStr: String read FLangStr write SetLangStr;
     property BkgrndColor: TColor read FBkgrndColor write SetBkgrndColor;
+    property TextColor: TColor read FTextColor write SetTextColor;
+    property TextStyle: String read FTextStyle write SetTextStyle;
+    property TextSize: Integer read FTextSize write SetTextSize;
+    property BkgrndImage: String read FBkgrndImage write SetBkgrndImage;
   end;
 
 
@@ -244,6 +256,43 @@ begin
   end;
 end;
 
+procedure TConfig.SetTextColor(cl: TColor);
+begin
+  if FTextColor <> cl then
+  begin
+    FTextColor:= cl;
+    if Assigned(FOnChange) then FOnChange(Self);
+  end;
+end;
+
+procedure TConfig.SetTextStyle(s: String);
+begin
+  if FTextStyle <> s then
+  begin
+    FTextStyle:= s;
+    if Assigned(FOnChange) then FOnChange(Self);
+  end;
+end;
+
+procedure TConfig.SetTextSize(i: Integer);
+begin
+  if FTextSize <> i then
+  begin
+    FTextSize:= i;
+    if Assigned(FOnChange) then FOnChange(Self);
+  end;
+end;
+
+procedure TConfig.SetBkgrndImage(s: string);
+begin
+  if FBkgrndImage <> s then
+  begin
+    FBkgrndImage:= s;
+    if Assigned(FOnChange) then FOnChange(Self);
+  end;
+
+end;
+
 function TConfig.SaveXMLnode(iNode: TDOMNode): Boolean;
 begin
   Try
@@ -264,6 +313,10 @@ begin
     TDOMElement(iNode).SetAttribute ('desktopmnu', IntToStr(Integer(FDeskTopMnu)));
     TDOMElement(iNode).SetAttribute ('langstr', FLangStr);
     TDOMElement(iNode).SetAttribute ('bkgrndcolor', ColorToString(FBkgrndColor));
+    TDOMElement(iNode).SetAttribute ('textcolor', ColorToString(FTextColor));
+    TDOMElement(iNode).SetAttribute ('textstyle', FTextStyle);
+    TDOMElement(iNode).SetAttribute ('textsize', IntToStr(Integer(FTextSize)));
+    TDOMElement(iNode).SetAttribute ('bkgrndimage', FBkgrndImage);
     Result:= True;
   except
     result:= False;
@@ -315,6 +368,10 @@ begin
     FDeskTopMnu:= Boolean(readIntValue(iNode, 'desktopmnu'));
     FLangStr:= TDOMElement(iNode).GetAttribute('langstr');
     FBkgrndColor:= StringToColor(TDOMElement(iNode).GetAttribute('bkgrndcolor'));
+    FTextColor:= StringToColor(TDOMElement(iNode).GetAttribute('textcolor'));
+    FTextStyle:= TDOMElement(iNode).GetAttribute('textstyle');
+    FTextSize:= readIntValue(iNode, 'textsize');
+    FBkgrndImage:= TDOMElement(iNode).GetAttribute('bkgrndimage');
     result:= true;
   except
     Result:= False;

@@ -18,12 +18,10 @@
     </General>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
-      <MinorVersionNr Value="8"/>
-      <RevisionNr Value="2"/>
-      <BuildNr Value="1"/>
+      <MinorVersionNr Value="9"/>
       <Language Value="040C"/>
       <Attributes pvaPreRelease="True"/>
-      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp - 2019" LegalTrademarks="bb - sdtp - 2019" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="0.8.2.1"/>
+      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp - 2019" LegalTrademarks="bb - sdtp - 2019" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="0.9.0.0"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>

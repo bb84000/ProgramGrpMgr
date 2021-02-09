@@ -1,28 +1,28 @@
 object Prefs: TPrefs
   Left = 803
-  Height = 223
+  Height = 265
   Top = 164
-  Width = 630
+  Width = 720
   BorderStyle = bsDialog
   Caption = 'Prefs'
-  ClientHeight = 223
-  ClientWidth = 630
+  ClientHeight = 265
+  ClientWidth = 720
   OnCreate = FormCreate
   LCLVersion = '2.0.10.0'
   object Panel1: TPanel
     Left = 8
-    Height = 144
+    Height = 176
     Top = 8
     Width = 342
     BevelInner = bvLowered
-    ClientHeight = 144
+    ClientHeight = 176
     ClientWidth = 342
     TabOrder = 0
     object CBHideInTaskBar: TCheckBox
       Left = 8
       Height = 19
       Hint = 'Ne jamais afficher l''application dans la barre des tâches.'
-      Top = 97
+      Top = 88
       Width = 330
       AutoSize = False
       Caption = 'Ne pas afficher dans la barre des tâches'
@@ -35,7 +35,7 @@ object Prefs: TPrefs
       Left = 8
       Height = 19
       Hint = 'L''application reste visible dans la zone de notification'
-      Top = 75
+      Top = 68
       Width = 330
       AutoSize = False
       Caption = 'Minimiser dans la zone de notification'
@@ -47,7 +47,7 @@ object Prefs: TPrefs
     object CBSavSizePos: TCheckBox
       Left = 8
       Height = 19
-      Top = 53
+      Top = 48
       Width = 330
       AutoSize = False
       Caption = 'Sauvegarder la taille et la position de la fenêtre'
@@ -57,7 +57,7 @@ object Prefs: TPrefs
     object CBNoChkNewVer: TCheckBox
       Left = 8
       Height = 19
-      Top = 31
+      Top = 28
       Width = 330
       AutoSize = False
       Caption = 'Ne pas rechercher automatiquement les nouvelles versions'
@@ -78,7 +78,7 @@ object Prefs: TPrefs
       Left = 8
       Height = 19
       Hint = 'Activer le cache des icones'
-      Top = 119
+      Top = 108
       Width = 330
       AutoSize = False
       Caption = 'Activer le cache des icones'
@@ -86,15 +86,38 @@ object Prefs: TPrefs
       ShowHint = True
       TabOrder = 5
     end
+    object CBXShortCut: TCheckBox
+      Left = 8
+      Height = 19
+      Top = 128
+      Width = 240
+      AutoSize = False
+      Caption = 'Placer un raccourci sur le bureau'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 6
+    end
+    object CBXDesktopMnu: TCheckBox
+      Left = 8
+      Height = 19
+      Hint = 'Ajoute une nouvelle commande au menu contextuel du bureau %spour créer une nouvelle fenêtre du Gestionnaire de Groupe de Programme'
+      Top = 148
+      Width = 240
+      AutoSize = False
+      Caption = 'Ajouter au menu contextuel du bureau'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 7
+    end
   end
   object Panel2: TPanel
-    Left = 360
-    Height = 144
+    Left = 368
+    Height = 176
     Top = 8
-    Width = 260
+    Width = 342
     BevelInner = bvLowered
-    ClientHeight = 144
-    ClientWidth = 260
+    ClientHeight = 176
+    ClientWidth = 342
     TabOrder = 1
     object LGrpIcon: TLabel
       Left = 10
@@ -115,28 +138,17 @@ object Prefs: TPrefs
       ParentColor = False
     end
     object CBLangue: TComboBox
-      Left = 92
+      Left = 105
       Height = 23
       Top = 48
-      Width = 158
+      Width = 225
       AutoSize = False
       ItemHeight = 15
       TabOrder = 0
       Text = 'CBLangue'
     end
-    object CBXShortCut: TCheckBox
-      Left = 10
-      Height = 19
-      Top = 100
-      Width = 240
-      AutoSize = False
-      Caption = 'Placer un raccourci sur le bureau'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 1
-    end
     object ImgGrpIcon: TImage
-      Left = 218
+      Left = 298
       Height = 32
       Hint = 'Double clic pour changer l''icone'
       Top = 10
@@ -145,20 +157,41 @@ object Prefs: TPrefs
       ParentShowHint = False
       ShowHint = True
     end
-    object Label1: TLabel
+    object LBkgndColor: TLabel
       Left = 8
       Height = 15
-      Top = 77
-      Width = 62
+      Top = 81
+      Width = 96
       AutoSize = False
-      Caption = 'Couleur '
+      Caption = 'Couleur de fond'
       ParentColor = False
     end
-    object ColorPicker1: TColorPicker
-      Left = 92
+    object ColorPickerBkgnd: TColorPicker
+      Left = 105
       Height = 23
-      Top = 74
-      Width = 158
+      Top = 78
+      Width = 225
+      ItemHeight = 17
+      ItemWidth = 0
+      Color = clDefault
+      MnuCopyCaption = '&Copy'
+      MnuPasteCaption = '&Paste'
+      TabOrder = 1
+    end
+    object LTextColor: TLabel
+      Left = 8
+      Height = 15
+      Top = 111
+      Width = 96
+      AutoSize = False
+      Caption = 'Couleur du texte'
+      ParentColor = False
+    end
+    object ColorPickerFont: TColorPicker
+      Left = 105
+      Height = 23
+      Top = 108
+      Width = 225
       ItemHeight = 17
       ItemWidth = 0
       Color = clDefault
@@ -166,34 +199,68 @@ object Prefs: TPrefs
       MnuPasteCaption = '&Paste'
       TabOrder = 2
     end
-    object CBXDesktopMnu: TCheckBox
+    object LTextStyle: TLabel
       Left = 10
-      Height = 19
-      Hint = 'Ajoute une nouvelle commande au menu contextuel du bureau %spour créer une nouvelle fenêtre du Gestionnaire de Groupe de Programme'
-      Top = 120
-      Width = 240
+      Height = 15
+      Top = 141
+      Width = 86
       AutoSize = False
-      Caption = 'Ajouter au menu contextuel du bureau'
+      Caption = 'Style du texte'
+      ParentColor = False
+    end
+    object CBBold: TCheckBox
+      Left = 105
+      Height = 19
+      Top = 138
+      Width = 55
+      AutoSize = False
+      Caption = 'Gras'
+      TabOrder = 3
+    end
+    object CBItal: TCheckBox
+      Left = 165
+      Height = 19
+      Top = 138
+      Width = 59
+      Caption = 'Italique'
+      TabOrder = 4
+    end
+    object CBUnder: TCheckBox
+      Left = 228
+      Height = 19
+      Top = 138
+      Width = 66
+      Caption = 'Souligné'
+      TabOrder = 5
+    end
+    object ESize: TEdit
+      Left = 305
+      Height = 23
+      Hint = 'Taille de la police, 0 par défaut '
+      Top = 137
+      Width = 24
+      NumbersOnly = True
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 3
+      TabOrder = 6
+      Text = '0'
     end
   end
   object Panel3: TPanel
     Left = 0
     Height = 31
-    Top = 192
-    Width = 630
+    Top = 234
+    Width = 720
     Align = alBottom
     BevelOuter = bvLowered
     ClientHeight = 31
-    ClientWidth = 630
+    ClientWidth = 720
     TabOrder = 2
     object LWinVer: TLabel
       Left = 1
       Height = 29
       Top = 1
-      Width = 628
+      Width = 718
       Align = alClient
       Caption = 'LWinVer'
       Layout = tlCenter
@@ -202,18 +269,18 @@ object Prefs: TPrefs
     end
   end
   object BtnCancel: TButton
-    Left = 336
+    Left = 376
     Height = 26
-    Top = 160
+    Top = 192
     Width = 75
     Caption = 'Annuler'
     ModalResult = 2
     TabOrder = 3
   end
   object BtnOK: TButton
-    Left = 208
+    Left = 264
     Height = 26
-    Top = 160
+    Top = 192
     Width = 75
     Caption = 'OK'
     ModalResult = 1

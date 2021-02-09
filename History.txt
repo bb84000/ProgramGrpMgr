@@ -212,6 +212,8 @@ Version 0.8.2.0 - 06/02/2021
 - Corection d'un bug : erreur avec une liste de programmes vide
 - Ajout d'un raccourci dans le menu contextuel du bureau
 
-Version 0.8.0.1 - 06/02/2021
+Version 0.9.0.0 - 08/02/2021
+- Choix d'une image de fond et possibilité de changer la couleur et le style du texte des icones
 - Correction d'un bug de ColorPicker
+- Correction d'un bug dans l'écriture dans le registre pour startwin et redémarrage
 

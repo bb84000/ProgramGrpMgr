@@ -8,11 +8,15 @@ object FProgram: TFProgram
   ClientHeight = 303
   ClientWidth = 600
   OnActivate = FormActivate
+  OnChangeBounds = FormChangeBounds
+  OnClick = FormClick
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnDropFiles = FormDropFiles
+  OnPaint = FormPaint
   OnResize = FormResize
+  OnShow = FormShow
   OnWindowStateChange = FormWindowStateChange
   LCLVersion = '2.0.10.0'
   object PnlTop: TPanel
@@ -279,7 +283,7 @@ object FProgram: TFProgram
     object SBPrefs: TSpeedButton
       Left = 120
       Height = 24
-      Top = 9
+      Top = 8
       Width = 24
       Glyph.Data = {
         36060000424D3606000000000000360400002800000020000000100000000100
@@ -336,6 +340,7 @@ object FProgram: TFProgram
       NumGlyphs = 2
       OnClick = SBPrefsClick
       ShowHint = True
+      ParentFont = False
       ParentShowHint = False
     end
     object SBLoadConf: TSpeedButton
@@ -486,6 +491,31 @@ object FProgram: TFProgram
       ShowHint = True
       ParentShowHint = False
     end
+    object SBAddPicture: TSpeedButton
+      Left = 232
+      Height = 24
+      Top = 9
+      Width = 24
+      Glyph.Data = {
+        76010000424D7801000000000000760000002800000020000000100000000100
+        04000000000000000000120B0000120B00000000000000000000000000000000
+        800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF0033BBBBBBBBBB
+        BB33337777777777777F33BB00BBBBBBBB33337F77333333F37F33BB0BBBBBB0
+        BB33337F73F33337FF7F33BBB0BBBB000B33337F37FF3377737F33BBB00BB00B
+        BB33337F377F3773337F33BBBB0B00BBBB33337F337F7733337F33BBBB000BBB
+        BB33337F33777F33337F33EEEE000EEEEE33337F3F777FFF337F33EE0E80000E
+        EE33337F73F77773337F33EEE0800EEEEE33337F37377F33337F33EEEE000EEE
+        EE33337F33777F33337F33EEEEE00EEEEE33337F33377FF3337F33EEEEEE00EE
+        EE33337F333377F3337F33EEEEEE00EEEE33337F33337733337F33EEEEEEEEEE
+        EE33337FFFFFFFFFFF7F33EEEEEEEEEEEE333377777777777773
+      }
+      NumGlyphs = 2
+      Visible = False
+      OnClick = SBPictureAddClick
+      ShowHint = True
+      ParentShowHint = False
+    end
   end
   object ListView1: TListView
     Left = 0
@@ -496,7 +526,12 @@ object FProgram: TFProgram
     AutoSort = False
     Columns = <>
     DragMode = dmAutomatic
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
     IconOptions.AutoArrange = True
+    ParentFont = False
     ParentShowHint = False
     PopupMenu = LVPMnu
     ReadOnly = True
@@ -504,6 +539,9 @@ object FProgram: TFProgram
     SortDirection = sdDescending
     TabOrder = 1
     ViewStyle = vsIcon
+    OnClick = ListView1Click
+    OnCustomDraw = ListView1CustomDraw
+    OnCustomDrawItem = ListView1CustomDrawItem
     OnDblClick = PMnuRunClick
     OnDragDrop = ListView1DragDrop
     OnDragOver = ListView1DragOver
@@ -18082,6 +18120,12 @@ object FProgram: TFProgram
         WordWrap = True
       end
     end
+  end
+  object Image1: TImage
+    Left = 495
+    Height = 90
+    Top = 102
+    Width = 90
   end
   object TrayProgman: TTrayIcon
     PopUpMenu = TrayMnu
@@ -35715,7 +35759,6 @@ object FProgram: TFProgram
     end
     object N1: TMenuItem
       Caption = '-'
-      OnClick = N1Click
     end
     object PMnuDelete: TMenuItem
       Caption = 'Supprimer'
@@ -35794,7 +35837,19 @@ object FProgram: TFProgram
       Caption = 'Ajouter un raccourci ou un fichier'
       OnClick = SBAddFileClick
     end
-    object N3: TMenuItem
+    object MenuItem1: TMenuItem
+      Caption = '-'
+    end
+    object MnuBkgndImage: TMenuItem
+      Caption = 'Ajouter une image de fond'
+      OnClick = SBPictureAddClick
+    end
+    object MnuDelBkGndImage: TMenuItem
+      Caption = 'Supprimer l''image de fond'
+      Enabled = False
+      OnClick = MnuDelBkGndImageClick
+    end
+    object MenuItem2: TMenuItem
       Caption = '-'
     end
     object PMnuSave: TMenuItem
@@ -35971,5 +36026,9 @@ object FProgram: TFProgram
     Options = [ofOldStyleDialog, ofEnableSizing, ofViewDetail]
     Left = 416
     Top = 100
+  end
+  object OPictDlg: TOpenPictureDialog
+    Left = 502
+    Top = 96
   end
 end

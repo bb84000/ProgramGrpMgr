@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - december 2020
+// bb - sdtp - february 2021
 //******************************************************************************
 unit program1;
 
@@ -9,10 +9,11 @@ unit program1;
 interface
 
 uses
-  Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
-  Buttons, StdCtrls,  CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM , laz2_XMLRead, laz2_XMLWrite, files1,
-  Registry,  LCLIntf, Menus, ShellAPI, About, SaveCfg1, prefs1, property1, inifiles,
-  chknewver, LoadGroup1, LoadConf1, Config1, lazbbosversion, lazbbutils;
+  Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls,
+  ComCtrls, Buttons, StdCtrls, CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM,
+  laz2_XMLRead, laz2_XMLWrite, files1, Registry, LCLIntf, Menus, ExtDlgs,
+  ShellAPI, About, SaveCfg1, prefs1, property1, inifiles, chknewver, LoadGroup1,
+  LoadConf1, Config1, lazbbosversion, lazbbutils, lmessages;
 
 type
 
@@ -25,9 +26,15 @@ type
   TFProgram = class(TForm)
     CBDisplay: TComboBox;
     CBSort: TComboBox;
+    Image1: TImage;
     ImgPrgSel: TImage;
     LPrgSel: TLabel;
     ListView1: TListView;
+    MenuItem1: TMenuItem;
+    MnuDelBkGndImage: TMenuItem;
+    MnuBkgndImage: TMenuItem;
+    MenuItem2: TMenuItem;
+    OPictDlg: TOpenPictureDialog;
     PTrayMnuQuit: TMenuItem;
     N7: TMenuItem;
     PTrayMnuAbout: TMenuItem;
@@ -51,7 +58,6 @@ type
     PMnuFolder: TMenuItem;
     PMnuAddFile: TMenuItem;
     PMnuSave: TMenuItem;
-    N3: TMenuItem;
     N2: TMenuItem;
     ODlg1: TOpenDialog;
     PnlPrgsel: TPanel;
@@ -59,6 +65,7 @@ type
     PnlStatus: TPanel;
     PnlTop: TPanel;
     LVPMnu: TPopupMenu;
+    SBAddPicture: TSpeedButton;
     SDD1: TSelectDirectoryDialog;
     TrayMnu: TPopupMenu;
     SBGroup: TSpeedButton;
@@ -74,12 +81,25 @@ type
     procedure CBDisplayChange(Sender: TObject);
     procedure CBSortChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure FormChangeBounds(Sender: TObject);
+    procedure FormClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormDeactivate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
+    procedure FormPaint(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure FormWindowStateChange(Sender: TObject);
+    procedure ListView1Click(Sender: TObject);
+    procedure ListView1CustomDraw(Sender: TCustomListView; const ARect: TRect;
+      var DefaultDraw: Boolean);
+    procedure ListView1CustomDrawItem(Sender: TCustomListView; Item: TListItem;
+      State: TCustomDrawState; var DefaultDraw: Boolean);
+    procedure ListView1CustomDrawSubItem(Sender: TCustomListView;
+      Item: TListItem; SubItem: Integer; State: TCustomDrawState;
+      var DefaultDraw: Boolean);
     procedure ListView1DragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure ListView1DragOver(Sender, Source: TObject; X, Y: Integer;
       State: TDragState; var Accept: Boolean);
@@ -89,7 +109,7 @@ type
     procedure ListView1SelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure LVPMnuPopup(Sender: TObject);
-    procedure N1Click(Sender: TObject);
+    procedure MnuDelBkGndImageClick(Sender: TObject);
     procedure PMnuDeleteClick(Sender: TObject);
     procedure PMnuHideBarsClick(Sender: TObject);
     procedure PMnuPropsClick(Sender: TObject);
@@ -103,6 +123,7 @@ type
     procedure SBFolderClick(Sender: TObject);
     procedure SBGroupClick(Sender: TObject);
     procedure SBLoadConfClick(Sender: TObject);
+    procedure SBPictureAddClick(Sender: TObject);
     procedure SBPrefsClick(Sender: TObject);
     procedure SBQuitClick(Sender: TObject);
     procedure SBSaveClick(Sender: TObject);
@@ -153,6 +174,7 @@ type
     ImgSavDisabled: TBitmap;
     cache: Boolean;
     use64bitcaption: string;
+    BkGndPicture: Tpicture;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -172,6 +194,8 @@ type
     function ReadFolder(strPath: string; Directory: Bool): Integer;
     procedure EnumerateResourceNames(Instance: THandle; var list: TStringList);
     procedure GetIconRes(filename: string; index:integer; var Ico: TIcon);
+    procedure WMActivate(var AMessage: TLMActivate); message LM_ACTIVATE;
+    procedure ApplicationDeactivate(Sender: TObject);
   public
 
   end;
@@ -217,15 +241,19 @@ var
   NoCheckVersion: Boolean;
   RunRegKeyVal, RunRegKeySz: string;
 begin
-  if uMsg=WM_QUERYENDSESSION then
+
+   if uMsg=WM_QUERYENDSESSION then
   begin
     if not FProgram.Settings.StartWin then
     begin
       reg := TRegistry.Create;
       reg.RootKey := HKEY_CURRENT_USER;
       reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\RunOnce', True) ;
-      RunRegKeyVal:= UTF8ToAnsi(FProgram.ProgName+'_'+FProgram.Settings.GroupName);
-      RunRegKeySz:= UTF8ToAnsi('"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName);
+      //Voir Sartwin
+      //RunRegKeyVal:= UTF8ToAnsi(FProgram.ProgName+'_'+FProgram.Settings.GroupName);
+      //RunRegKeySz:= UTF8ToAnsi('"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName);
+      RunRegKeyVal:= FProgram.ProgName+'_'+FProgram.Settings.GroupName;
+      RunRegKeySz:= '"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName;
       reg.WriteString(RunRegKeyVal, RunRegKeySz) ;
       reg.CloseKey;
       reg.free;
@@ -247,7 +275,6 @@ begin
             begin
               AboutBox.LUpdate.Caption:= StringReplace(FProgram.UpdateAvailable, '%s', s, [rfIgnoreCase]);
               NoCheckVersion:= FProgram.Settings.NoChkNewVer;
-              //if FProgram.ShowAlert(FProgram.Caption, FProgram.UpdateAvailable, s, FProgram.NoLongerChkUpdates, NoCheckVersion) then
               if AlertDlg(FProgram.Caption, FProgram.UpdateAvailable , ['OK', FProgram.CancelBtn,  FProgram.NoLongerChkUpdates],
                   NoCheckVersion  , mtError)= mrYesToAll then
               begin
@@ -275,6 +302,20 @@ begin
  begin
    if (AnsiToUTF8(Title)=FProgram.GetGrpParam) and (ClassName='Window') then Application.Terminate;
   end;
+end;
+
+// Needed to proper display image in listbox.
+
+procedure TFProgram.WMActivate(var AMessage: TLMActivate);
+begin
+  if AMessage.Active = WA_INACTIVE then Listview1.Invalidate ;
+end;
+
+// Slower than above...
+
+procedure TFProgram.ApplicationDeactivate(Sender: TObject);
+begin
+  //Listview1.Invalidate ;
 end;
 
 // retrieve command line parameters
@@ -317,6 +358,7 @@ var
   aPath : Array[0..MaxPathLen] of Char; //Allocate memory
 begin
   inherited;
+  //Application.OnDeactivate := @ApplicationDeactivate;
   EnumWindows(@EnumWindowsProc,0);
   // Instanciate windows callback
   PrevWndProc:={%H-}Windows.WNDPROC(SetWindowLongPtr(Self.Handle,GWL_WNDPROC,{%H-}PtrInt(@WndCallback)));
@@ -363,6 +405,13 @@ begin
     CreateDir(PrgMgrAppsData);
   end;
   IconDefFile:= SystemRoot+'\system32\imageres.dll';
+  Listview1.DoubleBuffered:= true;
+  BkGndPicture:= nil;
+end;
+
+procedure TFProgram.FormDeactivate(Sender: TObject);
+begin
+
 end;
 
 procedure TFProgram.FormDestroy(Sender: TObject);
@@ -404,11 +453,12 @@ end;
 
 procedure TFProgram.FormActivate(Sender: TObject);
 var
-    hWind: HWND;
+    //hWind: HWND;
     reg: Tregistry;
-    RunRegKeyVal, RunRegKeySz: string;
+    //RunRegKeyVal, RunRegKeySz: string;
 begin
   inherited;
+
   if not first then exit;
   Settings.GroupName:= GetGrpParam;
   // We get Windows Version
@@ -447,6 +497,17 @@ begin
   end;
 end;
 
+procedure TFProgram.FormChangeBounds(Sender: TObject);
+begin
+  Listview1.Invalidate;
+end;
+
+procedure TFProgram.FormClick(Sender: TObject);
+begin
+
+
+end;
+
 // Form drop files
 
 procedure TFProgram.FormDropFiles(Sender: TObject;
@@ -461,6 +522,15 @@ begin
       ListeChange:= True;
       LVDisplayFiles;
   end;
+end;
+
+procedure TFProgram.FormPaint(Sender: TObject);
+var
+  i: Integer;
+  //ARect: TRect;
+  begin
+    LIstView1.Invalidate;
+
 end;
 
 procedure TFProgram.FormResize(Sender: TObject);
@@ -481,6 +551,11 @@ begin
   end;
 end;
 
+procedure TFProgram.FormShow(Sender: TObject);
+begin
+  ListView1.Invalidate;
+end;
+
 function TFProgram.PMnuSaveEnable (Enable: Boolean):Boolean;
 begin
  PMnuSave.Enabled:= Enable;
@@ -495,6 +570,7 @@ procedure TFProgram.LoadConfig(GrpName: String);
 var
   i: Integer;
   LangFound: Boolean;
+
 begin
   with Settings do
   begin
@@ -541,6 +617,25 @@ begin
   Modlangue;
   // bakground colour
   ListView1.Color:= Settings.BkgrndColor;
+  // Text Colour
+  ListView1.Font.Color:= Settings.TextColor;
+  // text style
+  if Pos('B', upperCase(Settings.TextStyle)) >0 then ListView1.Font.Style:= [fsBold];
+  if Pos('I', upperCase(Settings.TextStyle)) >0 then ListView1.Font.Style:= ListView1.Font.Style+[fsItalic];
+  if Pos('U', upperCase(Settings.TextStyle)) >0 then ListView1.Font.Style:= ListView1.Font.Style+[fsUnderline];
+  // text size
+  ListView1.Font.Size:= Settings.TextSize;
+  // Background Image
+  if fileExists (Settings.BkgrndImage) then
+  try
+    BkGndPicture:= TPicture.Create;
+    BkGndPicture.LoadFromFile(Settings.BkgrndImage);
+    MnuDelBkGndImage.Enabled:= true;
+  except
+    BkGndPicture:= nil;
+    Settings.BkgrndImage:='';
+    MnuDelBkGndImage.Enabled:= false;
+  end;
   // Taille et position précédentes
   if Settings.SavSizePos then
   begin
@@ -761,8 +856,11 @@ begin
     Reg:= TRegistry.Create;
     Reg.RootKey:= HKEY_CURRENT_USER;
     Reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\Run', True);
-    RunRegKeyVal:= UTF8ToAnsi(ProgName+'_'+Settings.GroupName);
-    RunRegKeySz:= UTF8ToAnsi('"'+Application.ExeName+'" Grp='+Settings.GroupName);
+    // No need to transcode
+    //RunRegKeyVal:= UTF8ToAnsi(ProgName+'_'+Settings.GroupName);
+    //RunRegKeySz:= UTF8ToAnsi('"'+Application.ExeName+'" Grp='+Settings.GroupName);
+    RunRegKeyVal:= ProgName+'_'+Settings.GroupName;
+    RunRegKeySz:= '"'+Application.ExeName+'" Grp='+Settings.GroupName;
     if Settings.StartWin  then  // Démarrage avec Windows coché
     begin
       if not Reg.ValueExists(RunRegKeyVal) then
@@ -1127,6 +1225,7 @@ begin
     // when llist change generate an error
     ListView1.Hint:= ListeFichiers.GetItem(Item.Index).Description ;
     LPrgSel.Caption:= ListView1.Hint;
+    ListView1.Invalidate;
   except
   end;
 end;
@@ -1348,6 +1447,8 @@ var
   OldDSKMnu: Boolean;
   Reg: TRegistry;
   DskCtxKey: String;
+  //i: integer;
+  s: string;
 begin
   With Prefs do
   begin
@@ -1367,10 +1468,16 @@ begin
     CBXDesktopMnu.Checked:= Settings.DeskTopMnu;
     OldDSKMnu:= Settings.DeskTopMnu;
     CBIconcache.Checked:= Settings.IconCache;
-    ColorPicker1.color:= Settings.BkgrndColor;
+    ColorPickerBkgnd.color:= Settings.BkgrndColor;
+    ColorPickerFont.color:= Settings.TextColor;
+    // Fontstyle
+    CBBold.checked:= (fsBold in ListView1.Font.Style);
+    CBItal.checked:= (fsItalic in ListView1.Font.Style);
+    CBUnder.Checked:= (fsUnderline in Listview1.Font.Style);
+    ESize.Caption:= InttoStr(ListView1.Font.Size);
     if ShowModal = mrOK then
     begin
-     If CBLangue.ItemIndex <> CurLang then
+      If CBLangue.ItemIndex <> CurLang then
       begin
         CurLang:= CBLangue.ItemIndex;
         Settings.LangStr:= LangNums[CurLang];
@@ -1382,9 +1489,36 @@ begin
       Settings.MiniInTray:= CBMiniInTray.Checked;
       Settings.IconCache:= CBIconCache.Checked;
       Settings.DeskTopMnu:= CBXDesktopMnu.Checked;
-      Settings.BkgrndColor:= ColorPicker1.color;
-      ListView1.Color:= ColorPicker1.color;
-      if ImgChanged then
+      Settings.BkgrndColor:= ColorPickerBkgnd.color;
+      ListView1.Color:= ColorPickerBkgnd.color;
+      // Display text properly after color change
+      if not (Settings.TextColor= ColorPickerFont.color) then
+      begin
+        Settings.TextColor:= ColorPickerFont.color;
+        ListView1.Font.Color:= ColorPickerFont.color;
+        LVDisplayFiles;
+      end;
+      s:='';
+      ListView1.Font.Style:= [];
+      if CBBold.checked then
+      begin
+        ListView1.Font.Style:= ListView1.Font.Style+[fsBold];
+        s:= 'B';
+      end;
+      if CBItal.checked then
+      begin
+        ListView1.Font.Style:= ListView1.Font.Style+[fsItalic];
+        s:= s+'I';
+      end;
+      if CBUnder.checked then
+      begin
+        ListView1.Font.Style:= ListView1.Font.Style+[fsUnderline];
+        s:= s+'U';
+      end;
+      Settings.TextStyle:= s;
+      ListView1.Font.Size:= StrToInt(ESize.Caption);
+      Settings.TextSize:= ListView1.Font.Size;
+      If ImgChanged then
       begin
         Application.Icon:= ImgGrpIcon.Picture.Icon ;
         Application.ProcessMessages;
@@ -1471,6 +1605,25 @@ begin
   end;
 end;
 
+procedure TFProgram.SBPictureAddClick(Sender: TObject);
+begin
+  if OPictDlg.execute then
+  begin
+    Settings.BkgrndImage:= OPictDlg.FileName;
+    try
+      BkGndPicture:= TPicture.Create;
+      BkGndPicture.LoadFromFile(Settings.BkgrndImage);
+      MnuDelBkGndImage.Enabled:= true;
+    except
+      BkGndPicture:= nil;
+      Settings.BkgrndImage:='';
+       MnuDelBkGndImage.Enabled:= false;
+    end;
+    ListView1.Invalidate;
+  end;
+
+end;
+
 procedure TFProgram.SBAboutClick(Sender: TObject);
 begin
   AboutBox.LastUpdate:= Settings.LastUpdChk;
@@ -1555,7 +1708,7 @@ begin
     PMnuGroup.Visible:= False;
     PMnuFolder.Visible:= False;
     PMnuAddFile.Visible:= False;
-    N3.Visible:= False;
+    N4.Visible:= False;
     PMnuSave.Visible:= False;
     PMnuPrefs.Visible:= False;
     PMnuLoadConf.Visible:= False;
@@ -1575,7 +1728,7 @@ begin
     PMnuGroup.Visible:= True;
     PMnuFolder.Visible:= True;
     PMnuAddFile.Visible:= True;
-    N3.Visible:= True;
+    N4.Visible:= True;
     PMnuSave.Visible:= True;
     PMnuPrefs.Visible:= True;
     PMnuLoadConf.Visible:= True;
@@ -1586,10 +1739,17 @@ begin
   end;
 end;
 
-procedure TFProgram.N1Click(Sender: TObject);
+procedure TFProgram.MnuDelBkGndImageClick(Sender: TObject);
 begin
-
+  Settings.BkgrndImage:='';
+  BkGndPicture:= nil;
+  MnuDelBkGndImage.Enabled:= false;
+  ListView1.Invalidate;
 end;
+
+
+
+
 
 procedure TFProgram.CBDisplayChange(Sender: TObject);
 begin
@@ -1721,10 +1881,73 @@ begin
            PTrayMnuMaximize.Enabled:= False;
          end;
     end;
+  ListView1.Invalidate;
+end;
+
+procedure TFProgram.ListView1Click(Sender: TObject);
+begin
 
 end;
 
 
+// Display background image
+
+procedure TFProgram.ListView1CustomDraw(Sender: TCustomListView;
+  const ARect: TRect; var DefaultDraw: Boolean);
+begin
+  if BkGndPicture=nil then exit;
+  with Sender as TListview do
+  begin
+      //if ARect.Width < 50 then exit;;
+      Canvas.StretchDraw(ARect, BkGndPicture.Bitmap);
+      //SetBkMode(Canvas.Handle, TRANSPARENT);
+      Perform(LVM_SETTEXTBKCOLOR, 0, LongInt(CLR_NONE));
+      Perform(LVM_SETBKCOLOR,0, LongInt(CLR_NONE));
+  end;
+end;
+
+// Display customized item text
+
+procedure TFProgram.ListView1CustomDrawItem(Sender: TCustomListView;
+  Item: TListItem; State: TCustomDrawState; var DefaultDraw: Boolean);
+var
+  txt: string;
+  rec: TRect;
+  //rec1: Trect;
+  txtstyl: TTextStyle;
+begin
+  //if BkGndPicture=nil then exit;
+  txt:= ListeFichiers.GetItem(Item.Index).DisplayName;;
+  rec := Item.DisplayRect(drLabel);
+  Item.Caption:=  '';
+  if Item.selected then
+  begin
+    Sender.Canvas.Brush.Color := clHighlight;
+    Sender.Canvas.Brush.Style := bsSolid;
+    Sender.Canvas.FillRect(rec );
+    Sender.Canvas.Font.Color := clHighlightText;
+  end else
+  begin
+    Item.Caption := '';
+    //Sender.Canvas.Font.Style:= [fsBold];
+    Sender.Canvas.brush.color:= clNone;
+    Sender.Canvas.brush.Style:= bsClear;
+  end;
+  txtstyl:= Sender.Canvas.TextStyle;
+  txtstyl.Alignment:= taCenter;
+  txtstyl.Layout:= tlTop;
+  txtstyl.WordBreak := true;
+  txtstyl.SingleLine := false;
+  Sender.Canvas.TextRect(rec, 0, rec.top, txt, txtstyl );
+end;
+
+procedure TFProgram.ListView1CustomDrawSubItem(Sender: TCustomListView;
+  Item: TListItem; SubItem: Integer; State: TCustomDrawState;
+  var DefaultDraw: Boolean);
+begin
+
+
+end;
 
 // Language translation routines
 
@@ -1825,7 +2048,13 @@ With LangFile do
    Prefs.CBXDesktopMnu.Caption:= ReadString(LangStr, 'Prefs.CBXDesktopMnu.Caption',  Prefs.CBXDesktopMnu.Caption);
    Prefs.CBXDesktopMnu.Hint:= StringReplace(ReadString(LangStr, 'Prefs.CBXDesktopMnu.Hint', Prefs.CBXDesktopMnu.Hint),
                                '%s', #13#10, [rfReplaceAll]);
-
+   Prefs.LBkgndColor.Caption:= ReadString(LangStr, 'Prefs.LBkgndColor.Caption', Prefs.LBkgndColor.Caption);
+   Prefs.LTextColor.Caption:= ReadString(LangStr, 'Prefs.LTextColor.Caption', Prefs.LTextColor.Caption);
+   Prefs.CBBold.Caption:= ReadString(LangStr, 'Prefs.CBBold.Caption', Prefs.CBBold.Caption);
+   Prefs.CBItal.Caption:= ReadString(LangStr, 'Prefs.CBItal.Caption', Prefs.CBItal.Caption);
+   Prefs.CBUnder.Caption:= ReadString(LangStr, 'Prefs.CBUnder.Caption', Prefs.CBUnder.Caption);
+   Prefs.ESize.Hint:=  ReadString(LangStr, 'Prefs.ESize.Hint', Prefs.ESize.Hint);
+   Prefs.LTextStyle.Caption:= ReadString(LangStr, 'Prefs.LTextStyle.Caption', Prefs.LTextStyle.Caption);
 
    FPropertyCaption:= ReadString(LangStr, 'FPropertyCaption', 'Propriétés de %s');
    FProperty.TSGeneral.Caption:= ReadString(LangStr, 'FProperty.TSGeneral.Caption', FProperty.TSGeneral.Caption);

@@ -75,7 +75,14 @@ Prefs.CBMiniInTray.Hint=The application icon is not shown in the task bar, inste
 Prefs.CBHideInTaskBar.Caption=Do not show the application in the Task bar
 Prefs.CBHideInTaskBar.Hint=The application is not shown in the Task Bar. Need to be minimized in the tray
 Prefs.CBXDesktopMnu.Caption=Add to desktop context menu
-Prefs.CBXDesktopMnu.Hint=Add a command in the desktop context menu %sto create a new Program Group Manager winddow
+Prefs.CBXDesktopMnu.Hint=Add a command in the desktop context menu %sto create a new Program Group Manager window
+Prefs.LBkgndColor.Caption=Background color
+Prefs.LTextColor.Caption=Text color
+Prefs.CBBold.Caption=Bold
+Prefs.CBItal.Caption=Italic
+Prefs.CBUnder.Caption=Underline
+Prefs.ESize.Hint=Font size, default 0
+Prefs.LTextStyle.Caption=Text style
 
 FPropertyCaption=%s properties
 FProperty.TSGeneral.Caption=General
@@ -171,7 +178,13 @@ Prefs.CBHideInTaskBar.Hint=L'application n'est pas affichée dans la barre des t
 Prefs.ImgPrefs.Hint=Double clic pour changer l'icone
 Prefs.CBXDesktopMnu.Caption=Ajouter au menu contextuel du bureau
 Prefs.CBXDesktopMnu.Hint=Ajoute une nouvelle commande au menu contextuel du bureau %spour créer une nouvelle fenêtre du Gestionnaire de Groupe de Programme
-
+Prefs.LBkgndColor.Caption=Couleur de fond
+Prefs.LTextColor.Caption=Couleur du texte
+Prefs.CBBold.Caption=Gras
+Prefs.CBItal.Caption=Italique
+Prefs.CBUnder.Caption=Souligné
+Prefs.ESize.Hint=Taille de la police, 0 par défaut
+Prefs.LTextStyle.Caption=Style du texte
 
 FPropertyCaption=Propriétés de %s
 FProperty.TSGeneral.Caption=Général
