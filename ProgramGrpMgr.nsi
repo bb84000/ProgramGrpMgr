@@ -44,6 +44,7 @@
   !define MUI_FINISHPAGE_SHOWREADME_FUNCTION inst_shortcut
 ; Pages
 
+  !define MUI_WELCOMEPAGE_TITLE_3LINES
   !insertmacro MUI_PAGE_WELCOME
   !insertmacro MUI_PAGE_LICENSE $(licence)
  ; !insertmacro MUI_PAGE_DIRECTORY

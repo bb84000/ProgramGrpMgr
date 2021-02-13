@@ -40,6 +40,11 @@ PMnuQuit.Caption=Quit
 PMnuMaskBars=Mask the buttons and status bars
 PMnuShowBars=Show the buttons and status bars
 
+MnuAddImageStr=Add a background image
+MnuRepImageStr=Replace the background image
+MnuDelBkGndImage.Caption=Delete the background image
+
+
 PTrayMnuRestore.Caption=Restore
 PTrayMnuMinimize.Caption=Minimize
 PTrayMnuMaximize.Caption=Maximize
@@ -141,6 +146,11 @@ PMnuQuit.Caption=Quitter
 
 PMnuMaskBars=Masquer les barres de boutons et de statut
 PMnuShowBars=Afficher les barres de boutons et de statut
+
+MnuAddImageStr=Ajouter une image d'arrière plan
+MnuRepImageStr=Remplacer l'image d'arrière plan
+MnuDelBkGndImage.Caption=Supprimer l'image d'arrière plan
+
 
 PTrayMnuRestore.Caption=Restaurer
 PTrayMnuMinimize.Caption=Réduire

@@ -26,14 +26,14 @@ type
   TFProgram = class(TForm)
     CBDisplay: TComboBox;
     CBSort: TComboBox;
-    Image1: TImage;
+    ImgMnus: TImageList;
     ImgPrgSel: TImage;
     LPrgSel: TLabel;
     ListView1: TListView;
-    MenuItem1: TMenuItem;
+    N3: TMenuItem;
     MnuDelBkGndImage: TMenuItem;
-    MnuBkgndImage: TMenuItem;
-    MenuItem2: TMenuItem;
+    MnuAddBkgndImage: TMenuItem;
+    N41: TMenuItem;
     OPictDlg: TOpenPictureDialog;
     PTrayMnuQuit: TMenuItem;
     N7: TMenuItem;
@@ -65,7 +65,6 @@ type
     PnlStatus: TPanel;
     PnlTop: TPanel;
     LVPMnu: TPopupMenu;
-    SBAddPicture: TSpeedButton;
     SDD1: TSelectDirectoryDialog;
     TrayMnu: TPopupMenu;
     SBGroup: TSpeedButton;
@@ -82,17 +81,15 @@ type
     procedure CBSortChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormChangeBounds(Sender: TObject);
-    procedure FormClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
-    procedure FormDeactivate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormDropFiles(Sender: TObject; const FileNames: array of String);
     procedure FormPaint(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormWindowStateChange(Sender: TObject);
-    procedure ListView1Click(Sender: TObject);
+    procedure ImgDelClick(Sender: TObject);
     procedure ListView1CustomDraw(Sender: TCustomListView; const ARect: TRect;
       var DefaultDraw: Boolean);
     procedure ListView1CustomDrawItem(Sender: TCustomListView; Item: TListItem;
@@ -123,7 +120,7 @@ type
     procedure SBFolderClick(Sender: TObject);
     procedure SBGroupClick(Sender: TObject);
     procedure SBLoadConfClick(Sender: TObject);
-    procedure SBPictureAddClick(Sender: TObject);
+    procedure MnuAddBkgndImageClick(Sender: TObject);
     procedure SBPrefsClick(Sender: TObject);
     procedure SBQuitClick(Sender: TObject);
     procedure SBSaveClick(Sender: TObject);
@@ -169,9 +166,11 @@ type
     LastUpdateSearch, LastChkCaption, NextChkCaption: String;
     CheckVerChanged: Boolean;
     NoDeleteGroup, DeleteGrpMsg: String;
+    MnuAddImageStr: String;
+    MnuRepImageStr: String;
     OldConfig: Boolean;
     Version: String;
-    ImgSavDisabled: TBitmap;
+    //ImgSavDisabled: TBitmap;
     cache: Boolean;
     use64bitcaption: string;
     BkGndPicture: Tpicture;
@@ -181,8 +180,8 @@ type
     function SaveConfig(GrpName: String; Typ: SaveType): Bool;
     procedure LVDisplayFiles;
     function GetFile(FileName: string):TFichier;
-    procedure CropBitmap(InBitmap, OutBitMap : TBitmap; Enable: Boolean);//X, Y, W, H :Integer);
-    function PMnuSaveEnable (Enable: Boolean):Boolean;
+    function PMnuEnable (PMenu: TmenuItem; BtnBMP: TbitMap; Enable: Boolean):Boolean;
+    function PMnuEnable (PMenu: TmenuItem; InImgList: TImageList; Enable: Boolean; ListIndex:Integer):Boolean;
     function StateChanged: SaveType;
     procedure ListeFichiersOnChange(sender: TObject);
     procedure SettingsOnChange(sender: TObject);
@@ -250,8 +249,6 @@ begin
       reg.RootKey := HKEY_CURRENT_USER;
       reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\RunOnce', True) ;
       //Voir Sartwin
-      //RunRegKeyVal:= UTF8ToAnsi(FProgram.ProgName+'_'+FProgram.Settings.GroupName);
-      //RunRegKeySz:= UTF8ToAnsi('"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName);
       RunRegKeyVal:= FProgram.ProgName+'_'+FProgram.Settings.GroupName;
       RunRegKeySz:= '"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName;
       reg.WriteString(RunRegKeyVal, RunRegKeySz) ;
@@ -409,10 +406,6 @@ begin
   BkGndPicture:= nil;
 end;
 
-procedure TFProgram.FormDeactivate(Sender: TObject);
-begin
-
-end;
 
 procedure TFProgram.FormDestroy(Sender: TObject);
 begin
@@ -453,23 +446,22 @@ end;
 
 procedure TFProgram.FormActivate(Sender: TObject);
 var
-    //hWind: HWND;
     reg: Tregistry;
-    //RunRegKeyVal, RunRegKeySz: string;
 begin
   inherited;
 
   if not first then exit;
   Settings.GroupName:= GetGrpParam;
   // We get Windows Version
-  // WinVersion:= TWinVersion.Create;
   GetSysInfo(WinVersion);
   // For popup menu, retrieve bitmap from buttons
   CropBitmap(SBGroup.Glyph, PmnuGroup.Bitmap, SBGroup.Enabled);
   CropBitmap(SBFolder.Glyph, PMnuFolder.Bitmap, SBFolder.Enabled);
   CropBitmap(SBAddFile.Glyph, PMnuAddFile.Bitmap, SBAddFile.Enabled);
-  ImgSavDisabled:= PMnuSave.Bitmap;
-  PmnuSaveEnable (False);
+  CropBitmap(ImgMnus, MnuAddBkgndImage.Bitmap, True, 0);
+  //CropBitmap(ImgDel.Picture.Bitmap, MnuDelBkgndImage.Bitmap, False);
+  CropBitmap(ImgMnus, MnuDelBkgndImage.Bitmap, False, 1);
+  PmnuEnable (PMnuSave, SBSave.Glyph, false);
   CropBitmap(SBPrefs.Glyph, PMnuPrefs.Bitmap, SBPrefs.Enabled);
   CropBitmap(SBLoadConf.Glyph, PMnuLoadConf.Bitmap, SBLoadConf.Enabled);
   CropBitmap(SBAbout.Glyph, PMnuAbout.Bitmap, SBAbout.Enabled);
@@ -502,11 +494,7 @@ begin
   Listview1.Invalidate;
 end;
 
-procedure TFProgram.FormClick(Sender: TObject);
-begin
 
-
-end;
 
 // Form drop files
 
@@ -525,12 +513,8 @@ begin
 end;
 
 procedure TFProgram.FormPaint(Sender: TObject);
-var
-  i: Integer;
-  //ARect: TRect;
-  begin
-    LIstView1.Invalidate;
-
+begin
+  LIstView1.Invalidate;
 end;
 
 procedure TFProgram.FormResize(Sender: TObject);
@@ -556,11 +540,17 @@ begin
   ListView1.Invalidate;
 end;
 
-function TFProgram.PMnuSaveEnable (Enable: Boolean):Boolean;
+function TFProgram.PMnuEnable (PMenu: TmenuItem; InImgList: TImageList; Enable: Boolean; ListIndex: Integer):Boolean;
 begin
- PMnuSave.Enabled:= Enable;
- If Enabled then CropBitmap(SBSave.Glyph, PMnuSave.Bitmap, Enable)
- else CropBitmap(SBSave.Glyph, PMnuSave.Bitmap, Enable);
+  PMenu.Enabled:= Enable;
+  CropBitmap(InImgList, PMenu.Bitmap, Enable, ListIndex);
+  result:= Enable;
+end;
+
+function TFProgram.PMnuEnable (PMenu: TmenuItem; BtnBMP: TbitMap; Enable: Boolean):Boolean;
+begin
+  PMenu.Enabled:= Enable;
+  CropBitmap(BtnBmp, PMenu.Bitmap, Enable);
   result:= Enable;
 end;
 
@@ -626,15 +616,19 @@ begin
   // text size
   ListView1.Font.Size:= Settings.TextSize;
   // Background Image
+  MnuAddBkgndImage.Caption:= MnuAddImageStr;
   if fileExists (Settings.BkgrndImage) then
   try
     BkGndPicture:= TPicture.Create;
     BkGndPicture.LoadFromFile(Settings.BkgrndImage);
-    MnuDelBkGndImage.Enabled:= true;
+    //SBDelPicture.Enabled:= true;
+    MnuDelBkGndImage.Enabled:= PMnuEnable (MnuDelBkGndImage, ImgMnus, true, 1);
+    MnuAddBkgndImage.Caption:= MnuRepImageStr;
   except
     BkGndPicture:= nil;
     Settings.BkgrndImage:='';
-    MnuDelBkGndImage.Enabled:= false;
+     //SBDelPicture.Enabled:= false;
+    MnuDelBkGndImage.Enabled:= PMnuEnable (MnuDelBkGndImage, ImgMnus, false, 1);
   end;
   // Taille et position précédentes
   if Settings.SavSizePos then
@@ -947,7 +941,7 @@ begin
   ListeChange:= True;
   SBSave.Enabled:= True;
   PMnuSave.Enabled:= True;
-  PMnuSaveEnable(True);
+  PMnuEnable(PmnuSave, SBSave.Glyph, true);
   //LVDisplayFiles;
 end;
 
@@ -956,7 +950,7 @@ begin
   SettingsChange:= True;
   SBSave.Enabled:= True;
   PMnuSave.Enabled:= True;
-  PMnuSaveEnable(True);
+  PMnuEnable(PmnuSave, SBSave.Glyph, True);
 end;
 
 procedure TFProgram.SettingsOnStateChange(sender: TObject);
@@ -1118,7 +1112,6 @@ begin
         ListItem.ImageIndex:= i;
       end else
       begin
-        //ShowMessage('Test');
         If Assigned(SHDefExtractIcon) then
         begin
           //Function only from W2000, and can be discontinued ?
@@ -1216,8 +1209,6 @@ begin
 end;
 
 
-
-
 procedure TFProgram.ListView1SelectItem(Sender: TObject; Item: TListItem;
   Selected: Boolean);
 begin
@@ -1229,7 +1220,6 @@ begin
   except
   end;
 end;
-
 
 
 procedure TFProgram.PMnuRunClick(Sender: TObject);
@@ -1412,6 +1402,7 @@ begin
     end;
 end;
 
+
 procedure TFProgram.SBSaveClick(Sender: TObject);
 begin
   if WinVersion.VerMaj > 5 then   // Vista et après
@@ -1438,7 +1429,7 @@ begin
     ListeChange:= False;
     SettingsChange:= False;
     SBSave.Enabled:= False;
-    PMnuSave.Enabled:= PMnuSaveEnable(False);
+    PMnuSave.Enabled:= PMnuEnable(PMnuSave, SBSave.Glyph,  False);
   end ;
 end;
 
@@ -1447,9 +1438,11 @@ var
   OldDSKMnu: Boolean;
   Reg: TRegistry;
   DskCtxKey: String;
-  //i: integer;
-  s: string;
+  NewStylStr: string;
+  NewTXTStyl: TFontStyles;
+  TxtStyleChg: Boolean;
 begin
+  TxtStyleChg:=false;
   With Prefs do
   begin
     LWinVer.Caption:= ' '+WinVersion.VerDetail;
@@ -1459,7 +1452,6 @@ begin
     ImgGrpIcon.Picture.Icon.Handle:= Application.Icon.Handle;
     CBLangue.ItemIndex:= CurLang;
     CBStartWin.Checked:= Settings.StartWin;
-    // CBStartMini.Checked:= StartMini;
     CBSavSizePos.Checked:= Settings.SavSizePos;
     CBNoChkNewVer.Checked:= Settings.NoChkNewVer;
     CBMiniInTray.Checked:= Settings.MiniInTray;
@@ -1496,28 +1488,32 @@ begin
       begin
         Settings.TextColor:= ColorPickerFont.color;
         ListView1.Font.Color:= ColorPickerFont.color;
-        LVDisplayFiles;
-      end;
-      s:='';
-      ListView1.Font.Style:= [];
-      if CBBold.checked then
+        TxtStyleChg:= true;
+       end;
+      NewStylStr:='';
+      if CBBold.checked then NewStylStr:= 'B';
+      if CBItal.checked then NewStylStr:= NewStylStr+'I';
+      if CBUnder.checked then NewStylStr:=NewStylStr+'U';
+      If NewStylStr <> Settings.TextStyle then
       begin
-        ListView1.Font.Style:= ListView1.Font.Style+[fsBold];
-        s:= 'B';
+        TxtStyleChg:= true;
+        Settings.TextStyle:=NewStylStr;
+        NewTXTStyl:= [];
+        if Pos('B', upperCase(Settings.TextStyle)) >0 then NewTXTStyl:= NewTXTStyl+[fsBold];
+        if Pos('I', upperCase(Settings.TextStyle)) >0 then NewTXTStyl:= NewTXTStyl+[fsItalic];
+        if Pos('U', upperCase(Settings.TextStyle)) >0 then NewTXTStyl:= NewTXTStyl+[fsUnderline];
+        ListView1.Font.Style:= NewTXTStyl;
       end;
-      if CBItal.checked then
-      begin
-        ListView1.Font.Style:= ListView1.Font.Style+[fsItalic];
-        s:= s+'I';
+      try
+        if Settings.TextSize <> StrToInt(ESize.Caption) then
+        begin
+          TxtStyleChg:= true;
+          ListView1.Font.Size:= StrToInt(ESize.Caption);
+          Settings.TextSize:= ListView1.Font.Size;
+        end;
+      except
       end;
-      if CBUnder.checked then
-      begin
-        ListView1.Font.Style:= ListView1.Font.Style+[fsUnderline];
-        s:= s+'U';
-      end;
-      Settings.TextStyle:= s;
-      ListView1.Font.Size:= StrToInt(ESize.Caption);
-      Settings.TextSize:= ListView1.Font.Size;
+      if TxtStyleChg then LVDisplayFiles;
       If ImgChanged then
       begin
         Application.Icon:= ImgGrpIcon.Picture.Icon ;
@@ -1525,7 +1521,7 @@ begin
         Settings.GrpIconFile:= IconFile;
         Settings.GrpIconIndex:= IconIndex;
         SBSave.Enabled:= True;
-        PMnuSave.Enabled:= PmnuSaveEnable(True);
+        PMnuSave.Enabled:= PmnuEnable(PMnuSave, SBSave.Glyph, True);
       end;
     end;
     Settings.HideInTaskBar:= CBHideInTaskbar.Checked;
@@ -1605,7 +1601,7 @@ begin
   end;
 end;
 
-procedure TFProgram.SBPictureAddClick(Sender: TObject);
+procedure TFProgram.MnuAddBkgndImageClick(Sender: TObject);
 begin
   if OPictDlg.execute then
   begin
@@ -1613,11 +1609,12 @@ begin
     try
       BkGndPicture:= TPicture.Create;
       BkGndPicture.LoadFromFile(Settings.BkgrndImage);
-      MnuDelBkGndImage.Enabled:= true;
+      MnuAddBkgndImage.Caption:= MnuRepImageStr;
+      MnuDelBkGndImage.Enabled:= PMnuEnable (MnuDelBkGndImage, ImgMnus, true, 1);
     except
       BkGndPicture:= nil;
       Settings.BkgrndImage:='';
-       MnuDelBkGndImage.Enabled:= false;
+      MnuDelBkGndImage.Enabled:= PMnuEnable (MnuDelBkGndImage, ImgMnus, false, 1);
     end;
     ListView1.Invalidate;
   end;
@@ -1646,18 +1643,6 @@ begin
   SetForeGroundWindow(Handle);
 end;
 
-
-// Crop speedbutton images to popup menu images
-procedure TFProgram.CropBitmap(InBitmap, OutBitMap : TBitmap; Enable: Boolean);//X, Y, W, H :Integer);
-begin
-  OutBitMap.PixelFormat := InBitmap.PixelFormat;
-  OutBitmap.Width:= InBitMap.Height;  // as we can have double width or not in sbuttons
-  OutBitmap.Height:= InBitMap.Height;
-  // First or second image
-  if Enabled then BitBlt(OutBitMap.Canvas.Handle, 0, 0, OutBitmap.Width, OutBitmap.Height, InBitmap.Canvas.Handle, 0, 0, SRCCOPY)
-  else BitBlt(OutBitMap.Canvas.Handle, 0, 0, OutBitmap.Width, OutBitmap.Height, InBitmap.Canvas.Handle, OutBitmap.Height, 0, SRCCOPY);
-end;
-
 // Change display if mouse cursor is on an item or in an other sone of the listview
 
 procedure TFProgram.ListView1MouseMove(Sender: TObject; Shift: TShiftState; X,
@@ -1667,7 +1652,6 @@ var
   hIco: hIcon;
   liOver: TListItem;
 begin
-
   liOver:= ListView1.GetItemAt(X, Y);
   ListView1.Hint:='';
   ImgPrgSel.Picture.Icon.Handle:=  ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
@@ -1708,6 +1692,10 @@ begin
     PMnuGroup.Visible:= False;
     PMnuFolder.Visible:= False;
     PMnuAddFile.Visible:= False;
+    N3.Visible:= False;
+    MnuAddBkgndImage.Visible:= False;
+    MnuDelBkGndImage.Visible:= False;
+    N41.Visible:= False;
     N4.Visible:= False;
     PMnuSave.Visible:= False;
     PMnuPrefs.Visible:= False;
@@ -1728,6 +1716,10 @@ begin
     PMnuGroup.Visible:= True;
     PMnuFolder.Visible:= True;
     PMnuAddFile.Visible:= True;
+    N3.Visible:= True;
+    MnuAddBkgndImage.Visible:= True;
+    MnuDelBkGndImage.Visible:= True;
+    N41.Visible:= True;
     N4.Visible:= True;
     PMnuSave.Visible:= True;
     PMnuPrefs.Visible:= True;
@@ -1741,14 +1733,12 @@ end;
 
 procedure TFProgram.MnuDelBkGndImageClick(Sender: TObject);
 begin
-  Settings.BkgrndImage:='';
+    Settings.BkgrndImage:='';
   BkGndPicture:= nil;
-  MnuDelBkGndImage.Enabled:= false;
+  MnuDelBkGndImage.Enabled:= PMnuEnable (MnuDelBkGndImage, ImgMnus, false, 1);
+  MnuAddBkgndImage.Caption:= MnuAddImageStr;
   ListView1.Invalidate;
 end;
-
-
-
 
 
 procedure TFProgram.CBDisplayChange(Sender: TObject);
@@ -1759,7 +1749,7 @@ begin
   Settings.IconDisplay:= CBDisplay.ItemIndex;
   Settings.IconSort:= CBSort.ItemIndex;
   SBSave.Enabled:= True;
-  PMnuSave.Enabled:= PMnuSaveEnable(True);
+  PMnuSave.Enabled:= PMnuEnable(PMnuSave, SBSave.Glyph, True);
 end;
 
 procedure TFProgram.CBSortChange(Sender: TObject);
@@ -1884,11 +1874,10 @@ begin
   ListView1.Invalidate;
 end;
 
-procedure TFProgram.ListView1Click(Sender: TObject);
+procedure TFProgram.ImgDelClick(Sender: TObject);
 begin
 
 end;
-
 
 // Display background image
 
@@ -1898,9 +1887,7 @@ begin
   if BkGndPicture=nil then exit;
   with Sender as TListview do
   begin
-      //if ARect.Width < 50 then exit;;
       Canvas.StretchDraw(ARect, BkGndPicture.Bitmap);
-      //SetBkMode(Canvas.Handle, TRANSPARENT);
       Perform(LVM_SETTEXTBKCOLOR, 0, LongInt(CLR_NONE));
       Perform(LVM_SETBKCOLOR,0, LongInt(CLR_NONE));
   end;
@@ -1913,10 +1900,8 @@ procedure TFProgram.ListView1CustomDrawItem(Sender: TCustomListView;
 var
   txt: string;
   rec: TRect;
-  //rec1: Trect;
   txtstyl: TTextStyle;
 begin
-  //if BkGndPicture=nil then exit;
   txt:= ListeFichiers.GetItem(Item.Index).DisplayName;;
   rec := Item.DisplayRect(drLabel);
   Item.Caption:=  '';
@@ -1929,7 +1914,6 @@ begin
   end else
   begin
     Item.Caption := '';
-    //Sender.Canvas.Font.Style:= [fsBold];
     Sender.Canvas.brush.color:= clNone;
     Sender.Canvas.brush.Style:= bsClear;
   end;
@@ -1955,7 +1939,6 @@ procedure TFProgram.ModLangue ;
 var
   LangStr: String;
 begin
-//ShowMessage(LangStr);
 LangStr:=  Settings.LangStr;
 With LangFile do
  begin
@@ -1994,7 +1977,9 @@ With LangFile do
    PMnuPrefs.Caption:= SBPrefs.Hint;
    PMnuLoadConf.Caption:= SBLoadConf.Hint;
    PMnuQuit.Caption:= ReadString(LangStr, 'PMnuQuit.Caption', PMnuQuit.Caption);
-
+   MnuAddImageStr:= ReadString(LangStr, 'MnuAddImageStr', 'Ajouter une image d''arrière plan');
+   MnuRepImageStr:= ReadString(LangStr, 'MnuRepImageStr', 'Remplacer l''image d''arrière plan');
+   MnuDelBkGndImage.Caption:= ReadString(LangStr, 'MnuDelBkGndImage.Caption', MnuDelBkGndImage.Caption);
    PTrayMnuRestore.Caption:= ReadString(LangStr, 'PTrayMnuRestore.Caption', PTrayMnuRestore.Caption);
    PTrayMnuMinimize.Caption:= ReadString(LangStr, 'PTrayMnuMinimize.Caption', PTrayMnuMinimize.Caption);
    PTrayMnuMaximize.Caption:= ReadString(LangStr, 'PTrayMnuMaximize.Caption', PTrayMnuMaximize.Caption);

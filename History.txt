@@ -217,3 +217,9 @@ Version 0.9.0.0 - 08/02/2021
 - Correction d'un bug de ColorPicker
 - Correction d'un bug dans l'écriture dans le registre pour startwin et redémarrage
 
+Version 0.9.0.1 - 13/02/2021
+- Correction d'un bug dans l'affichage du menu Enregistrer
+- Suppression des menus d'image de fond quand on est sur une icone de programme
+- Modification de la routine de modification des préférences du style de texte
+- Suppression des boutons d'ajout et suppression d'image de fond
+
