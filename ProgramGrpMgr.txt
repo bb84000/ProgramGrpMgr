@@ -1,4 +1,4 @@
-ProgramGrpMgr.exe - Version 0.9.0.1
+ProgramGrpMgr.exe - Version 0.9.0.2
 
 English description at the end of french description
 

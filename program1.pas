@@ -170,7 +170,6 @@ type
     MnuRepImageStr: String;
     OldConfig: Boolean;
     Version: String;
-    //ImgSavDisabled: TBitmap;
     cache: Boolean;
     use64bitcaption: string;
     BkGndPicture: Tpicture;
@@ -194,7 +193,9 @@ type
     procedure EnumerateResourceNames(Instance: THandle; var list: TStringList);
     procedure GetIconRes(filename: string; index:integer; var Ico: TIcon);
     procedure WMActivate(var AMessage: TLMActivate); message LM_ACTIVATE;
-    procedure ApplicationDeactivate(Sender: TObject);
+    procedure OnDeactivate(Sender: TObject);
+    procedure OnEndSession(Sender: TObject);
+    procedure OnQueryendSession(var Cancel: Boolean);
   public
 
   end;
@@ -203,7 +204,7 @@ type
    // Message sent to the form by the update function
    WM_INFO_UPDATE = WM_USER + 101;
    WP_NewVersion = 15;
-   // Message sent to a listview to set the sapce between icons
+   // Message sent to a listview to set the space between icons
    LVM_SETICONSPACING =  LVM_FIRST+ 53;
 
 
@@ -229,21 +230,38 @@ implementation
 
 //
 // Windows Callback function to intercept windows messages
-// WM_QUERYENDSESSION
+
 // WM_INFO_UPDATE  set by update dialog
 //
 function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam; lParam: LParam):LRESULT; stdcall;
 var
-  reg: TRegistry;
+  //reg: TRegistry;
   s: string;
   CurVer, NewVer: Int64;
   NoCheckVersion: Boolean;
   RunRegKeyVal, RunRegKeySz: string;
 begin
-
-   if uMsg=WM_QUERYENDSESSION then
+{ if uMsg=WM_ENDSESSION then
   begin
-    if not FProgram.Settings.StartWin then
+        if not FProgram.Settings.StartWin then
+    begin
+      reg := TRegistry.Create;
+      reg.RootKey := HKEY_CURRENT_USER;
+      reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\RunOnce', True) ;
+      //Voir Sartwin
+      RunRegKeyVal:= FProgram.ProgName+'_'+FProgram.Settings.GroupName;
+      RunRegKeySz:= '"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName;
+      reg.WriteString(RunRegKeyVal, RunRegKeySz) ;
+      reg.CloseKey;
+      reg.free;
+      //FProgram.SaveConfig(FProgram.Settings.GroupName, FProgram.StateChanged);
+      Application.ProcessMessages;
+    end;
+      FProgram.Close;
+  end;}
+{   if uMsg=WM_QUERYENDSESSION then
+  begin
+   if not FProgram.Settings.StartWin then
     begin
       reg := TRegistry.Create;
       reg.RootKey := HKEY_CURRENT_USER;
@@ -257,7 +275,7 @@ begin
       FProgram.SaveConfig(FProgram.Settings.GroupName, FProgram.StateChanged);
       Application.ProcessMessages;
     end;
-  end;
+  end;   }
     // la forme de recherche de mise à jour a envoyé un message
   if uMsg = WM_INFO_UPDATE then
   case wParam of
@@ -310,9 +328,40 @@ end;
 
 // Slower than above...
 
-procedure TFProgram.ApplicationDeactivate(Sender: TObject);
+procedure TFProgram.OnDeactivate(Sender: TObject);
 begin
   //Listview1.Invalidate ;
+end;
+
+procedure TFProgram.OnEndSession(Sender: TObject);
+var
+  reg:TRegistry;
+  s: string;
+  CurVer, NewVer: Int64;
+  NoCheckVersion: Boolean;
+  RunRegKeyVal, RunRegKeySz: string;
+begin
+  if not FProgram.Settings.StartWin then
+  begin
+    reg := TRegistry.Create;
+    reg.RootKey := HKEY_CURRENT_USER;
+    reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\RunOnce', True) ;
+    //Voir Sartwin
+    RunRegKeyVal:= FProgram.ProgName+'_'+FProgram.Settings.GroupName;
+    RunRegKeySz:= '"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName;
+    reg.WriteString(RunRegKeyVal, RunRegKeySz) ;
+    reg.CloseKey;
+    reg.free;
+    //FProgram.SaveConfig(FProgram.Settings.GroupName, FProgram.StateChanged);
+    Application.ProcessMessages;
+  end;
+  Close;
+end;
+
+procedure TFProgram.OnQueryendSession(var Cancel: Boolean);
+begin
+  //do something
+Application.ProcessMessages;
 end;
 
 // retrieve command line parameters
@@ -355,7 +404,9 @@ var
   aPath : Array[0..MaxPathLen] of Char; //Allocate memory
 begin
   inherited;
-  //Application.OnDeactivate := @ApplicationDeactivate;
+    Application.OnEndSession := @OnEndSession;
+    Application.OnQueryEndSession := @OnQueryendSession;
+  //Application.OnDeactivate := @OnDeactivate;
   EnumWindows(@EnumWindowsProc,0);
   // Instanciate windows callback
   PrevWndProc:={%H-}Windows.WNDPROC(SetWindowLongPtr(Self.Handle,GWL_WNDPROC,{%H-}PtrInt(@WndCallback)));

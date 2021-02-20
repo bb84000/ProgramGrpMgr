@@ -223,3 +223,6 @@ Version 0.9.0.1 - 13/02/2021
 - Modification de la routine de modification des préférences du style de texte
 - Suppression des boutons d'ajout et suppression d'image de fond
 
+Version 0.9.0.2 - 20/02/2021
+- Modification des fonctions de traitement des messages de fermeture de session
+
