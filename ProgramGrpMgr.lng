@@ -60,14 +60,22 @@ FSaveCfg.CBXShortCut.Caption= Place a shortcut on the desktop
 FSaveCfg.LGrpIcon.Caption=Group Icon
 FSaveCfg.ImgGrpIcon.Hint=Double click to change icon
 
-UpdateAvailable=New version %s available
-LUpdateCaption=Check update
-LastChkCaption=Last check
-LastUpdateSearch=Last update check
-NoLongerChkUpdates=No longer search update
-NextChkCaption=Next check
+
+
 NoDeleteGroup=Cannot delete current group
 DeleteGrpMsg=You will delete %s group. Are you sure?
+
+;About
+Aboutbox.Caption=About Program Group Manager
+AboutBox.LUpdate.Caption=Search update
+AboutBox.UpdateAvailable=New version %s available. Click to download it
+AboutBox.NoUpdateAvailable=Program Group Manager is up to date.
+NoLongerChkUpdates=No longer check updates
+AboutBox.LastUpdateSearch=Last update check
+AboutBox.UrlProgSite=https://github.com/bb84000/ProgramGrpMgr/wiki
+AboutBox.LWebSite.Caption=Web site home page
+AboutBox.LSourceCode.Caption=Source code Web page
+UpdateAlertBox=Current version: %sA new version %s is available
 
 
 Prefs.Caption=Settings
@@ -167,14 +175,21 @@ FSaveCfg.CBXShortCut.Caption=Placer un raccourci sur le bureau
 FSaveCfg.LGrpIcon.Caption=Icone du groupe
 FSaveCfg.ImgGrpIcon.Hint=Double clic pour changer l'icone
 
-UpdateAvailable=Nouvelle version %s disponible
-LUpdateCaption=Recherche de mise à jour
-LastChkCaption=Dernière vérification
-LastUpdateSearch=Dernière recherche de mise à jour
-NoLongerChkUpdates=Ne plus rechercher les mises à jour
-NextChkCaption=Prochaine vérification
+
 NoDeleteGroup=Impossible de supprimer le groupe en cours
 DeleteGrpMsg=Vous allez effacer le groupe %s. Etes-vous sur ?
+
+;About
+Aboutbox.Caption=A propos du Gestionnaire de groupe de programmes
+AboutBox.LUpdate.Caption=Recherche de mise à jour
+AboutBox.UpdateAvailable=Nouvelle version %s disponible. Cliquer pour la télécharger
+AboutBox.NoUpdateAvailable=Le Gestionnaire de groupe de programmes est à jour.
+AboutBox.LastUpdateSearch=Dernière recherche de mise à jour
+AboutBox.UrlProgSite=https://github.com/bb84000/ProgramGrpMgr/wiki/Accueil
+AboutBox.LWebSite.Caption=Page d'accueil du site Web
+NoLongerChkUpdates=Ne plus rechercher les mises à jour
+AboutBox.LSourceCode.Caption=Page Web du code source
+UpdateAlertBox=Current version: %sUne nouvelle version %s est disponible
 
 Prefs.Caption=Préférences
 Prefs.CBStartWin.Caption=Exécuter au démarrage de Windows

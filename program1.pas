@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - february 2021
+// bb - sdtp - march 2021
 //******************************************************************************
 unit program1;
 
@@ -12,8 +12,8 @@ uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   ComCtrls, Buttons, StdCtrls, CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM,
   laz2_XMLRead, laz2_XMLWrite, files1, Registry, LCLIntf, Menus, ExtDlgs,
-  ShellAPI, About, SaveCfg1, prefs1, property1, inifiles, chknewver, LoadGroup1,
-  LoadConf1, Config1, lazbbosversion, lazbbutils, lmessages;
+  ShellAPI, SaveCfg1, prefs1, property1, lazbbinifiles, LoadGroup1,
+  LoadConf1, Config1, lazbbosversion, lazbbutils, lmessages, lazbbaboutupdate;
 
 type
 
@@ -144,14 +144,15 @@ type
     AppState : Integer;
     SMnuMaskBars, SMnuShowBars: String;
     langue: Integer;
-    LangFile: TiniFile;
+    LangFile: TBbiniFile;
+    IniFile: TBbInifile;
     LangNums: TStringList;
     CurLang: Integer;
     CompileDateTime: TDateTime;
     IconDefFile: String;
     SystemRoot: String;
     ShortCutName: String;
-    WinVersion: TOSInfo;//TWinVersion;
+    WinVersion: TOSInfo;
     YesBtn, NoBtn, CancelBtn: String;
     ExecName, ExecPath: String;
     FPropertyCaption: string;
@@ -161,9 +162,7 @@ type
     FMinWidth, FminHeight : Integer;
     BarsHeight: Integer;
     HideBarsHeight, ShowBarsheight: Integer;
-    UpdateAvailable, NoLongerChkUpdates: String;
-    LUpdateCaption, UpdateURL, ChkVerURL: String;
-    LastUpdateSearch, LastChkCaption, NextChkCaption: String;
+    NoLongerChkUpdates: String;
     CheckVerChanged: Boolean;
     NoDeleteGroup, DeleteGrpMsg: String;
     MnuAddImageStr: String;
@@ -173,6 +172,8 @@ type
     cache: Boolean;
     use64bitcaption: string;
     BkGndPicture: Tpicture;
+    sCannotGetNewVerList: String;
+    sNoLongerChkUpdates: String;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -188,7 +189,6 @@ type
     procedure ModLangue;
     function ClosestItem(pt: Tpoint; ptArr:array of Tpoint): TlistItem;
     function HidinTaskBar (enable: Boolean): boolean;
-    procedure ChkVersion;
     function ReadFolder(strPath: string; Directory: Bool): Integer;
     procedure EnumerateResourceNames(Instance: THandle; var list: TStringList);
     procedure GetIconRes(filename: string; index:integer; var Ico: TIcon);
@@ -196,27 +196,22 @@ type
     procedure OnDeactivate(Sender: TObject);
     procedure OnEndSession(Sender: TObject);
     procedure OnQueryendSession(var Cancel: Boolean);
+    procedure CheckUpdate;
   public
 
   end;
 
  const
-   // Message sent to the form by the update function
-   WM_INFO_UPDATE = WM_USER + 101;
-   WP_NewVersion = 15;
    // Message sent to a listview to set the space between icons
    LVM_SETICONSPACING =  LVM_FIRST+ 53;
-
 
 var
   FProgram: TFProgram;
   PrevWndProc: WNDPROC;
-
-  // Windows funcrions declarations
+  // Windows functions declarations
   PrivateExtractIcons: function(lpszFile: PChar; nIconIndex, cxIcon, cyIcon: integer;
                                   phicon: PHANDLE; piconid: PDWORD; nicon, flags: DWORD):
                                   DWORD stdcall;
-
   SHDefExtractIcon: function (pszIconFile:PChar; iIndex:Longint; uFlags:UINT; var phiconLarge:THandle; var phiconSmall:Thandle;
                               nIconSize:UINT):HRESULT; stdcall;
 
@@ -227,82 +222,6 @@ implementation
 {$R *.lfm}
 
 { TFProgram }
-
-//
-// Windows Callback function to intercept windows messages
-
-// WM_INFO_UPDATE  set by update dialog
-//
-function WndCallback(Ahwnd: HWND; uMsg: UINT; wParam: WParam; lParam: LParam):LRESULT; stdcall;
-var
-  //reg: TRegistry;
-  s: string;
-  CurVer, NewVer: Int64;
-  NoCheckVersion: Boolean;
-  RunRegKeyVal, RunRegKeySz: string;
-begin
-{ if uMsg=WM_ENDSESSION then
-  begin
-        if not FProgram.Settings.StartWin then
-    begin
-      reg := TRegistry.Create;
-      reg.RootKey := HKEY_CURRENT_USER;
-      reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\RunOnce', True) ;
-      //Voir Sartwin
-      RunRegKeyVal:= FProgram.ProgName+'_'+FProgram.Settings.GroupName;
-      RunRegKeySz:= '"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName;
-      reg.WriteString(RunRegKeyVal, RunRegKeySz) ;
-      reg.CloseKey;
-      reg.free;
-      //FProgram.SaveConfig(FProgram.Settings.GroupName, FProgram.StateChanged);
-      Application.ProcessMessages;
-    end;
-      FProgram.Close;
-  end;}
-{   if uMsg=WM_QUERYENDSESSION then
-  begin
-   if not FProgram.Settings.StartWin then
-    begin
-      reg := TRegistry.Create;
-      reg.RootKey := HKEY_CURRENT_USER;
-      reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\RunOnce', True) ;
-      //Voir Sartwin
-      RunRegKeyVal:= FProgram.ProgName+'_'+FProgram.Settings.GroupName;
-      RunRegKeySz:= '"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName;
-      reg.WriteString(RunRegKeyVal, RunRegKeySz) ;
-      reg.CloseKey;
-      reg.free;
-      FProgram.SaveConfig(FProgram.Settings.GroupName, FProgram.StateChanged);
-      Application.ProcessMessages;
-    end;
-  end;   }
-    // la forme de recherche de mise à jour a envoyé un message
-  if uMsg = WM_INFO_UPDATE then
-  case wParam of
-      WP_NewVersion:
-        begin
-          s:= string(lParam);
-          if length(s) > 0 then
-          begin
-            CurVer:= VersionToInt(Fprogram.version);
-            NewVer:= VersionToInt(s);
-            if NewVer > CurVer then
-            begin
-              AboutBox.LUpdate.Caption:= StringReplace(FProgram.UpdateAvailable, '%s', s, [rfIgnoreCase]);
-              NoCheckVersion:= FProgram.Settings.NoChkNewVer;
-              if AlertDlg(FProgram.Caption, FProgram.UpdateAvailable , ['OK', FProgram.CancelBtn,  FProgram.NoLongerChkUpdates],
-                  NoCheckVersion  , mtError)= mrYesToAll then
-              begin
-                FProgram.SBAboutClick(FChkNewVer);
-                FProgram.Settings.NoChkNewVer:= NoCheckVersion;
-              end;
-            end;
-          end;
-        end;
-    end;
-
-  result:=CallWindowProc(PrevWndProc,Ahwnd, uMsg, WParam, LParam);
-end;
 
 // Enumerate Windows to search a previous instance with the same group name
 function EnumWindowsProc(WHandle: HWND; LParM: LParam): LongBool;StdCall;Export;
@@ -336,9 +255,6 @@ end;
 procedure TFProgram.OnEndSession(Sender: TObject);
 var
   reg:TRegistry;
-  s: string;
-  CurVer, NewVer: Int64;
-  NoCheckVersion: Boolean;
   RunRegKeyVal, RunRegKeySz: string;
 begin
   if not FProgram.Settings.StartWin then
@@ -352,9 +268,9 @@ begin
     reg.WriteString(RunRegKeyVal, RunRegKeySz) ;
     reg.CloseKey;
     reg.free;
-    //FProgram.SaveConfig(FProgram.Settings.GroupName, FProgram.StateChanged);
-    Application.ProcessMessages;
   end;
+  SaveConfig(FProgram.Settings.GroupName, All);
+  Application.ProcessMessages;
   Close;
 end;
 
@@ -408,8 +324,6 @@ begin
     Application.OnQueryEndSession := @OnQueryendSession;
   //Application.OnDeactivate := @OnDeactivate;
   EnumWindows(@EnumWindowsProc,0);
-  // Instanciate windows callback
-  PrevWndProc:={%H-}Windows.WNDPROC(SetWindowLongPtr(Self.Handle,GWL_WNDPROC,{%H-}PtrInt(@WndCallback)));
   // Some things have to be run only on the first form activation
   // so, we set first at true
   Pointer(PrivateExtractIcons) := GetProcAddress(GetModuleHandle('user32.dll'),'PrivateExtractIconsA');
@@ -433,12 +347,12 @@ begin
   ProgName:= 'ProgramGrpMgr';
   LocalizedName:= 'Gestionnaire de Groupe de Programmes';
    // Chargement des chaînes de langue...
-  LangFile:= TIniFile.create(ExecPath+ProgName+'.lng');
+  LangFile:= TBbIniFile.create(ExecPath+ProgName+'.lng');
   LangNums:= TStringList.Create;
   Settings.GroupName:= GetGrpParam;
   ListeChange:= False;
   SettingsChange:= False;
-
+  // Get special folders
   SHGetSpecialFolderPath(0, aPath ,CSIDL_APPDATA,false);
   AppDataPath:= aPath;
   SHGetSpecialFolderPath(0,aPath , CSIDL_DESKTOP,false);
@@ -500,7 +414,6 @@ var
     reg: Tregistry;
 begin
   inherited;
-
   if not first then exit;
   Settings.GroupName:= GetGrpParam;
   // We get Windows Version
@@ -510,7 +423,6 @@ begin
   CropBitmap(SBFolder.Glyph, PMnuFolder.Bitmap, SBFolder.Enabled);
   CropBitmap(SBAddFile.Glyph, PMnuAddFile.Bitmap, SBAddFile.Enabled);
   CropBitmap(ImgMnus, MnuAddBkgndImage.Bitmap, True, 0);
-  //CropBitmap(ImgDel.Picture.Bitmap, MnuDelBkgndImage.Bitmap, False);
   CropBitmap(ImgMnus, MnuDelBkgndImage.Bitmap, False, 1);
   PmnuEnable (PMnuSave, SBSave.Glyph, false);
   CropBitmap(SBPrefs.Glyph, PMnuPrefs.Bitmap, SBPrefs.Enabled);
@@ -526,7 +438,15 @@ begin
   {$IFDEF WIN64}
       OSTarget:= '64 bits';
   {$ENDIF}
+  // Check inifile with URLs, if not present, then use default
+  IniFile:= TBbInifile.Create('ProgramGrpMgr.ini');
+  AboutBox.ChkVerURL := IniFile.ReadString('urls', 'ChkVerURL','https://github.com/bb84000/ProgramGrpMgr/releases/latest');
+  AboutBox.UrlWebsite:= IniFile.ReadString('urls', 'UrlWebSite','https://www.sdtp.com');
+  AboutBox.UrlSourceCode:=IniFile.ReadString('urls', 'UrlSourceCode','https://github.com/bb84000/ProgramGrpMgr');
+  if Assigned(IniFile) then IniFile.free;
   LoadConfig(Settings.GroupName);
+  // In case of program's first use
+  if length(Settings.LastVersion)=0 then Settings.LastVersion:= version;
   // check if desktop context menu enabled and change settings checkbox according.
   reg := TRegistry.Create;
   reg.RootKey := HKEY_CLASSES_ROOT;
@@ -538,6 +458,60 @@ begin
   begin
     ShowMessage(use64bitcaption);
   end;
+  CheckUpdate;
+end;
+
+procedure TFProgram.CheckUpdate;
+var
+  errmsg: string;
+  sNewVer: string;
+  CurVer, NewVer: int64;
+  alertpos: TPosition;
+  alertmsg: string;
+begin
+  //Dernière recherche il y a plus de 1 jour ?
+  errmsg := '';
+  alertmsg:= '';
+  if not visible then alertpos:= poDesktopCenter
+  else alertpos:= poMainFormCenter;
+  if (Trunc(Now)>Trunc(Settings.LastUpdChk)+1) and (not Settings.NoChkNewVer) then
+  begin
+      Settings.LastUpdChk := Trunc(Now);
+     AboutBox.Checked:= true;
+     AboutBox.ErrorMessage:='';
+     //AboutBox.version:= '0.1.0.0' ;
+     sNewVer:= AboutBox.ChkNewVersion;
+     errmsg:= AboutBox.ErrorMessage;
+     if length(sNewVer)=0 then
+     begin
+       if length(errmsg)=0 then alertmsg:= sCannotGetNewVerList
+       else alertmsg:= errmsg;
+       if AlertDlg(Caption,  alertmsg, ['OK', CancelBtn, sNoLongerChkUpdates],
+                    true, mtError, alertpos)= mrYesToAll then Settings.NoChkNewVer:= true;
+        exit;
+     end;
+     NewVer := VersionToInt(sNewVer);
+     // Cannot get new version
+     if NewVer < 0 then exit;
+     CurVer := VersionToInt(AboutBox.version);
+     if NewVer > CurVer then
+     begin
+       Settings.LastVersion:= sNewVer;
+       AboutBox.LUpdate.Caption := Format(AboutBox.sUpdateAvailable, [sNewVer]);
+       AboutBox.NewVersion:= true;
+       AboutBox.ShowModal;
+     end else
+     begin
+       AboutBox.LUpdate.Caption:= AboutBox.sNoUpdateAvailable;
+     end;
+     Settings.LastUpdChk:= now;
+   end else
+   begin
+    if VersionToInt(Settings.LastVersion)>VersionToInt(version) then
+       AboutBox.LUpdate.Caption := Format(AboutBox.sUpdateAvailable, [Settings.LastVersion]) else
+       AboutBox.LUpdate.Caption:= AboutBox.sNoUpdateAvailable;
+   end;
+   AboutBox.LUpdate.Hint:= AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
 end;
 
 procedure TFProgram.FormChangeBounds(Sender: TObject);
@@ -623,7 +597,6 @@ begin
 
  If not FileExists(ConfigFile) then
   begin
-
     If FileExists (PrgMgrAppsData+Settings.GroupName+'.bk0') then
     begin
       RenameFile(PrgMgrAppsData+Settings.GroupName+'.bk0', ConfigFile);
@@ -636,7 +609,6 @@ begin
       SaveConfig(Settings.GroupName, All)
     end;
   end;
-  //    ShowMessage(Settings.GroupName);
   LoadCfgFile(ConfigFile);
   if Settings.GroupName <> GrpName then Settings.GroupName := GrpName;
   // Détermination de la langue
@@ -678,7 +650,6 @@ begin
   except
     BkGndPicture:= nil;
     Settings.BkgrndImage:='';
-     //SBDelPicture.Enabled:= false;
     MnuDelBkGndImage.Enabled:= PMnuEnable (MnuDelBkGndImage, ImgMnus, false, 1);
   end;
   // Taille et position précédentes
@@ -736,20 +707,16 @@ begin
   If not FileExists(Settings.GrpIconFile) then Settings.GrpIconFile:= Application.ExeName;
   Application.Icon.Handle:= ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
   version:= GetVersionInfo.ProductVersion;
-  //Version:= '0.5.0.0';
-  UpdateUrl:= 'http://www.sdtp.com/versions/version.php?program=programgrpmgr&version=';
-  ChkVerURL:= 'https://www.sdtp.com/versions/versions.csv';
-
   // Aboutbox
-  AboutBox.Caption:= 'A propos du Gestionnaire de Groupe de Programmes';
   AboutBox.Image1.Picture.Icon.Handle:= Application.Icon.Handle;
   AboutBox.LProductName.Caption:= GetVersionInfo.ProductName+' ('+OsTarget+')';
   AboutBox.LCopyright.Caption:= GetVersionInfo.CompanyName+' - '+DateTimeToStr(CompileDateTime);
   AboutBox.LVersion.Caption:= 'Version: '+Version;
-  AboutBox.UrlUpdate:= UpdateURl+Version;
-  AboutBox.LUpdate.Caption:= LUpdateCaption;
-  AboutBox.UrlWebsite:=GetVersionInfo.Comments;
-  ChkVersion;
+  //AboutBox.ChkVerURL := 'https://github.com/bb84000/ProgramGrpMgr/releases/latest';
+  //AboutBox.UrlWebsite:= 'https://www.sdtp.com';
+  AboutBox.LUpdate.Hint := AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
+  AboutBox.Version:= Version;
+  AboutBox.ProgName:= ProgName;
   // Dont want to have the same icon handle
   ImgPrgSel.Picture.Icon.Handle:=  ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
   // Pointer to files and settings change
@@ -758,18 +725,6 @@ begin
   Settings.OnStateChange:= @SettingsOnStateChange;
   LVDisplayFiles;
 end;
-
-procedure TFProgram.ChkVersion;
-begin
-  //Dernière recherche il y a plus de 7 jours ?
-  if (Trunc(Now) > Settings.LastUpdChk+7) and (not Settings.NoChkNewVer) then
-  begin
-    Settings.LastUpdChk:= Trunc(Now);
-    FChkNewVer.GetLastVersion (ChkVerURL, 'programgrpmgr', Handle);
-    CheckVerChanged:= true;
-  end;
-end;
-
 
 // Hide the icon in the task bar
 
@@ -827,7 +782,7 @@ var
   FilNamWoExt: String;
   RunRegKeyVal, RunRegKeySz: String;
 begin
-  if OldConfig then Typ:= All;                        // always save to new cvonfig if it is old one
+  if OldConfig then Typ:= All;                        // always save to new config if it is old one
   if (Typ= None) then exit;
   // Current state
   if Settings.IconDisplay < 0 then Settings.IconDisplay:= 3;
@@ -869,6 +824,7 @@ begin
       SettingsNode:= CfgXML.CreateElement('settings');
       Settings.SaveXMLnode(SettingsNode);
       RootNode.Appendchild(SettingsNode);
+      WStateChange:= false;
     end;
     if (Typ = All) then
     begin
@@ -883,8 +839,6 @@ begin
       except
       end;
     end;
-
-
     // On sauvegarde les versions précédentes
     FilNamWoExt:= TrimFileExt(ConfigFile);
     if FileExists (FilNamWoExt+'.bk5')                   // Efface la plus ancienne
@@ -902,9 +856,7 @@ begin
     Reg.RootKey:= HKEY_CURRENT_USER;
     Reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\Run', True);
     // No need to transcode
-    //RunRegKeyVal:= UTF8ToAnsi(ProgName+'_'+Settings.GroupName);
-    //RunRegKeySz:= UTF8ToAnsi('"'+Application.ExeName+'" Grp='+Settings.GroupName);
-    RunRegKeyVal:= ProgName+'_'+Settings.GroupName;
+     RunRegKeyVal:= ProgName+'_'+Settings.GroupName;
     RunRegKeySz:= '"'+Application.ExeName+'" Grp='+Settings.GroupName;
     if Settings.StartWin  then  // Démarrage avec Windows coché
     begin
@@ -916,6 +868,8 @@ begin
       Reg.DeleteValue(RunRegKeyVal);
       Reg.CloseKey;
     end;
+    ListeChange:= false;
+    SettingsChange:= false;
     Reg.Free;
     FreeAndNil(CfgXML);
   end;
@@ -971,19 +925,14 @@ begin
         if FSaveCfg.IconIndex >=0 then Settings.GrpIconIndex:= FSaveCfg.IconIndex;
         CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
                        ShortCutName, Settings.GrpIconFile, Settings.GrpIconIndex);
-
       end;
-      SaveConfig(Settings.GroupName, StateChanged);
+      SaveConfig(Settings.GroupName, All);
     end;
   end else
   begin
- //    ShowMessage (Settings.GroupName);
-
     SaveConfig(Settings.GroupName, StateChanged);
-    ListeChange:= False;
-    SettingsChange:= False;
-    WStateChange:= False;
   end;
+
 end;
 
 
@@ -993,7 +942,6 @@ begin
   SBSave.Enabled:= True;
   PMnuSave.Enabled:= True;
   PMnuEnable(PmnuSave, SBSave.Glyph, true);
-  //LVDisplayFiles;
 end;
 
 procedure TFProgram.SettingsOnChange(sender: TObject);
@@ -1047,7 +995,6 @@ procedure TFProgram.LVDisplayFiles;
 var
   ListItem: TListItem;
   Flag: Integer;
-  //IcoSize: Integer;
   CurIcon: TIcon;
   i: Integer;
   w: Integer;
@@ -1235,7 +1182,7 @@ begin
       Pt.Y:= Y;
       DropItem:= GetItemAt(X,Y);
       // If DropItem = nil then DropItem:=GetNearestItem(Pt, sdAll);
-      // Replaced with own routineDon't work
+      // Replaced with own routine Don't work
       If DropItem = nil then   DropItem:= ClosestItem(Pt, PtArray);
       currentItem := Selected;
       while currentItem <> nil do
@@ -1243,7 +1190,6 @@ begin
         NextItem := GetNextItem(currentItem, sdAll, [lIsSelected]) ;
         ListeFichiers.SortType:= cdcNone;
         if Assigned(dropItem) then  ListeFichiers.DoMove(currentItem.Index, DropItem.Index);
-        //else ListeFichiers.DoMove(currentItem.Index, ListeFichiers.Count-1);
         FreeAndNil(currentItem);
         currentItem := nextItem;
        end;
@@ -1256,7 +1202,6 @@ procedure TFProgram.ListView1DragOver(Sender, Source: TObject; X, Y: Integer;
   State: TDragState; var Accept: Boolean);
 begin
   Accept := (Sender = ListView1);
-  //LVDisplayFiles;
 end;
 
 
@@ -1339,7 +1284,6 @@ var
   SearchRec: TSearchRec;
   FileAttr: Bool;
 begin
-  //ListeFichiers.Reset;
   ZeroMemory(@SearchRec, SizeOf(TSearchRec));
   i := FindFirst(strPath + '*.*', faAnyFile, SearchRec);
   while i = 0 do
@@ -1525,6 +1469,7 @@ begin
         CurLang:= CBLangue.ItemIndex;
         Settings.LangStr:= LangNums[CurLang];
         ModLangue;
+        CheckUpdate;
       end;
       Settings.StartWin:= CBStartWin.Checked;
       Settings.SavSizePos:= CBSavSizePos.Checked;
@@ -1673,11 +1618,31 @@ begin
 end;
 
 procedure TFProgram.SBAboutClick(Sender: TObject);
+var
+    chked: Boolean;
+    alertmsg: String;
 begin
   AboutBox.LastUpdate:= Settings.LastUpdChk;
-  AboutBox.LUpdate.Hint:=  LastUpdateSearch+': '+DateToStr(AboutBox.LastUpdate);
+  chked:= AboutBox.Checked;
+  AboutBox.ErrorMessage:='';
+  //AboutBox.Version:= '0.9.0.0';
   AboutBox.ShowModal;
-   Settings.LastUpdChk:= AboutBox.LastUpdate
+  // If we have checked update and got an error
+  if length(AboutBox.ErrorMessage)>0 then
+  begin
+    alertmsg := AboutBox.ErrorMessage;
+    if AlertDlg(Caption,  alertmsg, ['OK', CancelBtn, NoLongerChkUpdates],
+                    true, mtError)= mrYesToAll then Settings.NoChkNewVer:= true;
+  end;
+  // Truncate date to avoid changes if there is the same day (hh:mm are in the decimal part of the date)
+  if (not chked) and AboutBox.Checked then Settings.LastVersion:= AboutBox.LastVersion;
+  if trunc(AboutBox.LastUpdate) > trunc(Settings.LastUpdChk) then
+  begin
+    Settings.LastUpdChk:= AboutBox.LastUpdate;
+  end;
+
+
+   //Settings.LastUpdChk:= AboutBox.LastUpdate
   //exit;
 end;
 
@@ -2042,15 +2007,28 @@ With LangFile do
    if Settings.HideBars then PMnuHideBars.Caption:= SMnuShowBars
    else PMnuHideBars.Caption:= SMnuMaskBars;
    ShortCutName:= ReadString(LangStr, 'ShortCutName', 'Gestionnaire de groupe de programmes');
-
    DeleteOKMsg:= ReadString(LangStr, 'DeleteOKMsg', 'Vous allez effacer %u élément%s. Etes-vous sur ?');
 
-   UpdateAvailable:=ReadString(LangStr, 'UpdateAvailable', 'Nouvelle version %s disponible');
-   LUpdateCaption:= ReadString(LangStr, 'LUpdateCaption', 'Recherche de mise à jour');
-   LastChkCaption:= ReadString(LangStr, 'LastChkCaption', 'Dernière vérification');
-   LastUpdateSearch:= ReadString(LangStr, 'LastUpdateSearch', 'Dernière recherche de mise à jour');
+   sCannotGetNewVerList:=ReadString(LangStr,'CannotGetNewVerList','Liste des nouvelles versions indisponible');
+   sNoLongerChkUpdates:=ReadString(LangStr,'NoLongerChkUpdates','Ne plus rechercher les mises à jour');
+
+    // About
+    if not AboutBox.checked then AboutBox.LUpdate.Caption:=ReadString(LangStr,'AboutBox.LUpdate.Caption',AboutBox.LUpdate.Caption) else
+    begin
+      if AboutBox.NewVersion then AboutBox.LUpdate.Caption:= Format(AboutBox.sUpdateAvailable, [AboutBox.LastVersion])
+      else AboutBox.LUpdate.Caption:= AboutBox.sNoUpdateAvailable;
+    end;
+    AboutBox.sLastUpdateSearch:=ReadString(LangStr,'AboutBox.LastUpdateSearch','Dernière recherche de mise à jour');
+    AboutBox.sUpdateAvailable:=ReadString(LangStr,'AboutBox.UpdateAvailable','Nouvelle version %s disponible');
+    AboutBox.sNoUpdateAvailable:=ReadString(LangStr,'AboutBox.NoUpdateAvailable','Le gestionnaire de programmes est à jour');
+    Aboutbox.Caption:=ReadString(LangStr,'Aboutbox.Caption','A propos du Gestionnaire de programmes');
+    AboutBox.LProductName.Caption:= caption;
+    AboutBox.UrlProgSite:= ReadString(LangStr,'AboutBox.UrlProgSite','https://github.com/bb84000/ProgramGrpMgr/wiki/Accueil');
+    AboutBox.LWebSite.Caption:= ReadString(LangStr,'AboutBox.LWebSite.Caption', AboutBox.LWebSite.Caption);
+    AboutBox.LSourceCode.Caption:= ReadString(LangStr,'AboutBox.LSourceCode.Caption', AboutBox.LSourceCode.Caption);
+
    NoLongerChkUpdates:= ReadString(LangStr, 'NoLongerChkUpdates', 'Ne plus rechercher les mises à jour');
-   NextChkCaption:= ReadString(LangStr, 'NextChkCaption', 'Prochaine vérification');
+   //NextChkCaption:= ReadString(LangStr, 'NextChkCaption', 'Prochaine vérification');
    NoDeleteGroup:= ReadString(LangStr, 'NoDeleteGroup', 'Impossible de supprimer le groupe en cours');
    DeleteGrpMsg:= ReadString(LangStr, 'DeleteGrpMsg', 'Vous allez effacer le groupe %s. Etes-vous sur ?');
 
@@ -2064,7 +2042,7 @@ With LangFile do
    FSaveCfg.LGrpIcon.Caption:= ReadString(LangStr, 'FSaveCfg.LGrpIcon.Caption', FSaveCfg.LGrpIcon.Caption);
    FSaveCfg.ImgGrpIcon.Hint:= ReadString(LangStr, 'FSaveCfg.ImgGrpIcon.Hint', FSaveCfg.ImgGrpIcon.Hint);
    FSaveCfg.BtnCancel.Caption:= CancelBtn;
-   AboutBox.Caption:= SBAbout.Hint;
+   //AboutBox.Caption:= SBAbout.Hint;
 
    use64bitcaption:= ReadString(LangStr, 'use64bitcaption', 'Utilisez la version 64 bits de ce programme');
 

@@ -1,6 +1,6 @@
 //******************************************************************************
 // Settings data unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - february 2021
+// bb - sdtp - march 2021
 //******************************************************************************
 
 unit Config1;
@@ -26,6 +26,7 @@ type
     FIconSort: Integer;
     FLastUpdChk: Tdatetime;
     FNoChkNewVer: Boolean;
+    FLastVersion: String;
     FStartWin: Boolean;
     FMiniInTray: Boolean;
     FHideInTaskBar: Boolean;
@@ -53,6 +54,7 @@ type
     procedure SetIconSort (i: integer);
     procedure SetLastUpdChk (dt: TDateTime);
     procedure SetNoChkNewVer (b: Boolean);
+    procedure SetLastVersion(s: string);
     procedure SetStartWin (b: Boolean);
     procedure SetMiniInTray (b: Boolean);
     procedure SetHideInTaskBar (b: Boolean);
@@ -80,6 +82,7 @@ type
     property IconSort: Integer read FIconSort write SetIconSort default 0;
     property LastUpdChk: Tdatetime read FLastUpdChk write SetLastUpdChk;
     property NoChkNewVer: Boolean read FNoChkNewVer write SetNoChkNewVer;
+    property LastVersion: String read FLastVersion write SetLastVersion;
     property StartWin: Boolean read FStartWin write SetStartWin;
     property MiniInTray: Boolean read FMiniInTray write SetMiniInTray;
     property HideInTaskBar: Boolean read FHideInTaskBar write SetHideInTaskBar;
@@ -171,8 +174,18 @@ begin
    if FLastUpdChk <> dt then
    begin
      FLastUpdChk:= dt;
-     if Assigned(FOnChange) then FOnChange(Self);
+     if Assigned(FOnStateChange) then FOnStateChange(Self);
    end;
+end;
+
+
+procedure TConfig.SetLastVersion(s: string);
+begin
+  if FLastVersion <> s then
+  begin
+    FLastVersion:= s;
+    if Assigned(FOnChange) then FOnChange(Self);
+  end;
 end;
 
 procedure TConfig.SetNoChkNewVer(b: Boolean);
@@ -309,6 +322,7 @@ begin
     TDOMElement(iNode).SetAttribute ('wstate', FWState);
     TDOMElement(iNode).SetAttribute ('nochknewver', IntToStr(Integer(FNoChkNewVer)));
     TDOMElement(iNode).SetAttribute ('lastupdchk', DateToStr(FLastUpdChk));
+    TDOMElement(iNode).SetAttribute ('lastversion', FLastVersion);
     TDOMElement(iNode).SetAttribute ('startwin', IntToStr(Integer(FStartWin)));
     TDOMElement(iNode).SetAttribute ('desktopmnu', IntToStr(Integer(FDeskTopMnu)));
     TDOMElement(iNode).SetAttribute ('langstr', FLangStr);
@@ -364,6 +378,7 @@ begin
     FWState:= TDOMElement(iNode).GetAttribute('wstate');
     FNoChkNewVer:= Boolean(readIntValue(iNode, 'nochknewver')); //StrToInt(TDOMElement(iNode).GetAttribute('nochknewver')));
     FLastUpdChk:= readDateValue(iNode, 'lastupdchk');  //StrToDate(TDOMElement(iNode).GetAttribute('lastupdchk'));
+    FLastVersion:= TDOMElement(iNode).GetAttribute('lastversion');
     FStartWin:= Boolean(readIntValue(iNode, 'startwin')); //StrToInt(TDOMElement(iNode).GetAttribute('startwin')));
     FDeskTopMnu:= Boolean(readIntValue(iNode, 'desktopmnu'));
     FLangStr:= TDOMElement(iNode).GetAttribute('langstr');
