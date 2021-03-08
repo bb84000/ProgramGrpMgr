@@ -36,13 +36,14 @@ PMnuRunAs.Caption=Run as administrator
 PMnuProps.Caption=Properties
 PMnuDelete.Caption=Delete
 PMnuQuit.Caption=Quit
-
+PMnuCopy.Caption=Copy the item
+PMnuPaste.Caption=Paste an item
 PMnuMaskBars=Mask the buttons and status bars
 PMnuShowBars=Show the buttons and status bars
 
 MnuAddImageStr=Add a background image
 MnuRepImageStr=Replace the background image
-MnuDelBkGndImage.Caption=Delete the background image
+PMnuDelBkGndImage.Caption=Delete the background image
 
 
 PTrayMnuRestore.Caption=Restore
@@ -151,7 +152,8 @@ PMnuRunAs.Caption=Exécuter comme administrateur
 PMnuProps.Caption=Propriétés
 PMnuDelete.Caption=Supprimer
 PMnuQuit.Caption=Quitter
-
+PMnuCopy.Caption=Copier cet élément
+PMnuPaste.Caption=Coller un élément
 PMnuMaskBars=Masquer les barres de boutons et de statut
 PMnuShowBars=Afficher les barres de boutons et de statut
 

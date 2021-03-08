@@ -229,6 +229,12 @@ Version 0.9.0.2 - 20/02/2021
 Version 0.9.1.0 - 01/03/2021
 - Nouveau mécanisme de recherche de nouvelle version utilisant la page GitHub
 - Ajout de l'adresse du site hébergeant le code source dans la boîte A propos
-- Ajout d'un fichier ini pour els urls de la boîte A propos. Peut être utilisé 
+- Ajout d'un fichier ini pour les urls de la boîte A propos. Peut être utilisé
   en cas de changements de dernière minute
 - Modifié les actions lors de la fermeture forcée à la déconnexion de Windows
+
+Version 0.9.1.1 - 08/03/2021
+- Test de mise à jour appelé de manière asynchrone
+- Ajout de copier/coller d'un élément de programme interne ou vers une autre instance
+  du Gestionnaire
+

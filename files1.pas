@@ -10,7 +10,7 @@ unit files1;
 interface
 
 uses
-  Classes, SysUtils, dialogs, laz2_DOM , laz2_XMLRead, bbutils, windows;
+  Classes, SysUtils, dialogs, laz2_DOM , laz2_XMLRead, bbutils, windows, ClipBrd;
 Type
   TValues = (aString, aInteger, aDate, aboolean);
 
@@ -43,8 +43,6 @@ Type
     Duplicates : TDuplicates;
     procedure Delete (const i : Integer);
     procedure DoMove (CurIndex,NewIndex:Integer);
-
-
     procedure DeleteMulti (j, k : Integer);
     procedure Reset;
     procedure AddFile(Fichier : TFichier);
@@ -52,6 +50,8 @@ Type
     procedure ModifyField (const i: integer; field: string; value: variant);
     function GetItem(const i: Integer): TFichier;
     procedure DoSort;
+    procedure CopyToClipboard(Fichier:TFichier);
+    function PasteFromClipboard: Boolean;
     function SaveToXMLnode(iNode: TDOMNode): Boolean;
     function ReadXMLNode(iNode: TDOMNode): Boolean;
     //procedure Move(CurIndex,NewIndex:Integer));
@@ -221,6 +221,64 @@ begin
  for i := 0 to Count-1 do
   if Items[i] <> nil then Items[i]:= nil;
  Clear;
+end;
+
+procedure TFichierList.CopyToClipboard(Fichier:TFichier);
+var
+   itemtext: String;
+begin
+  // Signature on first line
+  itemtext:= '#PrgGrpItem#'+LineEnding;
+  itemtext:= itemtext+Fichier.Name+LineEnding;
+  itemtext:= itemtext+Fichier.Path+LineEnding;
+  itemtext:= itemtext+Fichier.DisplayName+LineEnding;
+  itemtext:= itemtext+Fichier.Params+LineEnding;
+  itemtext:= itemtext+Fichier.StartPath+LineEnding;
+  itemtext:= itemtext+IntToStr(Fichier.Size)+LineEnding;
+  itemtext:= itemtext+Fichier.TypeName+LineEnding;
+  itemtext:= itemtext+DateTimeToStr(Fichier.Date)+LineEnding;
+  itemtext:= itemtext+Fichier.IconFile+LineEnding;
+  itemtext:= itemtext+IntToStr(Fichier.IconIndex)+LineEnding;
+  itemtext:= itemtext+IntToStr(Integer(Fichier.OldIcon))+LineEnding;
+  itemtext:= itemtext+Fichier.Description;          // Last property, can have several lines
+  Clipboard.AsText:= itemtext;
+end;
+
+function TFichierList.PasteFromClipboard: Boolean;
+var
+  sl: Tstringlist;
+  nf: TFichier;
+  i: integer;
+begin
+  nf:= Default(TFichier);
+  sl:= TStringList.create;
+  try
+    sl.Text:= Clipboard.AsText;
+  except
+    result:= false;
+    exit;
+  end;
+  if sl.Strings[0]= '#PrgGrpItem#' then  // It is a proper item
+  try
+    result:= true;
+    nf.Name:= sl.Strings[1];
+    nf.Path:= sl.Strings[2];
+    nf.DisplayName:= sl.Strings[3];
+    nf.Params:= sl.Strings[4];
+    nf.StartPath:= sl.Strings[5];
+    nf.Size:= StrToInt(sl.Strings[6]);
+    nf.TypeName:= sl.Strings[7];
+    nf.Date:= StrToDateTime(sl.Strings[8]);
+    nf.IconFile:= sl.Strings[9];
+    nf.IconIndex:= StrToInt(sl.Strings[10]);
+    nf.OldIcon:= Bool(StrToInt(sl.Strings[11]));
+    if sl.count > 12 then
+    for i:= 12 to sl.count-1 do nf.Description:= nf.Description+sl.strings[i]+LineEnding;
+    AddFile(nf);
+  except
+  end;
+
+  if assigned (sl) then sl.free;
 end;
 
 function TFichierList.SaveToXMLnode(iNode: TDOMNode): Boolean;

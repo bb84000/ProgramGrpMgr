@@ -13,10 +13,17 @@ uses
   ComCtrls, Buttons, StdCtrls, CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM,
   laz2_XMLRead, laz2_XMLWrite, files1, Registry, LCLIntf, Menus, ExtDlgs,
   ShellAPI, SaveCfg1, prefs1, property1, lazbbinifiles, LoadGroup1,
-  LoadConf1, Config1, lazbbosversion, lazbbutils, lmessages, lazbbaboutupdate;
+  LoadConf1, Config1, lazbbosversion, lazbbutils, lmessages, lazbbaboutupdate, Clipbrd;
 
 type
+  { int64 or longint var type  }
 
+  {$IFDEF CPU32}
+    iDays= LongInt;
+  {$ENDIF}
+  {$IFDEF CPU64}
+    iDays= Int64;
+  {$ENDIF}
   { TFProgram }
 
   SaveType = (None, State, All);
@@ -30,9 +37,11 @@ type
     ImgPrgSel: TImage;
     LPrgSel: TLabel;
     ListView1: TListView;
+    PMnuAddBkgndImg: TMenuItem;
+    PMnuPaste: TMenuItem;
+    PMnuCopy: TMenuItem;
     N3: TMenuItem;
-    MnuDelBkGndImage: TMenuItem;
-    MnuAddBkgndImage: TMenuItem;
+    PMnuDelBkgndImg: TMenuItem;
     N41: TMenuItem;
     OPictDlg: TOpenPictureDialog;
     PTrayMnuQuit: TMenuItem;
@@ -76,7 +85,6 @@ type
     SBPrefs: TSpeedButton;
     SBSave: TSpeedButton;
     TrayProgman: TTrayIcon;
-
     procedure CBDisplayChange(Sender: TObject);
     procedure CBSortChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
@@ -106,9 +114,12 @@ type
     procedure ListView1SelectItem(Sender: TObject; Item: TListItem;
       Selected: Boolean);
     procedure LVPMnuPopup(Sender: TObject);
-    procedure MnuDelBkGndImageClick(Sender: TObject);
+    procedure PMnuAddBkgndImgClick(Sender: TObject);
+    procedure PMnuCopyClick(Sender: TObject);
+    procedure PMnuDelBkgndImgClick(Sender: TObject);
     procedure PMnuDeleteClick(Sender: TObject);
     procedure PMnuHideBarsClick(Sender: TObject);
+    procedure PMnuPasteClick(Sender: TObject);
     procedure PMnuPropsClick(Sender: TObject);
     procedure PMnuRunClick(Sender: TObject);
     procedure PnlTopResize(Sender: TObject);
@@ -120,7 +131,6 @@ type
     procedure SBFolderClick(Sender: TObject);
     procedure SBGroupClick(Sender: TObject);
     procedure SBLoadConfClick(Sender: TObject);
-    procedure MnuAddBkgndImageClick(Sender: TObject);
     procedure SBPrefsClick(Sender: TObject);
     procedure SBQuitClick(Sender: TObject);
     procedure SBSaveClick(Sender: TObject);
@@ -174,6 +184,7 @@ type
     BkGndPicture: Tpicture;
     sCannotGetNewVerList: String;
     sNoLongerChkUpdates: String;
+    ChkVerInterval: Int64;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -196,7 +207,7 @@ type
     procedure OnDeactivate(Sender: TObject);
     procedure OnEndSession(Sender: TObject);
     procedure OnQueryendSession(var Cancel: Boolean);
-    procedure CheckUpdate;
+    procedure CheckUpdate(days: iDays);
   public
 
   end;
@@ -227,14 +238,15 @@ implementation
 function EnumWindowsProc(WHandle: HWND; LParM: LParam): LongBool;StdCall;Export;
 var
   Title, ClassName:array[0..128] of char;
-
 begin
- Result:=True;
- GetWindowText(wHandle, Title,128);
- GetClassName(wHandle, ClassName,128);
- if IsWindowVisible(wHandle) then
- begin
-   if (AnsiToUTF8(Title)=FProgram.GetGrpParam) and (ClassName='Window') then Application.Terminate;
+  Title:= '';
+  ClassName:= '';
+  Result:=True;
+  GetWindowText(wHandle, Title,128);
+  GetClassName(wHandle, ClassName,128);
+  if IsWindowVisible(wHandle) then
+  begin
+    if (AnsiToUTF8(Title)=FProgram.GetGrpParam) and (ClassName='Window') then Application.Terminate;
   end;
 end;
 
@@ -406,6 +418,10 @@ begin
 
 end;
 
+procedure TFProgram.PMnuPasteClick(Sender: TObject);
+begin
+  if ListeFichiers.PasteFromClipboard then LVDisplayFiles;
+end;
 
 // Form activation
 
@@ -422,8 +438,10 @@ begin
   CropBitmap(SBGroup.Glyph, PmnuGroup.Bitmap, SBGroup.Enabled);
   CropBitmap(SBFolder.Glyph, PMnuFolder.Bitmap, SBFolder.Enabled);
   CropBitmap(SBAddFile.Glyph, PMnuAddFile.Bitmap, SBAddFile.Enabled);
-  CropBitmap(ImgMnus, MnuAddBkgndImage.Bitmap, True, 0);
-  CropBitmap(ImgMnus, MnuDelBkgndImage.Bitmap, False, 1);
+  CropBitmap(ImgMnus, PMnuAddBkgndImg.Bitmap, True, 0);
+  CropBitmap(ImgMnus, PMnuDelBkgndImg.Bitmap, False, 1);
+  CropBitmap(ImgMnus, PMnuCopy.Bitmap, True,2);
+  CropBitmap(ImgMnus, PMnuPaste.Bitmap, false,3);
   PmnuEnable (PMnuSave, SBSave.Glyph, false);
   CropBitmap(SBPrefs.Glyph, PMnuPrefs.Bitmap, SBPrefs.Enabled);
   CropBitmap(SBLoadConf.Glyph, PMnuLoadConf.Bitmap, SBLoadConf.Enabled);
@@ -432,17 +450,18 @@ begin
   CropBitmap(SBAbout.Glyph, PTrayMnuAbout.Bitmap, SBAbout.Enabled);
   CropBitmap(SBQuit.Glyph, PTrayMnuQuit.Bitmap, SBQuit.Enabled);
   BarsHeight:= ClientHeight-ListView1.Height;
-  {$IFDEF WIN32}
-      OSTarget:= '32 bits';
+  {$IFDEF CPU32}
+     OSTarget := '32 bits';
   {$ENDIF}
-  {$IFDEF WIN64}
-      OSTarget:= '64 bits';
+  {$IFDEF CPU64}
+     OSTarget := '64 bits';
   {$ENDIF}
   // Check inifile with URLs, if not present, then use default
   IniFile:= TBbInifile.Create('ProgramGrpMgr.ini');
   AboutBox.ChkVerURL := IniFile.ReadString('urls', 'ChkVerURL','https://github.com/bb84000/ProgramGrpMgr/releases/latest');
   AboutBox.UrlWebsite:= IniFile.ReadString('urls', 'UrlWebSite','https://www.sdtp.com');
   AboutBox.UrlSourceCode:=IniFile.ReadString('urls', 'UrlSourceCode','https://github.com/bb84000/ProgramGrpMgr');
+  ChkVerInterval:= IniFile.ReadInt64('urls', 'ChkVerInterval', 3);
   if Assigned(IniFile) then IniFile.free;
   LoadConfig(Settings.GroupName);
   // In case of program's first use
@@ -458,10 +477,13 @@ begin
   begin
     ShowMessage(use64bitcaption);
   end;
-  CheckUpdate;
+  Application.QueueAsyncCall(@CheckUpdate, ChkVerInterval);       // async call to let icons loading
+  //CheckUpdate(0);
 end;
 
-procedure TFProgram.CheckUpdate;
+// Parameter days defines the updates interval in days
+
+procedure TFProgram.CheckUpdate(days: iDays);
 var
   errmsg: string;
   sNewVer: string;
@@ -469,14 +491,14 @@ var
   alertpos: TPosition;
   alertmsg: string;
 begin
-  //Dernière recherche il y a plus de 1 jour ?
+  //Dernière recherche il y a "days" jours ou plus ?
   errmsg := '';
   alertmsg:= '';
   if not visible then alertpos:= poDesktopCenter
   else alertpos:= poMainFormCenter;
-  if (Trunc(Now)>Trunc(Settings.LastUpdChk)+1) and (not Settings.NoChkNewVer) then
+  if (Trunc(Now)>= Trunc(Settings.LastUpdChk)+days) and (not Settings.NoChkNewVer) then
   begin
-      Settings.LastUpdChk := Trunc(Now);
+     Settings.LastUpdChk := Trunc(Now);
      AboutBox.Checked:= true;
      AboutBox.ErrorMessage:='';
      //AboutBox.version:= '0.1.0.0' ;
@@ -639,18 +661,18 @@ begin
   // text size
   ListView1.Font.Size:= Settings.TextSize;
   // Background Image
-  MnuAddBkgndImage.Caption:= MnuAddImageStr;
+  PMnuAddBkgndImg.Caption:= MnuAddImageStr;
   if fileExists (Settings.BkgrndImage) then
   try
     BkGndPicture:= TPicture.Create;
     BkGndPicture.LoadFromFile(Settings.BkgrndImage);
     //SBDelPicture.Enabled:= true;
-    MnuDelBkGndImage.Enabled:= PMnuEnable (MnuDelBkGndImage, ImgMnus, true, 1);
-    MnuAddBkgndImage.Caption:= MnuRepImageStr;
+    PMnuDelBkgndImg.Enabled:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, true, 1);
+    PMnuAddBkgndImg.Caption:= MnuRepImageStr;
   except
     BkGndPicture:= nil;
     Settings.BkgrndImage:='';
-    MnuDelBkGndImage.Enabled:= PMnuEnable (MnuDelBkGndImage, ImgMnus, false, 1);
+    PMnuDelBkgndImg.Enabled:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, false, 1);
   end;
   // Taille et position précédentes
   if Settings.SavSizePos then
@@ -1469,7 +1491,8 @@ begin
         CurLang:= CBLangue.ItemIndex;
         Settings.LangStr:= LangNums[CurLang];
         ModLangue;
-        CheckUpdate;
+        Application.QueueAsyncCall(@CheckUpdate, ChkVerInterval);
+        //CheckUpdate(0);
       end;
       Settings.StartWin:= CBStartWin.Checked;
       Settings.SavSizePos:= CBSavSizePos.Checked;
@@ -1597,7 +1620,7 @@ begin
   end;
 end;
 
-procedure TFProgram.MnuAddBkgndImageClick(Sender: TObject);
+procedure TFProgram.PMnuAddBkgndImgClick(Sender: TObject);
 begin
   if OPictDlg.execute then
   begin
@@ -1605,12 +1628,12 @@ begin
     try
       BkGndPicture:= TPicture.Create;
       BkGndPicture.LoadFromFile(Settings.BkgrndImage);
-      MnuAddBkgndImage.Caption:= MnuRepImageStr;
-      MnuDelBkGndImage.Enabled:= PMnuEnable (MnuDelBkGndImage, ImgMnus, true, 1);
+      PMnuAddBkgndImg.Caption:= MnuRepImageStr;
+      PMnuDelBkgndImg.Enabled:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, true, 1);
     except
       BkGndPicture:= nil;
       Settings.BkgrndImage:='';
-      MnuDelBkGndImage.Enabled:= PMnuEnable (MnuDelBkGndImage, ImgMnus, false, 1);
+      PMnuDelBkgndImg.Enabled:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, false, 1);
     end;
     ListView1.Invalidate;
   end;
@@ -1695,6 +1718,8 @@ begin
 end;
 
 procedure TFProgram.LVPMnuPopup(Sender: TObject);
+var
+  s: String;
 begin
   if ListView1.Selected <> nil then
   begin
@@ -1703,14 +1728,16 @@ begin
     PMnuProps.Visible:= True;
     N1.Visible:= True;
     PMnuDelete.Visible:= True;
+    PMnuCopy.visible:= true;
+    PMnuPaste.visible:= false;
     PMnuHideBars.Visible:= False;
     N2.Visible:= False;
     PMnuGroup.Visible:= False;
     PMnuFolder.Visible:= False;
     PMnuAddFile.Visible:= False;
     N3.Visible:= False;
-    MnuAddBkgndImage.Visible:= False;
-    MnuDelBkGndImage.Visible:= False;
+    PMnuAddBkgndImg.Visible:= False;
+    PMnuDelBkgndImg.Visible:= False;
     N41.Visible:= False;
     N4.Visible:= False;
     PMnuSave.Visible:= False;
@@ -1727,14 +1754,16 @@ begin
     PMnuProps.Visible:= False;
     N1.Visible:= False;
     PMnuDelete.Visible:= False;
+    PMnuCopy.Visible:= False;
+    PMnuPaste.Visible:= true;
     PMnuHideBars.Visible:= True;
     N2.Visible:= True;
     PMnuGroup.Visible:= True;
     PMnuFolder.Visible:= True;
     PMnuAddFile.Visible:= True;
     N3.Visible:= True;
-    MnuAddBkgndImage.Visible:= True;
-    MnuDelBkGndImage.Visible:= True;
+    PMnuAddBkgndImg.Visible:= True;
+    PMnuDelBkgndImg.Visible:= True;
     N41.Visible:= True;
     N4.Visible:= True;
     PMnuSave.Visible:= True;
@@ -1745,14 +1774,27 @@ begin
     N5.Visible:= True;
     PMnuQuit.Visible:= True;
   end;
+  s:= Clipboard.AsText;
+  PMnuPaste.Enabled:= Boolean(pos('#PrgGrpItem#', s)); //Enable paste menu
+  CropBitmap(ImgMnus, PMnuPaste.Bitmap, PMnuPaste.Enabled,3);
 end;
 
-procedure TFProgram.MnuDelBkGndImageClick(Sender: TObject);
+
+
+
+
+
+procedure TFProgram.PMnuCopyClick(Sender: TObject);
+begin
+   ListeFichiers.CopyToClipboard(ListeFichiers.GetItem(ListView1.Selected.Index));
+end;
+
+procedure TFProgram.PMnuDelBkgndImgClick(Sender: TObject);
 begin
     Settings.BkgrndImage:='';
   BkGndPicture:= nil;
-  MnuDelBkGndImage.Enabled:= PMnuEnable (MnuDelBkGndImage, ImgMnus, false, 1);
-  MnuAddBkgndImage.Caption:= MnuAddImageStr;
+  PMnuDelBkgndImg.Enabled:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, false, 1);
+  PMnuAddBkgndImg.Caption:= MnuAddImageStr;
   ListView1.Invalidate;
 end;
 
@@ -1993,9 +2035,11 @@ With LangFile do
    PMnuPrefs.Caption:= SBPrefs.Hint;
    PMnuLoadConf.Caption:= SBLoadConf.Hint;
    PMnuQuit.Caption:= ReadString(LangStr, 'PMnuQuit.Caption', PMnuQuit.Caption);
+   PMnuCopy.Caption:= ReadString(LangStr, 'PMnuCopy.Caption', PMnuCopy.Caption);
+   PMnuPaste.Caption:= ReadString(LangStr, 'PMnuPaste.Caption', PMnuPaste.Caption);
    MnuAddImageStr:= ReadString(LangStr, 'MnuAddImageStr', 'Ajouter une image d''arrière plan');
    MnuRepImageStr:= ReadString(LangStr, 'MnuRepImageStr', 'Remplacer l''image d''arrière plan');
-   MnuDelBkGndImage.Caption:= ReadString(LangStr, 'MnuDelBkGndImage.Caption', MnuDelBkGndImage.Caption);
+   PMnuDelBkgndImg.Caption:= ReadString(LangStr, 'PMnuDelBkGndImage.Caption', PMnuDelBkgndImg.Caption);
    PTrayMnuRestore.Caption:= ReadString(LangStr, 'PTrayMnuRestore.Caption', PTrayMnuRestore.Caption);
    PTrayMnuMinimize.Caption:= ReadString(LangStr, 'PTrayMnuMinimize.Caption', PTrayMnuMinimize.Caption);
    PTrayMnuMaximize.Caption:= ReadString(LangStr, 'PTrayMnuMaximize.Caption', PTrayMnuMaximize.Caption);

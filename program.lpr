@@ -16,7 +16,7 @@ uses
 
 {$R *.res}
 
-begin
+ begin
   RequireDerivedFormResource:=True;
   Application.Title:='ProgramGrpMgr';
   Application.Scaled:=True;
