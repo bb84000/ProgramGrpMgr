@@ -238,3 +238,7 @@ Version 0.9.1.1 - 08/03/2021
 - Ajout de copier/coller d'un élément de programme interne ou vers une autre instance
   du Gestionnaire
 
+Version 0.9.1.2 - 10/03/2021
+- Modification des routines de réduction en icone dans la barre des tâches et la
+  zone de notifications
+

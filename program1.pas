@@ -16,14 +16,14 @@ uses
   LoadConf1, Config1, lazbbosversion, lazbbutils, lmessages, lazbbaboutupdate, Clipbrd;
 
 type
-  { int64 or longint var type  }
-
+  { int64 or longint type for Application.QueueAsyncCall }
   {$IFDEF CPU32}
     iDays= LongInt;
   {$ENDIF}
   {$IFDEF CPU64}
     iDays= Int64;
   {$ENDIF}
+
   { TFProgram }
 
   SaveType = (None, State, All);
@@ -97,7 +97,6 @@ type
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormWindowStateChange(Sender: TObject);
-    procedure ImgDelClick(Sender: TObject);
     procedure ListView1CustomDraw(Sender: TCustomListView; const ARect: TRect;
       var DefaultDraw: Boolean);
     procedure ListView1CustomDrawItem(Sender: TCustomListView; Item: TListItem;
@@ -151,7 +150,6 @@ type
     // Config file and values
     ConfigFile: String;
     ListeChange, SettingsChange, WStateChange: Bool;
-    AppState : Integer;
     SMnuMaskBars, SMnuShowBars: String;
     langue: Integer;
     LangFile: TBbiniFile;
@@ -185,6 +183,9 @@ type
     sCannotGetNewVerList: String;
     sNoLongerChkUpdates: String;
     ChkVerInterval: Int64;
+    Iconized: Boolean;
+    PrevLeft: Integer;
+    PrevTop: Integer;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -199,7 +200,6 @@ type
     procedure SettingsOnStateChange(sender: TObject);
     procedure ModLangue;
     function ClosestItem(pt: Tpoint; ptArr:array of Tpoint): TlistItem;
-    function HidinTaskBar (enable: Boolean): boolean;
     function ReadFolder(strPath: string; Directory: Bool): Integer;
     procedure EnumerateResourceNames(Instance: THandle; var list: TStringList);
     procedure GetIconRes(filename: string; index:integer; var Ico: TIcon);
@@ -208,6 +208,8 @@ type
     procedure OnEndSession(Sender: TObject);
     procedure OnQueryendSession(var Cancel: Boolean);
     procedure CheckUpdate(days: iDays);
+    procedure OnAppMinimize(Sender: TObject);
+    function HideOnTaskbar: boolean;
   public
 
   end;
@@ -219,6 +221,7 @@ type
 var
   FProgram: TFProgram;
   PrevWndProc: WNDPROC;
+
   // Windows functions declarations
   PrivateExtractIcons: function(lpszFile: PChar; nIconIndex, cxIcon, cyIcon: integer;
                                   phicon: PHANDLE; piconid: PDWORD; nicon, flags: DWORD):
@@ -257,7 +260,7 @@ begin
   if AMessage.Active = WA_INACTIVE then Listview1.Invalidate ;
 end;
 
-// Slower than above...
+// Slower than message passing
 
 procedure TFProgram.OnDeactivate(Sender: TObject);
 begin
@@ -274,7 +277,7 @@ begin
     reg := TRegistry.Create;
     reg.RootKey := HKEY_CURRENT_USER;
     reg.OpenKey('Software\Microsoft\Windows\CurrentVersion\RunOnce', True) ;
-    //Voir Sartwin
+    //Voir Startwin
     RunRegKeyVal:= FProgram.ProgName+'_'+FProgram.Settings.GroupName;
     RunRegKeySz:= '"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName;
     reg.WriteString(RunRegKeyVal, RunRegKeySz) ;
@@ -289,7 +292,37 @@ end;
 procedure TFProgram.OnQueryendSession(var Cancel: Boolean);
 begin
   //do something
-Application.ProcessMessages;
+  Application.ProcessMessages;
+end;
+
+// Intercept minimize system system command to correct
+// wrong window placement on restore from tray
+
+procedure TFProgram.OnAppMinimize(Sender: TObject);
+begin
+  if Settings.HideInTaskbar then
+  begin
+    PrevLeft:= left;
+    PrevTop:= top;
+    WindowState:= wsMinimized;
+    PTrayMnuMinimize.enabled:= false;
+    PTrayMnuRestore.enabled:= true;
+    PTrayMnuMaximize.enabled:= true;
+    Iconized:= HideOnTaskbar;
+  end;
+end;
+
+// Hide icon on taskbar if needed
+
+function TFProgram.HideOnTaskbar: boolean;
+begin
+  result:= false;
+  if Settings.MiniInTray and Settings.HideInTaskbar then
+  begin
+    result:= true;
+    visible:= false;
+    PTrayMnuRestore.Enabled:= true;
+  end;
 end;
 
 // retrieve command line parameters
@@ -324,7 +357,6 @@ begin
 end;
 
 
-
 // Form creation
 
 procedure TFProgram.FormCreate(Sender: TObject);
@@ -334,7 +366,8 @@ begin
   inherited;
     Application.OnEndSession := @OnEndSession;
     Application.OnQueryEndSession := @OnQueryendSession;
-  //Application.OnDeactivate := @OnDeactivate;
+    // Intercept minimize system command
+    Application.OnMinimize:=@OnAppMinimize;
   EnumWindows(@EnumWindowsProc,0);
   // Some things have to be run only on the first form activation
   // so, we set first at true
@@ -351,7 +384,6 @@ begin
   Settings:= TConfig.Create;
   ImgList:= TImageList.Create(self);
   langue:= Lo(GetUserDefaultLangID);
-  //langue:=  LANG_ITALIAN;
   If length(Settings.LangStr)= 0 then Settings.LangStr:= IntToStr(langue);
   // Fix official program name to avoid trouble if exe name is changed
   ExecName:= ExtractFileName(Application.ExeName);
@@ -415,7 +447,6 @@ begin
     PMnuHideBars.Caption:= SMnuShowBars;
     Height:= ShowBarsHeight-BarsHeight;
   end;
-
 end;
 
 procedure TFProgram.PMnuPasteClick(Sender: TObject);
@@ -478,7 +509,6 @@ begin
     ShowMessage(use64bitcaption);
   end;
   Application.QueueAsyncCall(@CheckUpdate, ChkVerInterval);       // async call to let icons loading
-  //CheckUpdate(0);
 end;
 
 // Parameter days defines the updates interval in days
@@ -510,7 +540,7 @@ begin
        else alertmsg:= errmsg;
        if AlertDlg(Caption,  alertmsg, ['OK', CancelBtn, sNoLongerChkUpdates],
                     true, mtError, alertpos)= mrYesToAll then Settings.NoChkNewVer:= true;
-        exit;
+       exit;
      end;
      NewVer := VersionToInt(sNewVer);
      // Cannot get new version
@@ -540,8 +570,6 @@ procedure TFProgram.FormChangeBounds(Sender: TObject);
 begin
   Listview1.Invalidate;
 end;
-
-
 
 // Form drop files
 
@@ -607,7 +635,7 @@ procedure TFProgram.LoadConfig(GrpName: String);
 var
   i: Integer;
   LangFound: Boolean;
-
+  winstate: TWindowState;
 begin
   with Settings do
   begin
@@ -643,8 +671,7 @@ begin
     end;
   // Si la langue n'est pas traduite, alors on passe en Anglais
   If not LangFound then
-  //If LangFound then
-  begin
+   begin
     langue:= LANG_ENGLISH;
     Settings.LangStr:= IntToStr(langue);
   end;
@@ -666,7 +693,6 @@ begin
   try
     BkGndPicture:= TPicture.Create;
     BkGndPicture.LoadFromFile(Settings.BkgrndImage);
-    //SBDelPicture.Enabled:= true;
     PMnuDelBkgndImg.Enabled:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, true, 1);
     PMnuAddBkgndImg.Caption:= MnuRepImageStr;
   except
@@ -677,49 +703,46 @@ begin
   // Taille et position précédentes
   if Settings.SavSizePos then
   begin
+    Position:= poDesktopCenter;
     Try
-      AppState:= StrToInt('$'+Copy(Settings.WState,1,4));
-      Top:= StrToInt('$'+Copy(Settings.WState,5,4));
-      Left:= StrToInt('$'+Copy(Settings.WState,9,4));
-      Height:= StrToInt('$'+Copy(Settings.WState,13,4));
-      Width:= StrToInt('$'+Copy(Settings.WState,17,4)) ;
+      WinState := TWindowState(StrToInt('$' + Copy(Settings.WState, 1, 4)));
+      Top := StrToInt('$' + Copy(Settings.WState, 5, 4));
+      Left := StrToInt('$' + Copy(Settings.WState, 9, 4));
+      Height := StrToInt('$' + Copy(Settings.WState, 13, 4));
+      Width := StrToInt('$' + Copy(Settings.WState, 17, 4));
     except
     end;
     TrayProgman.Visible:= Settings.MiniInTray;
-    if Appstate = SW_SHOWMINIMIZED then
-    begin
-      ShowWindow(Application.Handle, AppState) ; //  Minimize in task bar is done on application, not on main form
-    end else
-    begin
-      ShowWindow(Handle, AppState);  // Maximize is done on main form, not on application
-     end;
-    Case AppState of
-      1: begin    // Normal
-           PTrayMnuRestore.Enabled:= False;
-           PTrayMnuMinimize.Enabled:= True;
-           PTrayMnuMaximize.Enabled:= True;
-         end;
-      2: begin   // Minimized
-           PTrayMnuRestore.Enabled:= True;
-           PTrayMnuMinimize.Enabled:= False;
-           PTrayMnuMaximize.Enabled:= True;
-         end;
-      3: begin   // Maximized
-           PTrayMnuRestore.Enabled:= True;
-           PTrayMnuMinimize.Enabled:= True;
-           PTrayMnuMaximize.Enabled:= False;
-         end;
+    WindowState := WinState;
+    PrevLeft:= left;
+    PrevTop:= top;
+    Case WindowState of
+      wsNormal: begin
+        PTrayMnuRestore.Enabled:= False;
+        PTrayMnuMinimize.Enabled:= True;
+        PTrayMnuMaximize.Enabled:= True;
+      end;
+      wsMinimized: begin
+        PTrayMnuRestore.Enabled:= True;
+        PTrayMnuMinimize.Enabled:= False;
+        PTrayMnuMaximize.Enabled:= True;
+        WindowState:=wsNormal;
+        Application.Minimize;
+      end;
+      wsMaximized: begin
+        PTrayMnuRestore.Enabled:= True;
+        PTrayMnuMinimize.Enabled:= True;
+        PTrayMnuMaximize.Enabled:= False;
+      end;
     end;
-    HidInTaskBar(Settings.HideInTaskBar and Settings.MiniInTray);     // ON ne cache que si l'icone est dans la zone de notification !!!
+    if not visible then HideOnTaskbar;
     PnlTop.Visible:= not Settings.HideBars;
     PnlStatus.Visible:= not Settings.HideBars;
     if Settings.HideBars then begin
       PMnuHideBars.Caption:= SMnuShowBars;
-
     end else
     begin
       PMnuHideBars.Caption:= SMnuMaskBars;
-
     end;
   end;
   CBDisplay.ItemIndex:= Settings.IconDisplay;
@@ -728,14 +751,13 @@ begin
   Caption:= Settings.GroupName;
   If not FileExists(Settings.GrpIconFile) then Settings.GrpIconFile:= Application.ExeName;
   Application.Icon.Handle:= ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
+  TrayProgman.Icon:= Application.Icon;
   version:= GetVersionInfo.ProductVersion;
   // Aboutbox
   AboutBox.Image1.Picture.Icon.Handle:= Application.Icon.Handle;
   AboutBox.LProductName.Caption:= GetVersionInfo.ProductName+' ('+OsTarget+')';
   AboutBox.LCopyright.Caption:= GetVersionInfo.CompanyName+' - '+DateTimeToStr(CompileDateTime);
   AboutBox.LVersion.Caption:= 'Version: '+Version;
-  //AboutBox.ChkVerURL := 'https://github.com/bb84000/ProgramGrpMgr/releases/latest';
-  //AboutBox.UrlWebsite:= 'https://www.sdtp.com';
   AboutBox.LUpdate.Hint := AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
   AboutBox.Version:= Version;
   AboutBox.ProgName:= ProgName;
@@ -746,22 +768,6 @@ begin
   Settings.OnChange:= @SettingsOnChange;
   Settings.OnStateChange:= @SettingsOnStateChange;
   LVDisplayFiles;
-end;
-
-// Hide the icon in the task bar
-
-function TFProgram.HidinTaskBar (enable: Boolean): boolean;
-begin
-  ShowWindow(Application.Handle, SW_HIDE) ;
-  if enable then
-  begin
-    SetWindowLong(Application.Handle, GWL_EXSTYLE, getWindowLong(Application.Handle, GWL_EXSTYLE) or WS_EX_TOOLWINDOW) ;
-  end else
-  begin
-    SetWindowLong(Application.Handle, GWL_EXSTYLE, GetWindowLong(Application.Handle, GWL_EXSTYLE) and (not WS_EX_TOOLWINDOW));
-  end;
-  ShowWindow(Application.Handle, SW_SHOW) ;
-  Result:= enable;
 end;
 
 // load the settings file
@@ -798,7 +804,6 @@ function TFProgram.SaveConfig(GrpName: String; Typ: SaveType): Bool;
 var
   CfgXML: TXMLDocument;
   RootNode, SettingsNode, FilesNode :TDOMNode;
-  WindowPlacement: TWindowPlacement;
   i: Integer;
   Reg: TRegistry;
   FilNamWoExt: String;
@@ -811,20 +816,13 @@ begin
   if Settings.IconSort < 0 then Settings.IconSort:= 0;
   // Window position
   Settings.WState:= '';
-  If WindowState = wsMaximized then
-  begin
-    AppState :=  SW_SHOWMAXIMIZED;                   // Application is never maximized, only the main form
-  end else
-  begin
-    GetWindowPlacement(Application.Handle, @WindowPlacement);
-    AppState := WindowPlacement.showCmd;             // Elsewhere, we use the app placement
-  end;
-  if Top < 0 then Top:= 0;
-  if Left < 0 then Left:= 0;
-  Settings.WState:= IntToHex(AppState, 4)+IntToHex(Top, 4)+IntToHex(Left, 4)+IntToHex(Height, 4)+IntToHex(width, 4);
+  if self.Top < 0 then self.Top:= 0;
+  if self.Left < 0 then self.Left:= 0;
+  // Main form size and position
+  Settings.WState:= IntToHex(ord(self.WindowState), 4)+IntToHex(self.Top, 4)+
+                      IntToHex(self.Left, 4)+IntToHex(self.Height, 4)+IntToHex(self.width, 4);
   Settings.BkgrndColor:= ListView1.Color;
   // LOad or create config file
-
   ConfigFile:= PrgMgrAppsData+GrpName+'.xml';
   try
      // If oldconfig, then create a new file, else read existing config file
@@ -898,23 +896,15 @@ begin
 end;
 
 function TFProgram.StateChanged : SaveType;
-var
-  WindowPlacement: TWindowPlacement;
 begin
   result:= none;
-  If (WindowState = wsMinimized) then
-  begin
-    AppState := SW_SHOWMINIMIZED
-  end else
-  begin
-    GetWindowPlacement(Handle, @WindowPlacement);
-    AppState := WindowPlacement.showCmd;
-  end;
   if Top < 0 then Top:= 0;
   if Left < 0 then Left:= 0;
   // seulement si on veut sauvegarder la taille et la position
   if Settings.SavSizePos then
-     Settings.WState:= IntToHex(AppState, 4)+IntToHex(Top, 4)+IntToHex(Left, 4)+IntToHex(Height, 4)+IntToHex(width, 4);
+    Settings.WState:= IntToHex(ord(WindowState), 4)+IntToHex(Top, 4)+
+                      IntToHex(Left, 4)+IntToHex(Height, 4)+IntToHex(width, 4);
+
   If (Prefs.ImgChanged or WStateChange or CheckVerChanged) then
   begin
     result:= State ;
@@ -1281,7 +1271,10 @@ begin
   PTrayMnuRestore.Enabled:= True;
   PTrayMnuMinimize.Enabled:= True;
   PTrayMnuMaximize.Enabled:= False;
-  ShowWindow(handle, SW_SHOWMAXIMIZED);
+  //ShowWindow(handle, SW_SHOWMAXIMIZED);
+  WindowState:=wsMaximized;
+  visible:= true;
+  Application.BringToFront;
 end;
 
 procedure TFProgram.PTrayMnuMinimizeClick(Sender: TObject);
@@ -1289,7 +1282,10 @@ begin
   PTrayMnuRestore.Enabled:= True;
   PTrayMnuMinimize.Enabled:= False;
   PTrayMnuMaximize.Enabled:= True;
-  ShowWindow(Application.Handle, SW_SHOWMINIMIZED);
+  PrevLeft:= left;
+  PrevTop:= top;
+  //ShowWindow(Application.Handle, SW_SHOWMINIMIZED);
+  Application.Minimize;
 end;
 
 procedure TFProgram.PTrayMnuRestoreClick(Sender: TObject);
@@ -1297,7 +1293,13 @@ begin
   PTrayMnuRestore.Enabled:= False;
   PTrayMnuMinimize.Enabled:= True;
   PTrayMnuMaximize.Enabled:= True;
-  ShowWindow(handle, SW_SHOWNORMAL);
+  //ShowWindow(handle, SW_SHOWNORMAL);
+  WindowState:=wsNormal;
+  //Need to reload position as it can change during hide in taskbar process
+  visible:= true;
+  //Application.BringToFront;
+  left:= PrevLeft;
+  top:= PrevTop;
 end;
 
 function TFProgram.ReadFolder(strPath: string; Directory: Bool): Integer;
@@ -1492,7 +1494,6 @@ begin
         Settings.LangStr:= LangNums[CurLang];
         ModLangue;
         Application.QueueAsyncCall(@CheckUpdate, ChkVerInterval);
-        //CheckUpdate(0);
       end;
       Settings.StartWin:= CBStartWin.Checked;
       Settings.SavSizePos:= CBSavSizePos.Checked;
@@ -1544,7 +1545,6 @@ begin
       end;
     end;
     Settings.HideInTaskBar:= CBHideInTaskbar.Checked;
-    HidinTaskBar(Settings.HideInTaskBar and Settings.MiniInTray);
     if CBXShortCut.Checked then
     begin
       CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
@@ -1932,10 +1932,7 @@ begin
   ListView1.Invalidate;
 end;
 
-procedure TFProgram.ImgDelClick(Sender: TObject);
-begin
 
-end;
 
 // Display background image
 

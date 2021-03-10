@@ -4,12 +4,12 @@
     <PathDelim Value="\"/>
     <Version Value="11"/>
     <BuildModes Active="Default"/>
-    <Units Count="80">
+    <Units Count="81">
       <Unit0>
         <Filename Value="program.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ProgramGrpMgr"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="3"/>
         <CursorPos X="2" Y="19"/>
         <UsageCount Value="200"/>
@@ -22,8 +22,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="741"/>
-        <CursorPos Y="758"/>
+        <TopLine Value="1121"/>
+        <CursorPos X="3" Y="821"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -39,7 +39,7 @@
       <Unit3>
         <Filename Value="files1.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="251"/>
         <CursorPos X="5" Y="277"/>
         <UsageCount Value="200"/>
@@ -85,7 +85,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Property1"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="34"/>
         <CursorPos X="49" Y="82"/>
         <UsageCount Value="200"/>
@@ -131,7 +131,7 @@
         <Filename Value="config1.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Config1"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="3"/>
         <CursorPos X="21" Y="3"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -144,7 +144,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="78"/>
         <CursorPos X="26" Y="94"/>
-        <UsageCount Value="108"/>
+        <UsageCount Value="113"/>
       </Unit12>
       <Unit13>
         <Filename Value="..\bbunits\alert.pas"/>
@@ -197,11 +197,10 @@
       <Unit19>
         <Filename Value="C:\lazarus\lcl\forms.pp"/>
         <UnitName Value="Forms"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="843"/>
-        <CursorPos X="14" Y="858"/>
-        <UsageCount Value="34"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="52"/>
+        <CursorPos X="3" Y="69"/>
+        <UsageCount Value="36"/>
       </Unit19>
       <Unit20>
         <Filename Value="..\Packets\bbcomponents.pas"/>
@@ -282,10 +281,10 @@
       </Unit30>
       <Unit31>
         <Filename Value="ProgramGrpMgr.lng"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="2"/>
         <TopLine Value="148"/>
         <CursorPos X="36" Y="156"/>
-        <UsageCount Value="60"/>
+        <UsageCount Value="62"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit31>
@@ -390,10 +389,10 @@
       </Unit44>
       <Unit45>
         <Filename Value="History.txt"/>
-        <EditorIndex Value="10"/>
-        <TopLine Value="208"/>
-        <CursorPos X="21" Y="236"/>
-        <UsageCount Value="65"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="212"/>
+        <CursorPos X="21" Y="241"/>
+        <UsageCount Value="67"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit45>
@@ -407,9 +406,9 @@
       </Unit46>
       <Unit47>
         <Filename Value="ProgramGrpMgr.txt"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="8"/>
         <CursorPos X="36"/>
-        <UsageCount Value="38"/>
+        <UsageCount Value="40"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit47>
@@ -613,18 +612,18 @@
         <ComponentName Value="AboutBox"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="146"/>
         <CursorPos X="7" Y="169"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="25"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit75>
       <Unit76>
         <Filename Value="ProgramGrpMgr.ini"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="1"/>
         <CursorPos X="52" Y="3"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit76>
@@ -649,128 +648,127 @@
         <CursorPos X="10" Y="69"/>
         <UsageCount Value="15"/>
       </Unit79>
+      <Unit80>
+        <Filename Value="C:\lazarus\fpc\3.2.0\source\rtl\win\wininc\defines.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2795"/>
+        <CursorPos X="6" Y="2811"/>
+        <UsageCount Value="11"/>
+      </Unit80>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="28" HistoryIndex="27">
       <Position1>
         <Filename Value="program1.pas"/>
-        <Caret Line="210" Column="26" TopLine="196"/>
+        <Caret Line="741" Column="126" TopLine="285"/>
       </Position1>
       <Position2>
         <Filename Value="program1.pas"/>
-        <Caret Line="480" Column="42" TopLine="454"/>
+        <Caret Line="1423" Column="23" TopLine="1397"/>
       </Position2>
       <Position3>
         <Filename Value="program1.pas"/>
-        <Caret Line="481" Column="16" TopLine="455"/>
+        <Caret Line="1429" Column="24" TopLine="1403"/>
       </Position3>
       <Position4>
         <Filename Value="program1.pas"/>
-        <Caret Line="764" Column="24" TopLine="871"/>
+        <Caret Line="193" Column="25" TopLine="179"/>
       </Position4>
       <Position5>
         <Filename Value="program1.pas"/>
-        <Caret Line="766" Column="3" TopLine="522"/>
+        <Caret Line="501" Column="13" TopLine="475"/>
       </Position5>
       <Position6>
         <Filename Value="program1.pas"/>
-        <Caret Line="769" Column="14" TopLine="750"/>
+        <Caret Line="8" Column="53"/>
       </Position6>
       <Position7>
         <Filename Value="program1.pas"/>
-        <Caret Line="776" Column="18" TopLine="752"/>
+        <Caret Line="154" Column="13" TopLine="128"/>
       </Position7>
       <Position8>
         <Filename Value="program1.pas"/>
-        <Caret Line="10" Column="109"/>
+        <Caret Line="717" Column="16" TopLine="691"/>
       </Position8>
       <Position9>
         <Filename Value="program1.pas"/>
-        <Caret Line="715" Column="33" TopLine="689"/>
+        <Caret Line="858" Column="13" TopLine="831"/>
       </Position9>
       <Position10>
         <Filename Value="program1.pas"/>
-        <Caret Line="1490" Column="13" TopLine="1463"/>
+        <Caret Line="862" Column="13" TopLine="836"/>
       </Position10>
       <Position11>
         <Filename Value="program1.pas"/>
-        <Caret Line="1491" Column="46" TopLine="1464"/>
+        <Caret Line="866" Column="38" TopLine="840"/>
       </Position11>
       <Position12>
         <Filename Value="program1.pas"/>
-        <Caret Line="1561" Column="38" TopLine="1535"/>
+        <Caret Line="758" TopLine="732"/>
       </Position12>
       <Position13>
         <Filename Value="program1.pas"/>
-        <Caret Line="1562" Column="33" TopLine="1536"/>
+        <Caret Line="732" Column="5" TopLine="280"/>
       </Position13>
       <Position14>
         <Filename Value="program1.pas"/>
-        <Caret Line="2116" Column="103" TopLine="2090"/>
+        <Caret Line="1353" TopLine="1345"/>
       </Position14>
       <Position15>
         <Filename Value="program1.pas"/>
-        <Caret Line="2117" Column="98" TopLine="2091"/>
+        <Caret Line="307" Column="11" TopLine="285"/>
       </Position15>
       <Position16>
         <Filename Value="program1.pas"/>
-        <Caret Line="715" Column="33" TopLine="700"/>
+        <Caret Line="733" Column="17" TopLine="705"/>
       </Position16>
       <Position17>
         <Filename Value="program1.pas"/>
-        <Caret Line="14" Column="107"/>
+        <Caret Line="1341" Column="11" TopLine="1314"/>
       </Position17>
       <Position18>
         <Filename Value="program1.pas"/>
-        <Caret Line="715" Column="11" TopLine="689"/>
+        <Caret Line="209" Column="3" TopLine="187"/>
       </Position18>
       <Position19>
         <Filename Value="program1.pas"/>
-        <Caret Line="771" Column="13" TopLine="419"/>
+        <Caret Line="911" Column="35" TopLine="904"/>
       </Position19>
       <Position20>
         <Filename Value="program1.pas"/>
-        <Caret Line="400" TopLine="396"/>
+        <Caret Line="972" Column="15" TopLine="945"/>
       </Position20>
       <Position21>
         <Filename Value="program1.pas"/>
-        <Caret Line="1311" Column="18" TopLine="1029"/>
+        <Caret Line="1941" TopLine="1926"/>
       </Position21>
       <Position22>
         <Filename Value="program1.pas"/>
-        <Caret Line="298" Column="15" TopLine="282"/>
+        <Caret Line="1550" Column="18" TopLine="1524"/>
       </Position22>
       <Position23>
         <Filename Value="program1.pas"/>
-        <Caret Line="299" Column="22" TopLine="282"/>
+        <Caret Line="213" Column="27" TopLine="199"/>
       </Position23>
       <Position24>
         <Filename Value="program1.pas"/>
-        <Caret Line="300" TopLine="282"/>
+        <Caret Line="312" Column="29" TopLine="285"/>
       </Position24>
       <Position25>
         <Filename Value="program1.pas"/>
-        <Caret Line="594" TopLine="578"/>
+        <Caret Line="307" Column="166" TopLine="298"/>
       </Position25>
       <Position26>
         <Filename Value="program1.pas"/>
-        <Caret Line="1315" Column="33" TopLine="1308"/>
+        <Caret Line="1550" TopLine="1538"/>
       </Position26>
       <Position27>
         <Filename Value="program1.pas"/>
-        <Caret Line="2170" Column="75" TopLine="2154"/>
+        <Caret Line="808" TopLine="792"/>
       </Position27>
       <Position28>
         <Filename Value="program1.pas"/>
-        <Caret Line="770" Column="45" TopLine="757"/>
+        <Caret Line="153" TopLine="135"/>
       </Position28>
-      <Position29>
-        <Filename Value="program1.pas"/>
-        <Caret Line="502" Column="43"/>
-      </Position29>
-      <Position30>
-        <Filename Value="program1.pas"/>
-        <Caret Line="713" Column="17" TopLine="687"/>
-      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
