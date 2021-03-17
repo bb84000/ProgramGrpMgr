@@ -242,3 +242,6 @@ Version 0.9.1.2 - 10/03/2021
 - Modification des routines de réduction en icone dans la barre des tâches et la
   zone de notifications
 
+Version 0.9.1.3 -17/03/2021
+- Modification de la fermeture du programme lors de l'arrêt de Windows
+

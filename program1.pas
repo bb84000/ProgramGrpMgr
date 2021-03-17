@@ -205,7 +205,6 @@ type
     procedure GetIconRes(filename: string; index:integer; var Ico: TIcon);
     procedure WMActivate(var AMessage: TLMActivate); message LM_ACTIVATE;
     procedure OnDeactivate(Sender: TObject);
-    procedure OnEndSession(Sender: TObject);
     procedure OnQueryendSession(var Cancel: Boolean);
     procedure CheckUpdate(days: iDays);
     procedure OnAppMinimize(Sender: TObject);
@@ -267,11 +266,15 @@ begin
   //Listview1.Invalidate ;
 end;
 
-procedure TFProgram.OnEndSession(Sender: TObject);
+
+
+procedure TFProgram.OnQueryendSession(var Cancel: Boolean);
 var
   reg:TRegistry;
   RunRegKeyVal, RunRegKeySz: string;
 begin
+  SaveConfig(FProgram.Settings.GroupName, All);
+  Application.ProcessMessages;
   if not FProgram.Settings.StartWin then
   begin
     reg := TRegistry.Create;
@@ -284,15 +287,7 @@ begin
     reg.CloseKey;
     reg.free;
   end;
-  SaveConfig(FProgram.Settings.GroupName, All);
-  Application.ProcessMessages;
   Close;
-end;
-
-procedure TFProgram.OnQueryendSession(var Cancel: Boolean);
-begin
-  //do something
-  Application.ProcessMessages;
 end;
 
 // Intercept minimize system system command to correct
@@ -364,7 +359,6 @@ var
   aPath : Array[0..MaxPathLen] of Char; //Allocate memory
 begin
   inherited;
-    Application.OnEndSession := @OnEndSession;
     Application.OnQueryEndSession := @OnQueryendSession;
     // Intercept minimize system command
     Application.OnMinimize:=@OnAppMinimize;
