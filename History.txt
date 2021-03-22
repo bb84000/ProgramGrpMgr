@@ -245,3 +245,9 @@ Version 0.9.1.2 - 10/03/2021
 Version 0.9.1.3 -17/03/2021
 - Modification de la fermeture du programme lors de l'arrêt de Windows
 
+Version 0.9.1.4 - 22/03/2021
+- La détection d'une nouvelle version ne nécessite plus de sauvegarder les préférences
+- La version de windows s'affiche en infobulle en plaçant le curseur de la souris
+  sur le champ "version" de la boîte "A propos"
+- Mise à jour de Lazarus 2.0.12
+

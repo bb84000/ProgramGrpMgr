@@ -175,6 +175,7 @@ type
     NoDeleteGroup, DeleteGrpMsg: String;
     MnuAddImageStr: String;
     MnuRepImageStr: String;
+
     OldConfig: Boolean;
     Version: String;
     cache: Boolean;
@@ -210,7 +211,7 @@ type
     procedure OnAppMinimize(Sender: TObject);
     function HideOnTaskbar: boolean;
   public
-
+     Test: String;
   end;
 
  const
@@ -361,12 +362,13 @@ begin
   inherited;
     Application.OnQueryEndSession := @OnQueryendSession;
     // Intercept minimize system command
-    Application.OnMinimize:=@OnAppMinimize;
+  Application.OnMinimize:=@OnAppMinimize;
   EnumWindows(@EnumWindowsProc,0);
   // Some things have to be run only on the first form activation
   // so, we set first at true
   Pointer(PrivateExtractIcons) := GetProcAddress(GetModuleHandle('user32.dll'),'PrivateExtractIconsA');
   Pointer(SHDefExtractIcon) := GetProcAddress(GetModuleHandle('shell32.dll'),'SHDefExtractIconA');
+
   First:= True;
   // Compilation date/time
   try
@@ -525,7 +527,7 @@ begin
      Settings.LastUpdChk := Trunc(Now);
      AboutBox.Checked:= true;
      AboutBox.ErrorMessage:='';
-     //AboutBox.version:= '0.1.0.0' ;
+     AboutBox.version:= '0.1.0.0' ;
      sNewVer:= AboutBox.ChkNewVersion;
      errmsg:= AboutBox.ErrorMessage;
      if length(sNewVer)=0 then
@@ -649,7 +651,6 @@ begin
        then  RenameFile(PrgMgrAppsData+Settings.GroupName+'.bk'+IntToStr(i), PrgMgrAppsData+Settings.GroupName+'.bk'+IntToStr(i-1));
     end else
     begin
-
       SaveConfig(Settings.GroupName, All)
     end;
   end;
@@ -752,6 +753,7 @@ begin
   AboutBox.LProductName.Caption:= GetVersionInfo.ProductName+' ('+OsTarget+')';
   AboutBox.LCopyright.Caption:= GetVersionInfo.CompanyName+' - '+DateTimeToStr(CompileDateTime);
   AboutBox.LVersion.Caption:= 'Version: '+Version;
+  AboutBox.LVersion.Hint:= WinVersion.VerDetail;
   AboutBox.LUpdate.Hint := AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
   AboutBox.Version:= Version;
   AboutBox.ProgName:= ProgName;

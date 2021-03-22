@@ -184,7 +184,7 @@ begin
   if FLastVersion <> s then
   begin
     FLastVersion:= s;
-    if Assigned(FOnChange) then FOnChange(Self);
+    if Assigned(FOnStateChange) then FOnStateChange(Self);
   end;
 end;
 
