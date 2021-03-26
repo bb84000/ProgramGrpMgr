@@ -12,8 +12,8 @@ uses
   Windows, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   ComCtrls, Buttons, StdCtrls, CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM,
   laz2_XMLRead, laz2_XMLWrite, files1, Registry, LCLIntf, Menus, ExtDlgs,
-  ShellAPI, SaveCfg1, prefs1, property1, lazbbinifiles, LoadGroup1,
-  LoadConf1, Config1, lazbbosversion, lazbbutils, lmessages, lazbbaboutupdate, Clipbrd;
+  ShellAPI, SaveCfg1, prefs1, property1, lazbbinifiles, LoadGroup1, LazUTF8,
+  LoadConf1, Config1, lazbbosver, lazbbutils, lmessages, lazbbaboutupdate, Clipbrd;
 
 type
   { int64 or longint type for Application.QueueAsyncCall }
@@ -151,7 +151,7 @@ type
     ConfigFile: String;
     ListeChange, SettingsChange, WStateChange: Bool;
     SMnuMaskBars, SMnuShowBars: String;
-    langue: Integer;
+    //langue: Integer;
     LangFile: TBbiniFile;
     IniFile: TBbInifile;
     LangNums: TStringList;
@@ -160,7 +160,7 @@ type
     IconDefFile: String;
     SystemRoot: String;
     ShortCutName: String;
-    WinVersion: TOSInfo;
+
     YesBtn, NoBtn, CancelBtn: String;
     ExecName, ExecPath: String;
     FPropertyCaption: string;
@@ -175,7 +175,7 @@ type
     NoDeleteGroup, DeleteGrpMsg: String;
     MnuAddImageStr: String;
     MnuRepImageStr: String;
-
+    LangStr: string;
     OldConfig: Boolean;
     Version: String;
     cache: Boolean;
@@ -211,7 +211,7 @@ type
     procedure OnAppMinimize(Sender: TObject);
     function HideOnTaskbar: boolean;
   public
-     Test: String;
+     OSVersion: TOSVersion ;
   end;
 
  const
@@ -274,8 +274,6 @@ var
   reg:TRegistry;
   RunRegKeyVal, RunRegKeySz: string;
 begin
-  SaveConfig(FProgram.Settings.GroupName, All);
-  Application.ProcessMessages;
   if not FProgram.Settings.StartWin then
   begin
     reg := TRegistry.Create;
@@ -288,7 +286,9 @@ begin
     reg.CloseKey;
     reg.free;
   end;
-  Close;
+  if ListeChange then SaveConfig(FProgram.Settings.GroupName, All)
+  else SaveConfig(FProgram.Settings.GroupName, State)   ;
+  //Close;             // Not needed
 end;
 
 // Intercept minimize system system command to correct
@@ -379,13 +379,14 @@ begin
   ListeFichiers:= TFichierList.Create;
   Settings:= TConfig.Create;
   ImgList:= TImageList.Create(self);
-  langue:= Lo(GetUserDefaultLangID);
-  If length(Settings.LangStr)= 0 then Settings.LangStr:= IntToStr(langue);
+  LazGetShortLanguageID(LangStr);
+  If (length(Settings.LangStr)= 0) then Settings.LangStr:= LangStr;
   // Fix official program name to avoid trouble if exe name is changed
   ExecName:= ExtractFileName(Application.ExeName);
   ExecPath:= ExtractFilePath(Application.ExeName);
   ProgName:= 'ProgramGrpMgr';
   LocalizedName:= 'Gestionnaire de Groupe de Programmes';
+
    // Chargement des chaînes de langue...
   LangFile:= TBbIniFile.create(ExecPath+ProgName+'.lng');
   LangNums:= TStringList.Create;
@@ -460,7 +461,7 @@ begin
   if not first then exit;
   Settings.GroupName:= GetGrpParam;
   // We get Windows Version
-  GetSysInfo(WinVersion);
+  OSVersion:= TOSVersion.Create(LangStr, LangFile);
   // For popup menu, retrieve bitmap from buttons
   CropBitmap(SBGroup.Glyph, PmnuGroup.Bitmap, SBGroup.Enabled);
   CropBitmap(SBFolder.Glyph, PMnuFolder.Bitmap, SBFolder.Enabled);
@@ -500,7 +501,7 @@ begin
   Prefs.CBXDesktopMnu.Checked:= Settings.DeskTopMnu;
   reg.CloseKey;
   reg.free;
-  If (WinVersion.Architecture= 'x86_64') and  (OsTarget='32 bits') then
+  if (Pos('64', OSVersion.Architecture)>0) and (OsTarget='32 bits') then
   begin
     ShowMessage(use64bitcaption);
   end;
@@ -527,7 +528,7 @@ begin
      Settings.LastUpdChk := Trunc(Now);
      AboutBox.Checked:= true;
      AboutBox.ErrorMessage:='';
-     AboutBox.version:= '0.1.0.0' ;
+     //AboutBox.version:= '0.1.0.0' ;
      sNewVer:= AboutBox.ChkNewVersion;
      errmsg:= AboutBox.ErrorMessage;
      if length(sNewVer)=0 then
@@ -657,6 +658,10 @@ begin
   LoadCfgFile(ConfigFile);
   if Settings.GroupName <> GrpName then Settings.GroupName := GrpName;
   // Détermination de la langue
+  //LangFound:= false;
+  // old settings used nubers instead characters
+  if Settings.LangStr='12' then Settings.LangStr:= 'fr';
+  LangFound:= false;
   LangFile.ReadSections(LangNums);
   if LangNums.Count > 1 then
     For i:= 0 to LangNums.Count-1 do
@@ -667,8 +672,7 @@ begin
   // Si la langue n'est pas traduite, alors on passe en Anglais
   If not LangFound then
    begin
-    langue:= LANG_ENGLISH;
-    Settings.LangStr:= IntToStr(langue);
+    Settings.LangStr := 'en';
   end;
   CurLang:= LangNums.IndexOf(Settings.LangStr);
   Modlangue;
@@ -753,7 +757,7 @@ begin
   AboutBox.LProductName.Caption:= GetVersionInfo.ProductName+' ('+OsTarget+')';
   AboutBox.LCopyright.Caption:= GetVersionInfo.CompanyName+' - '+DateTimeToStr(CompileDateTime);
   AboutBox.LVersion.Caption:= 'Version: '+Version;
-  AboutBox.LVersion.Hint:= WinVersion.VerDetail;
+  //AboutBox.LVersion.Hint:= OSVersion.VerDetail;
   AboutBox.LUpdate.Hint := AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
   AboutBox.Version:= Version;
   AboutBox.ProgName:= ProgName;
@@ -915,7 +919,7 @@ procedure TFProgram.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   If ListeChange or SettingsChange then
   begin
-    if WinVersion.VerMaj > 5 then   // Vista et après
+    if OSVersion.VerMaj > 5 then   // Vista et après
     FSaveCfg.IconDefFile:= SystemRoot+'\system32\imageres.dll' else
     FSaveCfg.IconDefFile:= SystemRoot+'\system32\shell32.dll';
     FSaveCfg.EGrpName.Text:= Settings.GroupName;
@@ -1420,7 +1424,7 @@ end;
 
 procedure TFProgram.SBSaveClick(Sender: TObject);
 begin
-  if WinVersion.VerMaj > 5 then   // Vista et après
+  if OSVersion.VerMaj > 5 then   // Vista et après
   FSaveCfg.IconDefFile:= SystemRoot+'\system32\imageres.dll' else
   FSaveCfg.IconDefFile:= SystemRoot+'\system32\shell32.dll';
   FSaveCfg.EGrpName.Text:= Settings.GroupName;
@@ -1460,8 +1464,8 @@ begin
   TxtStyleChg:=false;
   With Prefs do
   begin
-    LWinVer.Caption:= ' '+WinVersion.VerDetail;
-    if WinVersion.VerMaj > 5 then   // Vista et après
+    LWinVer.Caption:= ' '+OSVersion.VerDetail;
+    if OSVersion.VerMaj > 5 then   // Vista et après
     IconDefFile:= SystemRoot+'\system32\imageres.dll' else
     IconDefFile:= SystemRoot+'\system32\shell32.dll';
     ImgGrpIcon.Picture.Icon.Handle:= Application.Icon.Handle;
@@ -1987,10 +1991,10 @@ end;
 // Language translation routines
 
 procedure TFProgram.ModLangue ;
-var
-  LangStr: String;
 begin
 LangStr:=  Settings.LangStr;
+OSVersion:= TOSVersion.Create(LangStr, LangFile);
+AboutBox.LVersion.Hint:= OSVersion.VerDetail;
 With LangFile do
  begin
    // MessageBox buttons

@@ -1,16 +1,16 @@
 ﻿;Languages File/Fichier de langues
-;It is possible to create a new language using its Windows ID as new section
-;Il est possible de créer une nouvelle langue en utilisant son identifiant Windows
-;Danish	[6], Dutch [19], Finnish [11], German [7], Greek [8], Hungarian [14]
-;Icelandic [15], Italian [16], Norwegian [20], Polish [21], Portuguese [22]
-;Russian [25], Serbo Croatian [26], Slovak [27], Swedish [29], Turkish [31]
+;It is possible to create a new language using its ID as new section
+;Il est possible de créer une nouvelle langue en utilisant son identifiant
+;Danish	[da], Dutch [nl], Finnish [fi], German [de], Greek [el], Hungarian [hu]
+;Icelandic [is], Italian [it], Norwegian [no], Polish [pl], Portuguese [pt]
+;Russian [ru], Serbo Croatian [sr], Slovak [sk], Swedish [sv], Turkish [tr]
 
 ;Save this file in a secure place if you change it, it will be replaced by any update !
 ;you wiill probably need to add some items.
 ;Submit your translation on my site or GitHub
 
 ;English
-[9]
+[en]
 ;General
 Language=English
 YesBtn=Yes
@@ -124,9 +124,27 @@ FLoadConf.BtnCancel.Caption=Cancel
 
 use64bitcaption=Use the 64bit version of the program
 
+;lazbbosver
+Home=Home
+Professional=Professional
+Server=Server
+00000=Unknown version
+10240=v 1507 "July 2015 update"
+10586=v 1511 "November 2015 update"
+14393=v 1607 "July 2016 (Anniversary update)"
+15063=v 1703 "April 2017 (Creators update)"
+16299=v 1709 "October 2017 (Fall Creators update)"
+17134=v 1803 "April 2018 update"
+17763=v 1809 "October 2018 update"
+18362=v 1903 "May 2019 update"
+18363=v 1909 "November 2019 update"
+19041=v 2004 "May 2020 update"
+19042=v 20H2 "October 2020 update"
+20241=v 21H1 "Spring 2021 updsate"        
+
 
 ;Français
-[12]
+[fr]
 ;General
 Language=Français
 YesBtn=Oui
@@ -238,3 +256,20 @@ FLoadConf.BtnApply.Caption=Appliquer
 FLoadConf.BtnCancel.Caption=Annuler
 use64bitcaption=Utilisez la version 64 bits de ce programme
 
+;lazbbosver
+Home=Famille
+Professional=Entreprise
+Server=Serveur
+00000=Version inconnue
+10240=v 1507 "Juillet 2015"
+10586=v 1511 "Novembre 2015"
+14393=v 1607 "Juillet 2016 (Màj Anniversaire)"
+15063=v 1703 "Avril 2017 (Màj Createurs)"
+16299=v 1709 "Octobre 2017(Màj Fall Créateurs)"
+17134=v 1803 "Avril 2018"
+17763=v 1809 "Octobre 2018"
+18362=v 1903 "Mai 2019"
+18363=v 1909 "Novembre 2019"
+19041=v 2004 "Mai 2020"
+19042=v 20H2 "Octobre 2020"
+20241=v 21H1 "Printemps 2021"         
