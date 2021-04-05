@@ -252,7 +252,11 @@ Version 0.9.1.4 - 22/03/2021
 - Mise à jour de Lazarus 2.0.12
 
 Version 0.9.1.5 - 26/03/2021
-- Use history.txt file to check new version to not depend of Github last version page layout
-- Changed OS version detection
-- Corrected behaviour when restarting Windows
+- Utilisation de history.txt pour rechercher une nouvelle version pour ne pas dépendre 
+  de la page "latest version" de Github
+- Modification de la détection de version de Windows
+- Correction du comportement lors du redémarrage de Windows
 
+Version 0.9.1.6 - 05/04/2021
+- Correction de la vérification de mise à jour : Temps d'attente plus long et
+  indication d'erreur, correction erreur check url page par défaut

@@ -47,7 +47,7 @@
   !define MUI_WELCOMEPAGE_TITLE_3LINES
   !insertmacro MUI_PAGE_WELCOME
   !insertmacro MUI_PAGE_LICENSE $(licence)
- ; !insertmacro MUI_PAGE_DIRECTORY
+  !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
   !insertmacro MUI_PAGE_FINISH
 

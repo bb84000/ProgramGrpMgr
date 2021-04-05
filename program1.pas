@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - march 2021
+// bb - sdtp - april 2021
 //******************************************************************************
 unit program1;
 
@@ -133,6 +133,7 @@ type
     procedure SBPrefsClick(Sender: TObject);
     procedure SBQuitClick(Sender: TObject);
     procedure SBSaveClick(Sender: TObject);
+    procedure Timer2Timer(Sender: TObject);
     procedure TrayProgmanDblClick(Sender: TObject);
   private
     First: Boolean;
@@ -267,8 +268,6 @@ begin
   //Listview1.Invalidate ;
 end;
 
-
-
 procedure TFProgram.OnQueryendSession(var Cancel: Boolean);
 var
   reg:TRegistry;
@@ -288,7 +287,6 @@ begin
   end;
   if ListeChange then SaveConfig(FProgram.Settings.GroupName, All)
   else SaveConfig(FProgram.Settings.GroupName, State)   ;
-  //Close;             // Not needed
 end;
 
 // Intercept minimize system system command to correct
@@ -386,7 +384,8 @@ begin
   ExecPath:= ExtractFilePath(Application.ExeName);
   ProgName:= 'ProgramGrpMgr';
   LocalizedName:= 'Gestionnaire de Groupe de Programmes';
-
+  // Load inifile for urls if present
+  IniFile:= TBbInifile.Create('ProgramGrpMgr.ini');
    // Chargement des chaînes de langue...
   LangFile:= TBbIniFile.create(ExecPath+ProgName+'.lng');
   LangNums:= TStringList.Create;
@@ -418,7 +417,8 @@ begin
   FreeAndNil(ListeFichiers);
   FreeAndNil(ImgList);
   FreeAndNil(langnums);
-  FreeAndNil(langfile);
+  if Assigned(langfile) then langfile.free;
+  if Assigned(IniFile) then IniFile.free;
   FreeAndNil(Settings);
 end;
 
@@ -485,12 +485,11 @@ begin
      OSTarget := '64 bits';
   {$ENDIF}
   // Check inifile with URLs, if not present, then use default
-  IniFile:= TBbInifile.Create('ProgramGrpMgr.ini');
-  AboutBox.ChkVerURL := IniFile.ReadString('urls', 'ChkVerURL','https://github.com/bb84000/ProgramGrpMgr/releases/latest');
+  AboutBox.ChkVerURL := IniFile.ReadString('urls', 'ChkVerURL','https://github.com/bb84000/ProgramGrpMgr/raw/master/history.txt');
   AboutBox.UrlWebsite:= IniFile.ReadString('urls', 'UrlWebSite','https://www.sdtp.com');
   AboutBox.UrlSourceCode:=IniFile.ReadString('urls', 'UrlSourceCode','https://github.com/bb84000/ProgramGrpMgr');
   ChkVerInterval:= IniFile.ReadInt64('urls', 'ChkVerInterval', 3);
-  if Assigned(IniFile) then IniFile.free;
+
   LoadConfig(Settings.GroupName);
   // In case of program's first use
   if length(Settings.LastVersion)=0 then Settings.LastVersion:= version;
@@ -561,6 +560,7 @@ begin
        AboutBox.LUpdate.Caption:= AboutBox.sNoUpdateAvailable;
    end;
    AboutBox.LUpdate.Hint:= AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
+
 end;
 
 procedure TFProgram.FormChangeBounds(Sender: TObject);
@@ -1452,6 +1452,11 @@ begin
   end ;
 end;
 
+procedure TFProgram.Timer2Timer(Sender: TObject);
+begin
+
+end;
+
 procedure TFProgram.SBPrefsClick(Sender: TObject);
 var
   OldDSKMnu: Boolean;
@@ -1681,6 +1686,7 @@ begin
   PTrayMnuRestoreClick(Sender);
   SetForeGroundWindow(Handle);
 end;
+
 
 // Change display if mouse cursor is on an item or in an other sone of the listview
 
