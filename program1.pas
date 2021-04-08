@@ -161,7 +161,7 @@ type
     IconDefFile: String;
     SystemRoot: String;
     ShortCutName: String;
-
+    sBackupPrefs: String;
     YesBtn, NoBtn, CancelBtn: String;
     ExecName, ExecPath: String;
     FPropertyCaption: string;
@@ -208,6 +208,7 @@ type
     procedure WMActivate(var AMessage: TLMActivate); message LM_ACTIVATE;
     procedure OnDeactivate(Sender: TObject);
     procedure OnQueryendSession(var Cancel: Boolean);
+    procedure OnEndSession(Sender: TObject);
     procedure CheckUpdate(days: iDays);
     procedure OnAppMinimize(Sender: TObject);
     function HideOnTaskbar: boolean;
@@ -229,6 +230,8 @@ var
                                   DWORD stdcall;
   SHDefExtractIcon: function (pszIconFile:PChar; iIndex:Longint; uFlags:UINT; var phiconLarge:THandle; var phiconSmall:Thandle;
                               nIconSize:UINT):HRESULT; stdcall;
+  ShutdownBlockReasonCreate: function (Handle: hWnd; Msg: lpcwstr): Bool; StdCall;
+  ShutdownBlockReasonDestroy: function (Handle: hWnd): Bool; StdCall;
 
   function EnumWindowsProc(WHandle: HWND; LParM: LParam): LongBool;StdCall;Export;
 
@@ -270,9 +273,20 @@ end;
 
 procedure TFProgram.OnQueryendSession(var Cancel: Boolean);
 var
+  reason: PWidechar;
+begin
+  reason:= PWideChar(UTF8Decode(sBackupPrefs));
+  if assigned(ShutdownBlockReasonCreate) then ShutdownBlockReasonCreate(Application.Handle, reason);
+  Cancel:= False;
+end;
+
+procedure TFProgram.OnEndSession(Sender:TObject);
+var
   reg:TRegistry;
   RunRegKeyVal, RunRegKeySz: string;
 begin
+  if ListeChange then SaveConfig(FProgram.Settings.GroupName, All)
+  else SaveConfig(FProgram.Settings.GroupName, State)   ;
   if not FProgram.Settings.StartWin then
   begin
     reg := TRegistry.Create;
@@ -283,10 +297,10 @@ begin
     RunRegKeySz:= '"'+Application.ExeName+'" Grp='+FProgram.Settings.GroupName;
     reg.WriteString(RunRegKeyVal, RunRegKeySz) ;
     reg.CloseKey;
-    reg.free;
+    if Assigned(reg) then FreeAndNil(reg);
   end;
-  if ListeChange then SaveConfig(FProgram.Settings.GroupName, All)
-  else SaveConfig(FProgram.Settings.GroupName, State)   ;
+  Application.ProcessMessages;
+  if assigned(ShutdownBlockReasonDestroy) then ShutdownBlockReasonDestroy(Application.Handle);
 end;
 
 // Intercept minimize system system command to correct
@@ -358,16 +372,20 @@ var
   aPath : Array[0..MaxPathLen] of Char; //Allocate memory
 begin
   inherited;
-    Application.OnQueryEndSession := @OnQueryendSession;
-    // Intercept minimize system command
+  Application.OnQueryEndSession := @OnQueryendSession;
+  Application.ONEndSession:= @OnEndSession;
+  // Intercept minimize system command
   Application.OnMinimize:=@OnAppMinimize;
   EnumWindows(@EnumWindowsProc,0);
   // Some things have to be run only on the first form activation
   // so, we set first at true
+  First:= True;
+  // Dynamic load of windows functions needed as then can not exist on some old windows versions
   Pointer(PrivateExtractIcons) := GetProcAddress(GetModuleHandle('user32.dll'),'PrivateExtractIconsA');
   Pointer(SHDefExtractIcon) := GetProcAddress(GetModuleHandle('shell32.dll'),'SHDefExtractIconA');
+  Pointer(ShutdownBlockReasonCreate):= GetProcAddress(GetModuleHandle('user32.dll'), 'ShutdownBlockReasonCreate');
+  Pointer(ShutdownBlockReasonDestroy):= GetProcAddress(GetModuleHandle('user32.dll'), 'ShutdownBlockReasonDestroy');
 
-  First:= True;
   // Compilation date/time
   try
     CompileDateTime:= Str2Date({$I %DATE%}, 'YYYY/MM/DD')+StrToTime({$I %TIME%});
@@ -414,12 +432,12 @@ end;
 
 procedure TFProgram.FormDestroy(Sender: TObject);
 begin
-  FreeAndNil(ListeFichiers);
-  FreeAndNil(ImgList);
-  FreeAndNil(langnums);
-  if Assigned(langfile) then langfile.free;
-  if Assigned(IniFile) then IniFile.free;
-  FreeAndNil(Settings);
+  if Assigned(ListeFichiers) then FreeAndNil(ListeFichiers);
+  if Assigned(ImgList) then FreeAndNil(ImgList);
+  if Assigned(langnums) then FreeAndNil(langnums);
+  if Assigned(langfile) then FreeAndNil(langfile);
+  if Assigned(IniFile) then FreeAndNil(IniFile);
+  if Assigned(Settings) then FreeAndNil(Settings);
 end;
 
 
@@ -1668,10 +1686,6 @@ begin
   begin
     Settings.LastUpdChk:= AboutBox.LastUpdate;
   end;
-
-
-   //Settings.LastUpdChk:= AboutBox.LastUpdate
-  //exit;
 end;
 
 procedure TFProgram.SBQuitClick(Sender: TObject);
@@ -1997,6 +2011,8 @@ end;
 // Language translation routines
 
 procedure TFProgram.ModLangue ;
+var
+UTF16S: UnicodeString;
 begin
 LangStr:=  Settings.LangStr;
 OSVersion:= TOSVersion.Create(LangStr, LangFile);
@@ -2048,7 +2064,7 @@ With LangFile do
    PTrayMnuMaximize.Caption:= ReadString(LangStr, 'PTrayMnuMaximize.Caption', PTrayMnuMaximize.Caption);
    PTrayMnuAbout.Caption:= SBAbout.Hint;
    PTrayMnuQuit.Caption:= PMnuQuit.Caption;
-
+   sBackupPrefs:= ReadString(LangStr, 'BackupPrefs', 'Sauvegarde des préférences');
    SMnuMaskBars:= LangFile.ReadString(LangStr, 'PMnuMaskBars','Masquer la barre de boutons');
    SMnuShowBars:= LangFile.ReadString(LangStr, 'PMnuShowBars','Afficher la barre de boutons');
    if Settings.HideBars then PMnuHideBars.Caption:= SMnuShowBars

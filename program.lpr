@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - february 2021
+// bb - sdtp - april 2021
 //******************************************************************************
 program  ProgramGrpMgr ;
 
@@ -12,7 +12,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, program1,  lazbbaboutupdate, SaveCfg1, prefs1, Property1,
-  ChkNewVer, LoadGroup1, LoadConf1, lazbbChkNewVer ;
+  LoadGroup1, LoadConf1 ;
 
 {$R *.res}
 
@@ -26,10 +26,8 @@ uses
   Application.CreateForm(TFSaveCfg, FSaveCfg);
   Application.CreateForm(TPrefs, Prefs);
   Application.CreateForm(TFProperty, FProperty);
-  Application.CreateForm(TFChkNewVer, FChkNewVer);
   Application.CreateForm(TFLoadGroup, FLoadGroup);
   Application.CreateForm(TFLoadConf, FLoadConf);
-
   Application.Run;
 end.
 

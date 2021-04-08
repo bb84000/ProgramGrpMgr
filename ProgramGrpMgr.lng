@@ -1,4 +1,5 @@
 ﻿;Languages File/Fichier de langues
+;bb - sdtp - april 2021
 ;It is possible to create a new language using its ID as new section
 ;Il est possible de créer une nouvelle langue en utilisant son identifiant
 ;Danish	[da], Dutch [nl], Finnish [fi], German [de], Greek [el], Hungarian [hu]
@@ -27,7 +28,7 @@ SBPrefs.Hint=Change settings
 SBRefresh.Hint=Refresh the programs list
 SBQuit.Hint=Close the application
 SBLoadConf.Hint=Load a previous setting
-
+BackupPrefs=Settings backup
 ODlg1.Title=Add a file
 CBDisplay.Items.Text=Very large icons%sLarge icons%sMedium icons%sStandard icons%sSmall icons
 CBSort.Items.Text=No sort%sSort by name (ascendant)%sSort by name (descendant)%sSort by date(ascendant)%sSort by date(descendant)
@@ -161,7 +162,7 @@ SBPrefs.Hint=Modification des préférences
 SBRefresh.Hint=Actualise la liste de programmes
 SBQuit.Hint=Ferme l'application
 SBLoadConf.Hint=Charge une configuration antérieure
-
+BackupPrefs=Sauvegarde des préférences
 ODlg1.Title=Ajouter un fichier
 CBDisplay.Items.Text=Très grandes icones%sGrandes icones%sIcones moyennes%sIcones normales%sPetites icones
 CBSort.Items.Text=Pas de tri%sTri par nom (ascendant)%sTri par nom (descendant)%sTri par date (ascendant)%sTri par date (descendant)

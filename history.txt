@@ -260,3 +260,7 @@ Version 0.9.1.5 - 26/03/2021
 Version 0.9.1.6 - 05/04/2021
 - Correction de la vérification de mise à jour : Temps d'attente plus long et
   indication d'erreur, correction erreur check url page par défaut
+
+Version 0.9.1.7 - 08/04/2021
+- Modification de la fermeture forcée du programme lors de l'arrêt ou du
+  redémarrage de Windows
