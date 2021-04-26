@@ -13,7 +13,8 @@ uses
   ComCtrls, Buttons, StdCtrls, CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM,
   laz2_XMLRead, laz2_XMLWrite, files1, Registry, LCLIntf, Menus, ExtDlgs,
   ShellAPI, SaveCfg1, prefs1, property1, lazbbinifiles, LoadGroup1, LazUTF8,
-  LoadConf1, Config1, lazbbosver, lazbbutils, lmessages, lazbbaboutupdate, Clipbrd;
+  LoadConf1, Config1, lazbbosver, lazbbutils, lmessages, lazbbaboutupdate,
+  Clipbrd, FileUtil;
 
 type
   { int64 or longint type for Application.QueueAsyncCall }
@@ -154,7 +155,7 @@ type
     SMnuMaskBars, SMnuShowBars: String;
     //langue: Integer;
     LangFile: TBbiniFile;
-    IniFile: TBbInifile;
+
     LangNums: TStringList;
     CurLang: Integer;
     CompileDateTime: TDateTime;
@@ -184,6 +185,7 @@ type
     BkGndPicture: Tpicture;
     sCannotGetNewVerList: String;
     sNoLongerChkUpdates: String;
+    sUrlProgSite: String;
     ChkVerInterval: Int64;
     Iconized: Boolean;
     PrevLeft: Integer;
@@ -402,8 +404,7 @@ begin
   ExecPath:= ExtractFilePath(Application.ExeName);
   ProgName:= 'ProgramGrpMgr';
   LocalizedName:= 'Gestionnaire de Groupe de Programmes';
-  // Load inifile for urls if present
-  IniFile:= TBbInifile.Create('ProgramGrpMgr.ini');
+
    // Chargement des chaînes de langue...
   LangFile:= TBbIniFile.create(ExecPath+ProgName+'.lng');
   LangNums:= TStringList.Create;
@@ -436,7 +437,6 @@ begin
   if Assigned(ImgList) then FreeAndNil(ImgList);
   if Assigned(langnums) then FreeAndNil(langnums);
   if Assigned(langfile) then FreeAndNil(langfile);
-  if Assigned(IniFile) then FreeAndNil(IniFile);
   if Assigned(Settings) then FreeAndNil(Settings);
 end;
 
@@ -473,7 +473,8 @@ end;
 
 procedure TFProgram.FormActivate(Sender: TObject);
 var
-    reg: Tregistry;
+  reg: Tregistry;
+  IniFile: TBbInifile;
 begin
   inherited;
   if not first then exit;
@@ -503,11 +504,14 @@ begin
      OSTarget := '64 bits';
   {$ENDIF}
   // Check inifile with URLs, if not present, then use default
-  AboutBox.ChkVerURL := IniFile.ReadString('urls', 'ChkVerURL','https://github.com/bb84000/ProgramGrpMgr/raw/master/history.txt');
+  IniFile:= TBbInifile.Create('ProgramGrpMgr.ini');
+  AboutBox.ChkVerURL := IniFile.ReadString('urls', 'ChkVerURL','https://github.com/bb84000/ProgramGrpMgr/releases/latest');
   AboutBox.UrlWebsite:= IniFile.ReadString('urls', 'UrlWebSite','https://www.sdtp.com');
+  sUrlProgSite:= IniFile.ReadString('urls', 'UrlProgSite','https://github.com/bb84000/ProgramGrpMgr/wiki'); // can be localized
   AboutBox.UrlSourceCode:=IniFile.ReadString('urls', 'UrlSourceCode','https://github.com/bb84000/ProgramGrpMgr');
   ChkVerInterval:= IniFile.ReadInt64('urls', 'ChkVerInterval', 3);
-
+  if assigned(inifile) then FreeAndNil(inifile);
+  // Now load settings
   LoadConfig(Settings.GroupName);
   // In case of program's first use
   if length(Settings.LastVersion)=0 then Settings.LastVersion:= version;
@@ -552,8 +556,10 @@ begin
      begin
        if length(errmsg)=0 then alertmsg:= sCannotGetNewVerList
        else alertmsg:= errmsg;
-       if AlertDlg(Caption,  alertmsg, ['OK', CancelBtn, sNoLongerChkUpdates],
-                    true, mtError, alertpos)= mrYesToAll then Settings.NoChkNewVer:= true;
+       begin
+         if AlertDlg(Caption,  alertmsg, ['OK', CancelBtn, sNoLongerChkUpdates],
+                  true, mtError, alertpos)= mrYesToAll then Settings.NoChkNewVer:= true;
+       end;
        exit;
      end;
      NewVer := VersionToInt(sNewVer);
@@ -1663,10 +1669,11 @@ begin
 
 end;
 
+
 procedure TFProgram.SBAboutClick(Sender: TObject);
 var
     chked: Boolean;
-    alertmsg: String;
+    alertmsg, s: String;
 begin
   AboutBox.LastUpdate:= Settings.LastUpdChk;
   chked:= AboutBox.Checked;
@@ -2012,7 +2019,8 @@ end;
 
 procedure TFProgram.ModLangue ;
 var
-UTF16S: UnicodeString;
+  UTF16S: UnicodeString;
+  s: string;
 begin
 LangStr:=  Settings.LangStr;
 OSVersion:= TOSVersion.Create(LangStr, LangFile);
@@ -2086,7 +2094,8 @@ With LangFile do
     AboutBox.sNoUpdateAvailable:=ReadString(LangStr,'AboutBox.NoUpdateAvailable','Le gestionnaire de programmes est à jour');
     Aboutbox.Caption:=ReadString(LangStr,'Aboutbox.Caption','A propos du Gestionnaire de programmes');
     AboutBox.LProductName.Caption:= caption;
-    AboutBox.UrlProgSite:= ReadString(LangStr,'AboutBox.UrlProgSite','https://github.com/bb84000/ProgramGrpMgr/wiki/Accueil');
+    AboutBox.LProgPage.Caption:= ReadString(LangStr,'AboutBox.LProgPage.Caption', AboutBox.LProgPage.Caption);
+    AboutBox.UrlProgSite:= sUrlProgSite+ ReadString(LangStr,'AboutBox.UrlProgSite','Accueil');
     AboutBox.LWebSite.Caption:= ReadString(LangStr,'AboutBox.LWebSite.Caption', AboutBox.LWebSite.Caption);
     AboutBox.LSourceCode.Caption:= ReadString(LangStr,'AboutBox.LSourceCode.Caption', AboutBox.LSourceCode.Caption);
 

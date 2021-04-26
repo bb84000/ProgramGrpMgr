@@ -264,3 +264,9 @@ Version 0.9.1.6 - 05/04/2021
 Version 0.9.1.7 - 08/04/2021
 - Modification de la fermeture forcée du programme lors de l'arrêt ou du
   redémarrage de Windows
+
+Version 0.9.2.0 - 26/04/2021
+- Retour vers la recherche d'une nouvelle version dans la page "latest release",
+  l'adresse du fichier historique dépendant du nom de la branche principale
+- Ajout de la page d'accueil du programme dans le dialogue A propos
+
