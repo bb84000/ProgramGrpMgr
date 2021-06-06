@@ -142,7 +142,7 @@ Server=Server
 18363=v 1909 "November 2019 update"
 19041=v 2004 "May 2020 update"
 19042=v 20H2 "October 2020 update"
-20241=v 21H1 "Spring 2021 updsate"        
+19043=v 21H1 "May 2021 updsate"
 
 
 ;Français
@@ -275,4 +275,4 @@ Server=Serveur
 18363=v 1909 "Novembre 2019"
 19041=v 2004 "Mai 2020"
 19042=v 20H2 "Octobre 2020"
-20241=v 21H1 "Printemps 2021"         
+19043=v 21H1 "Mai 2021"
