@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - may 2021
+// bb - sdtp - october 2021
 //******************************************************************************
 unit program1;
 
@@ -17,7 +17,7 @@ uses
   Clipbrd, FileUtil;
 
 type
-  { int64 or longint type for Application.QueueAsyncCall }
+  { int64 or longint type for Application.QueueAsyncCall}
   {$IFDEF CPU32}
     iDays= LongInt;
   {$ENDIF}

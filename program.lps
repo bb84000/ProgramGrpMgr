@@ -19,7 +19,9 @@
         <ComponentName Value="FProgram"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <CursorPos X="19" Y="3"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="5"/>
+        <CursorPos X="57" Y="20"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit1>
@@ -274,10 +276,11 @@
       </Unit30>
       <Unit31>
         <Filename Value="ProgramGrpMgr.lng"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="126"/>
-        <CursorPos X="6" Y="145"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="247"/>
+        <CursorPos X="45" Y="280"/>
         <UsageCount Value="66"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit31>
       <Unit32>
@@ -381,10 +384,9 @@
       </Unit44>
       <Unit45>
         <Filename Value="history.txt"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="242"/>
-        <CursorPos X="64" Y="274"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="245"/>
+        <CursorPos Y="278"/>
         <UsageCount Value="71"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
@@ -399,9 +401,9 @@
       </Unit46>
       <Unit47>
         <Filename Value="ProgramGrpMgr.txt"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="62"/>
-        <CursorPos X="36"/>
+        <CursorPos X="27" Y="93"/>
         <UsageCount Value="43"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
