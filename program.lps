@@ -2,16 +2,17 @@
 <CONFIG>
   <ProjectSession>
     <PathDelim Value="\"/>
-    <Version Value="11"/>
+    <Version Value="12"/>
     <BuildModes Active="Default"/>
     <Units Count="91">
       <Unit0>
         <Filename Value="program.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="ProgramGrpMgr"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="1"/>
         <CursorPos X="21" Y="3"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="program1.pas"/>
@@ -20,10 +21,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="5"/>
-        <CursorPos X="57" Y="20"/>
+        <CursorPos X="27" Y="3"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="..\bbunits\bbutils.pas"/>
@@ -139,7 +140,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="78"/>
         <CursorPos X="26" Y="94"/>
-        <UsageCount Value="129"/>
+        <UsageCount Value="132"/>
       </Unit12>
       <Unit13>
         <Filename Value="..\bbunits\alert.pas"/>
@@ -276,10 +277,10 @@
       </Unit30>
       <Unit31>
         <Filename Value="ProgramGrpMgr.lng"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="247"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="246"/>
         <CursorPos X="45" Y="280"/>
-        <UsageCount Value="66"/>
+        <UsageCount Value="68"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit31>
@@ -384,10 +385,10 @@
       </Unit44>
       <Unit45>
         <Filename Value="history.txt"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="245"/>
-        <CursorPos Y="278"/>
-        <UsageCount Value="71"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="250"/>
+        <CursorPos Y="284"/>
+        <UsageCount Value="73"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit45>
@@ -401,10 +402,9 @@
       </Unit46>
       <Unit47>
         <Filename Value="ProgramGrpMgr.txt"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="62"/>
-        <CursorPos X="27" Y="93"/>
-        <UsageCount Value="43"/>
+        <EditorIndex Value="4"/>
+        <CursorPos X="36"/>
+        <UsageCount Value="45"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit47>
@@ -719,7 +719,32 @@
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit90>
     </Units>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="6" HistoryIndex="5">
+      <Position1>
+        <Filename Value="program1.pas"/>
+        <Caret Line="259" Column="11" TopLine="234"/>
+      </Position1>
+      <Position2>
+        <Filename Value="program1.pas"/>
+        <Caret Line="412" Column="8" TopLine="380"/>
+      </Position2>
+      <Position3>
+        <Filename Value="program1.pas"/>
+        <Caret Line="266" Column="4" TopLine="255"/>
+      </Position3>
+      <Position4>
+        <Filename Value="program1.pas"/>
+        <Caret Line="411" Column="3" TopLine="400"/>
+      </Position4>
+      <Position5>
+        <Filename Value="program1.pas"/>
+        <Caret Line="358" Column="3" TopLine="346"/>
+      </Position5>
+      <Position6>
+        <Filename Value="program1.pas"/>
+        <Caret Line="348" TopLine="341"/>
+      </Position6>
+    </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes Count="1" ActiveMode="default">

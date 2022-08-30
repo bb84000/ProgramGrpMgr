@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - october 2021
+// bb - sdtp - august 2022
 //******************************************************************************
 unit program1;
 
@@ -270,7 +270,7 @@ end;
 
 procedure TFProgram.OnDeactivate(Sender: TObject);
 begin
-  //Listview1.Invalidate ;
+  Listview1.Invalidate ;
 end;
 
 procedure TFProgram.OnQueryendSession(var Cancel: Boolean);
@@ -337,6 +337,8 @@ end;
 
 // retrieve command line parameters
 
+
+
 function TFProgram.GetGrpParam: String;
 var
   s: string;
@@ -350,11 +352,11 @@ begin
   if p > 0 then
   begin
     s1:= Copy(s, p+length(Application.ExeName), length(s));
-    if (s1[1]= #34) or (s1[1]= #39) then
-    s1:= Copy(s1, 3, length(s1)) else
-    s1:= Copy(s1, 2, length(s1));
     if length(s1) > 0 then
     begin
+      if (s1[1]= #34) or (s1[1]= #39) then
+      s1:= Copy(s1, 3, length(s1)) else
+      s1:= Copy(s1, 2, length(s1));
       s1:= StringReplace(s1, #34, '', [rfReplaceAll]);
       param:= StringReplace(s1, #39, '', [rfReplaceAll]);
       p:= Pos('Grp=', param);
@@ -409,6 +411,7 @@ begin
   LangFile:= TBbIniFile.create(ExecPath+ProgName+'.lng');
   LangNums:= TStringList.Create;
   Settings.GroupName:= GetGrpParam;
+
   ListeChange:= False;
   SettingsChange:= False;
   // Get special folders
