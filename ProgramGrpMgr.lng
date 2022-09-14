@@ -41,6 +41,7 @@ PMnuCopy.Caption=Copy the item
 PMnuPaste.Caption=Paste an item
 PMnuMaskBars=Mask the buttons and status bars
 PMnuShowBars=Show the buttons and status bars
+sProgramsGroup=Programs group:
 
 MnuAddImageStr=Add a background image
 MnuRepImageStr=Replace the background image
@@ -176,6 +177,7 @@ PMnuCopy.Caption=Copier cet élément
 PMnuPaste.Caption=Coller un élément
 PMnuMaskBars=Masquer les barres de boutons et de statut
 PMnuShowBars=Afficher les barres de boutons et de statut
+sProgramsGroup=Groupe de programmes:
 
 MnuAddImageStr=Ajouter une image d'arrière plan
 MnuRepImageStr=Remplacer l'image d'arrière plan

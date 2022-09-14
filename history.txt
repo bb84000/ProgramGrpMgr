@@ -281,3 +281,12 @@ Version 0.9.2.3 - 07/01/2022
 
 Version 0.9.2.4 - 29/08/2022
 - Remplacement des bmp par des png en raison du passage à Lazarus 2.2.2
+
+Version 0.9.2.5 - 14/09/2022
+- Modification du script d'installation (gestion correcte des environbnements 32 ou 64 bits)
+- Le commentaire du raccourci sur le bureau mentionne le nom du groupe de programmes
+- Quand on execute le programme alors qu'une instance est déjà présente, la nouvelle instance
+  prend sa place. Dans le cas où l'ancienne instance n'était pas visible (minimisée ou dans le
+  tray), la nouvelle est restaurée à l'écran.
+
+

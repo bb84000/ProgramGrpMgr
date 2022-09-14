@@ -16,6 +16,10 @@ uses
   LoadConf1, Config1, lazbbosver, lazbbutils, lmessages, lazbbaboutupdate,
   Clipbrd, FileUtil;
 
+const
+  WM_NEWINSTANCE = WM_USER + 101;
+  WP_restaure = 0;
+
 type
   { int64 or longint type for Application.QueueAsyncCall}
   {$IFDEF CPU32}
@@ -30,6 +34,8 @@ type
   SaveType = (None, State, All);
 
   AttributeType = (atString, atInteger, atDatetime, atBoolean);
+
+
 
   TFProgram = class(TForm)
     CBDisplay: TComboBox;
@@ -144,6 +150,7 @@ type
     StartMenuPath: String;
     PrgMgrAppsData: string;
     ProgName: String;
+    sProgramsGroup: String;
     LocalizedName: String;
     Settings: Tconfig;
     oldw: array [0..50] of Integer;
@@ -224,7 +231,7 @@ type
 
 var
   FProgram: TFProgram;
-  PrevWndProc: WNDPROC;
+  prevHandle: HWND;
 
   // Windows functions declarations
   PrivateExtractIcons: function(lpszFile: PChar; nIconIndex, cxIcon, cyIcon: integer;
@@ -244,9 +251,14 @@ implementation
 { TFProgram }
 
 // Enumerate Windows to search a previous instance with the same group name
+// If there is a previous instance, we will close it when the current instance is activated
+// and restore it if it is minimized
+
 function EnumWindowsProc(WHandle: HWND; LParM: LParam): LongBool;StdCall;Export;
 var
   Title, ClassName:array[0..128] of char;
+  phandle: HWND;
+  i: INteger;
 begin
   Title:= '';
   ClassName:= '';
@@ -255,8 +267,11 @@ begin
   GetClassName(wHandle, ClassName,128);
   if IsWindowVisible(wHandle) then
   begin
-    if (AnsiToUTF8(Title)=FProgram.GetGrpParam) and (ClassName='Window') then Application.Terminate;
-  end;
+    if (AnsiToUTF8(Title)=FProgram.GetGrpParam) and (ClassName='Window') then
+    begin
+      prevHandle:= WHandle;
+     end;
+   end;
 end;
 
 // Needed to proper display image in listbox.
@@ -380,6 +395,7 @@ begin
   Application.ONEndSession:= @OnEndSession;
   // Intercept minimize system command
   Application.OnMinimize:=@OnAppMinimize;
+  prevHandle:= 0;
   EnumWindows(@EnumWindowsProc,0);
   // Some things have to be run only on the first form activation
   // so, we set first at true
@@ -431,6 +447,8 @@ begin
   IconDefFile:= SystemRoot+'\system32\imageres.dll';
   Listview1.DoubleBuffered:= true;
   BkGndPicture:= nil;
+
+
 end;
 
 
@@ -478,6 +496,7 @@ procedure TFProgram.FormActivate(Sender: TObject);
 var
   reg: Tregistry;
   IniFile: TBbInifile;
+  rec: TRect;
 begin
   inherited;
   if not first then exit;
@@ -514,8 +533,12 @@ begin
   AboutBox.UrlSourceCode:=IniFile.ReadString('urls', 'UrlSourceCode','https://github.com/bb84000/ProgramGrpMgr');
   ChkVerInterval:= IniFile.ReadInt64('urls', 'ChkVerInterval', 3);
   if assigned(inifile) then FreeAndNil(inifile);
+  // A previous instance is already running (we didnt see it as it was minimized ?) so we close it
+  if prevHandle>0 then postMessage(prevHandle, WM_CLOSE, 0, 0);
   // Now load settings
   LoadConfig(Settings.GroupName);
+  // if the previous running instance was minimized, then we show the new instance
+  if prevHandle>0 then PTrayMnuRestoreClick(self);
   // In case of program's first use
   if length(Settings.LastVersion)=0 then Settings.LastVersion:= version;
   // check if desktop context menu enabled and change settings checkbox according.
@@ -529,6 +552,7 @@ begin
   begin
     ShowMessage(use64bitcaption);
   end;
+
   Application.QueueAsyncCall(@CheckUpdate, ChkVerInterval);       // async call to let icons loading
 end;
 
@@ -963,7 +987,7 @@ begin
         if length(FSaveCfg.IconFile) > 0 then Settings.GrpIconFile:= FSaveCfg.IconFile;
         if FSaveCfg.IconIndex >=0 then Settings.GrpIconIndex:= FSaveCfg.IconIndex;
         CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
-                       ShortCutName, Settings.GrpIconFile, Settings.GrpIconIndex);
+                       sProgramsGroup+' '+Settings.GroupName, Settings.GrpIconFile, Settings.GrpIconIndex);
       end;
       SaveConfig(Settings.GroupName, All);
     end;
@@ -1469,7 +1493,7 @@ begin
       if length(FSaveCfg.IconFile) > 0 then Settings.GrpIconFile:= FSaveCfg.IconFile;
       if FSaveCfg.IconIndex >=0 then Settings.GrpIconIndex:= FSaveCfg.IconIndex;
       CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
-                     ShortCutName, Settings.GrpIconFile, Settings.GrpIconIndex);
+                     sProgramsGroup+' '+Settings.GroupName, Settings.GrpIconFile, Settings.GrpIconIndex);
     end;
     SaveConfig(Settings.GroupName, StateChanged);
     ListeChange:= False;
@@ -1580,7 +1604,7 @@ begin
     if CBXShortCut.Checked then
     begin
       CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
-                     ShortCutName, Settings.GrpIconFile, Settings.GrpIconIndex);
+                     sProgramsGroup+' '+Settings.GroupName, Settings.GrpIconFile, Settings.GrpIconIndex);
     end;
     // Program in desktop context menu has changed
     if Settings.DeskTopMnu <> OldDSKMnu then
@@ -2082,7 +2106,7 @@ With LangFile do
    else PMnuHideBars.Caption:= SMnuMaskBars;
    ShortCutName:= ReadString(LangStr, 'ShortCutName', 'Gestionnaire de groupe de programmes');
    DeleteOKMsg:= ReadString(LangStr, 'DeleteOKMsg', 'Vous allez effacer %u élément%s. Etes-vous sur ?');
-
+   sProgramsGroup:= ReadString(LangStr, 'sProgramsGroup', 'Groupe de programmes:');
    sCannotGetNewVerList:=ReadString(LangStr,'CannotGetNewVerList','Liste des nouvelles versions indisponible');
    sNoLongerChkUpdates:=ReadString(LangStr,'NoLongerChkUpdates','Ne plus rechercher les mises à jour');
 

@@ -22,10 +22,10 @@
       <UseVersionInfo Value="True"/>
       <MinorVersionNr Value="9"/>
       <RevisionNr Value="2"/>
-      <BuildNr Value="4"/>
+      <BuildNr Value="5"/>
       <Language Value="040C"/>
       <Attributes pvaPreRelease="True"/>
-      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp" LegalTrademarks="bb - sdtp" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="0.9.2.4"/>
+      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp" LegalTrademarks="bb - sdtp" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="0.9.2.5"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -148,8 +148,8 @@
     </SearchPaths>
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
-      <TargetCPU Value="i386"/>
-      <TargetOS Value="win32"/>
+      <TargetCPU Value="x86_64"/>
+      <TargetOS Value="win64"/>
       <Optimizations>
         <OptimizationLevel Value="3"/>
       </Optimizations>
