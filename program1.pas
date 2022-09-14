@@ -221,6 +221,7 @@ type
     procedure CheckUpdate(days: iDays);
     procedure OnAppMinimize(Sender: TObject);
     function HideOnTaskbar: boolean;
+    Procedure WMSyscommand(Var msg: TWmSysCommand); message WM_SYSCOMMAND;
   public
      OSVersion: TOSVersion ;
   end;
@@ -231,7 +232,7 @@ type
 
 var
   FProgram: TFProgram;
-  prevHandle: HWND;
+  previnst: Boolean;
 
   // Windows functions declarations
   PrivateExtractIcons: function(lpszFile: PChar; nIconIndex, cxIcon, cyIcon: integer;
@@ -269,9 +270,21 @@ begin
   begin
     if (AnsiToUTF8(Title)=FProgram.GetGrpParam) and (ClassName='Window') then
     begin
-      prevHandle:= WHandle;
-     end;
+    previnst:= true;
+    PostMessage(wHandle, WM_SYSCOMMAND, SC_Restore, 0);
+    end;
    end;
+end;
+
+
+// Traitement des messages du menu système
+
+procedure TFprogram.WMSyscommand(Var msg: TWmSysCommand);
+begin
+  case (msg.cmdtype and $FFF0) of
+    SC_RESTORE:  PTrayMnuRestoreClick(self);
+  end;
+  inherited;
 end;
 
 // Needed to proper display image in listbox.
@@ -395,7 +408,7 @@ begin
   Application.ONEndSession:= @OnEndSession;
   // Intercept minimize system command
   Application.OnMinimize:=@OnAppMinimize;
-  prevHandle:= 0;
+  previnst:= false;
   EnumWindows(@EnumWindowsProc,0);
   // Some things have to be run only on the first form activation
   // so, we set first at true
@@ -447,8 +460,6 @@ begin
   IconDefFile:= SystemRoot+'\system32\imageres.dll';
   Listview1.DoubleBuffered:= true;
   BkGndPicture:= nil;
-
-
 end;
 
 
@@ -519,6 +530,8 @@ begin
   CropBitmap(SBAbout.Glyph, PTrayMnuAbout.Bitmap, SBAbout.Enabled);
   CropBitmap(SBQuit.Glyph, PTrayMnuQuit.Bitmap, SBQuit.Enabled);
   BarsHeight:= ClientHeight-ListView1.Height;
+  // A previous instance is already running
+  if previnst then close;
   {$IFDEF CPU32}
      OSTarget := '32 bits';
   {$ENDIF}
@@ -533,13 +546,9 @@ begin
   AboutBox.UrlSourceCode:=IniFile.ReadString('urls', 'UrlSourceCode','https://github.com/bb84000/ProgramGrpMgr');
   ChkVerInterval:= IniFile.ReadInt64('urls', 'ChkVerInterval', 3);
   if assigned(inifile) then FreeAndNil(inifile);
-  // A previous instance is already running (we didnt see it as it was minimized ?) so we close it
-  if prevHandle>0 then postMessage(prevHandle, WM_CLOSE, 0, 0);
+
   // Now load settings
   LoadConfig(Settings.GroupName);
-  // if the previous running instance was minimized, then we show the new instance
-  if prevHandle>0 then PTrayMnuRestoreClick(self);
-  // In case of program's first use
   if length(Settings.LastVersion)=0 then Settings.LastVersion:= version;
   // check if desktop context menu enabled and change settings checkbox according.
   reg := TRegistry.Create;
@@ -552,7 +561,6 @@ begin
   begin
     ShowMessage(use64bitcaption);
   end;
-
   Application.QueueAsyncCall(@CheckUpdate, ChkVerInterval);       // async call to let icons loading
 end;
 
