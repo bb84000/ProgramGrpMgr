@@ -16,9 +16,6 @@ uses
   LoadConf1, Config1, lazbbosver, lazbbutils, lmessages, lazbbaboutupdate,
   Clipbrd, FileUtil;
 
-const
-  WM_NEWINSTANCE = WM_USER + 101;
-  WP_restaure = 0;
 
 type
   { int64 or longint type for Application.QueueAsyncCall}
@@ -221,7 +218,6 @@ type
     procedure CheckUpdate(days: iDays);
     procedure OnAppMinimize(Sender: TObject);
     function HideOnTaskbar: boolean;
-    Procedure WMSyscommand(Var msg: TWmSysCommand); message WM_SYSCOMMAND;
   public
      OSVersion: TOSVersion ;
   end;
@@ -229,6 +225,7 @@ type
  const
    // Message sent to a listview to set the space between icons
    LVM_SETICONSPACING =  LVM_FIRST+ 53;
+
 
 var
   FProgram: TFProgram;
@@ -270,21 +267,10 @@ begin
   begin
     if (AnsiToUTF8(Title)=FProgram.GetGrpParam) and (ClassName='Window') then
     begin
-    previnst:= true;
-    PostMessage(wHandle, WM_SYSCOMMAND, SC_Restore, 0);
+      previnst:= true;
+      PostMessage(wHandle, WM_SYSCOMMAND, SC_Restore, 0);
     end;
-   end;
-end;
-
-
-// Traitement des messages du menu système
-
-procedure TFprogram.WMSyscommand(Var msg: TWmSysCommand);
-begin
-  case (msg.cmdtype and $FFF0) of
-    SC_RESTORE:  PTrayMnuRestoreClick(self);
   end;
-  inherited;
 end;
 
 // Needed to proper display image in listbox.
@@ -315,6 +301,8 @@ var
   reg:TRegistry;
   RunRegKeyVal, RunRegKeySz: string;
 begin
+  // Second instance launched, do nothing
+  if previnst then exit;
   if ListeChange then SaveConfig(FProgram.Settings.GroupName, All)
   else SaveConfig(FProgram.Settings.GroupName, State)   ;
   if not FProgram.Settings.StartWin then
@@ -364,8 +352,6 @@ begin
 end;
 
 // retrieve command line parameters
-
-
 
 function TFProgram.GetGrpParam: String;
 var
@@ -530,8 +516,6 @@ begin
   CropBitmap(SBAbout.Glyph, PTrayMnuAbout.Bitmap, SBAbout.Enabled);
   CropBitmap(SBQuit.Glyph, PTrayMnuQuit.Bitmap, SBQuit.Enabled);
   BarsHeight:= ClientHeight-ListView1.Height;
-  // A previous instance is already running
-  if previnst then close;
   {$IFDEF CPU32}
      OSTarget := '32 bits';
   {$ENDIF}
@@ -546,7 +530,6 @@ begin
   AboutBox.UrlSourceCode:=IniFile.ReadString('urls', 'UrlSourceCode','https://github.com/bb84000/ProgramGrpMgr');
   ChkVerInterval:= IniFile.ReadInt64('urls', 'ChkVerInterval', 3);
   if assigned(inifile) then FreeAndNil(inifile);
-
   // Now load settings
   LoadConfig(Settings.GroupName);
   if length(Settings.LastVersion)=0 then Settings.LastVersion:= version;
@@ -557,6 +540,8 @@ begin
   Prefs.CBXDesktopMnu.Checked:= Settings.DeskTopMnu;
   reg.CloseKey;
   reg.free;
+  // A previous instance is already running
+  if previnst then close;
   if (Pos('64', OSVersion.Architecture)>0) and (OsTarget='32 bits') then
   begin
     ShowMessage(use64bitcaption);
@@ -868,6 +853,8 @@ var
   FilNamWoExt: String;
   RunRegKeyVal, RunRegKeySz: String;
 begin
+  // If second instance, do nothing
+  if previnst then exit;
   if OldConfig then Typ:= All;                        // always save to new config if it is old one
   if (Typ= None) then exit;
   // Current state
@@ -976,6 +963,7 @@ end;
 
 procedure TFProgram.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  if previnst then exit;
   If ListeChange or SettingsChange then
   begin
     if OSVersion.VerMaj > 5 then   // Vista et après
