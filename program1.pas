@@ -14,7 +14,7 @@ uses
   laz2_XMLRead, laz2_XMLWrite, files1, Registry, LCLIntf, Menus, ExtDlgs,
   ShellAPI, SaveCfg1, prefs1, property1, lazbbinifiles, LoadGroup1, LazUTF8,
   LoadConf1, Config1, lazbbosver, lazbbutils, lmessages, lazbbaboutupdate,
-  Clipbrd, FileUtil;
+  Clipbrd, lazbbOneInst, FileUtil;
 
 
 type
@@ -35,6 +35,7 @@ type
 
 
   TFProgram = class(TForm)
+    bbOneInst1: TbbOneInst;
     CBDisplay: TComboBox;
     CBSort: TComboBox;
     ImgMnus: TImageList;
@@ -89,6 +90,7 @@ type
     SBPrefs: TSpeedButton;
     SBSave: TSpeedButton;
     TrayProgman: TTrayIcon;
+    procedure bbOneInst1OtherInstance(Sender: TObject; Parameter: String);
     procedure CBDisplayChange(Sender: TObject);
     procedure CBSortChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
@@ -229,7 +231,6 @@ type
 
 var
   FProgram: TFProgram;
-  previnst: Boolean;
 
   // Windows functions declarations
   PrivateExtractIcons: function(lpszFile: PChar; nIconIndex, cxIcon, cyIcon: integer;
@@ -258,7 +259,7 @@ var
   phandle: HWND;
   i: INteger;
 begin
-  Title:= '';
+{  Title:= '';
   ClassName:= '';
   Result:=True;
   GetWindowText(wHandle, Title,128);
@@ -267,10 +268,10 @@ begin
   begin
     if (AnsiToUTF8(Title)=FProgram.GetGrpParam) and (ClassName='Window') then
     begin
-      previnst:= true;
       PostMessage(wHandle, WM_SYSCOMMAND, SC_Restore, 0);
+      Application.Terminate;
     end;
-  end;
+  end; }
 end;
 
 // Needed to proper display image in listbox.
@@ -301,8 +302,6 @@ var
   reg:TRegistry;
   RunRegKeyVal, RunRegKeySz: string;
 begin
-  // Second instance launched, do nothing
-  if previnst then exit;
   if ListeChange then SaveConfig(FProgram.Settings.GroupName, All)
   else SaveConfig(FProgram.Settings.GroupName, State)   ;
   if not FProgram.Settings.StartWin then
@@ -389,13 +388,13 @@ procedure TFProgram.FormCreate(Sender: TObject);
 var
   aPath : Array[0..MaxPathLen] of Char; //Allocate memory
 begin
+  // check previous instance
+  EnumWindows(@EnumWindowsProc,0);
   inherited;
   Application.OnQueryEndSession := @OnQueryendSession;
   Application.ONEndSession:= @OnEndSession;
   // Intercept minimize system command
   Application.OnMinimize:=@OnAppMinimize;
-  previnst:= false;
-  EnumWindows(@EnumWindowsProc,0);
   // Some things have to be run only on the first form activation
   // so, we set first at true
   First:= True;
@@ -496,6 +495,7 @@ var
   rec: TRect;
 begin
   inherited;
+
   if not first then exit;
   Settings.GroupName:= GetGrpParam;
   // We get Windows Version
@@ -541,7 +541,6 @@ begin
   reg.CloseKey;
   reg.free;
   // A previous instance is already running
-  if previnst then close;
   if (Pos('64', OSVersion.Architecture)>0) and (OsTarget='32 bits') then
   begin
     ShowMessage(use64bitcaption);
@@ -853,8 +852,6 @@ var
   FilNamWoExt: String;
   RunRegKeyVal, RunRegKeySz: String;
 begin
-  // If second instance, do nothing
-  if previnst then exit;
   if OldConfig then Typ:= All;                        // always save to new config if it is old one
   if (Typ= None) then exit;
   // Current state
@@ -963,7 +960,6 @@ end;
 
 procedure TFProgram.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  if previnst then exit;
   If ListeChange or SettingsChange then
   begin
     if OSVersion.VerMaj > 5 then   // Vista et après
@@ -1860,6 +1856,11 @@ begin
   PMnuSave.Enabled:= PMnuEnable(PMnuSave, SBSave.Glyph, True);
 end;
 
+procedure TFProgram.bbOneInst1OtherInstance(Sender: TObject; Parameter: String);
+begin
+  PTrayMnuRestoreClick(self);
+end;
+
 procedure TFProgram.CBSortChange(Sender: TObject);
 begin
   Settings.IconSort:= CBSort.ItemIndex;
@@ -2238,4 +2239,5 @@ begin
 end;
 
 end.
+
 

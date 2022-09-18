@@ -36336,4 +36336,11 @@ object FProgram: TFProgram
       C7
     }
   end
+  object bbOneInst1: TbbOneInst
+    Enabled = True
+    UseParameter = True
+    OnOtherInstance = bbOneInst1OtherInstance
+    Left = 274
+    Top = 73
+  end
 end

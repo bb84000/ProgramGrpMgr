@@ -292,6 +292,8 @@ Version 0.9.2.5 - 14/09/2022
 Version 0.9.2.6 - 14/09/2022
 - Modification du processus en cas de seconde instance : c'est la première qui est conservée
 
-Version 0.9.2.7 - 16/09/2022
-- Processus seconde instance simplifié. Enregistrement des préférences annulé pour la seconde instance
+Version 0.9.2.8 - 18/09/2022
+- Utilisation du composant TbbOneInst pour gérer les instances multiples
+
+
 
