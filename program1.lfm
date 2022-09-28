@@ -36068,6 +36068,7 @@ object FProgram: TFProgram
     object PMnuDelBkgndImg: TMenuItem
       Caption = 'Supprimer l''image de fond'
       Enabled = False
+      Visible = False
       OnClick = PMnuDelBkgndImgClick
     end
     object N41: TMenuItem
@@ -36342,5 +36343,9 @@ object FProgram: TFProgram
     OnOtherInstance = bbOneInst1OtherInstance
     Left = 274
     Top = 73
+  end
+  object OsVersion: TbbOsVersion
+    Left = 374
+    Top = 178
   end
 end

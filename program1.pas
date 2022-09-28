@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - august 2022
+// bb - sdtp - september 2022
 //******************************************************************************
 unit program1;
 
@@ -13,8 +13,8 @@ uses
   ComCtrls, Buttons, StdCtrls, CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM,
   laz2_XMLRead, laz2_XMLWrite, files1, Registry, LCLIntf, Menus, ExtDlgs,
   ShellAPI, SaveCfg1, prefs1, property1, lazbbinifiles, LoadGroup1, LazUTF8,
-  LoadConf1, Config1, lazbbosver, lazbbutils, lmessages, lazbbaboutupdate,
-  Clipbrd, lazbbOneInst, FileUtil;
+  LoadConf1, Config1, lazbbutils, lmessages, lazbbaboutupdate,
+  Clipbrd, lazbbOneInst, lazbbOsVersion, FileUtil;
 
 
 type
@@ -36,6 +36,7 @@ type
 
   TFProgram = class(TForm)
     bbOneInst1: TbbOneInst;
+    OsVersion: TbbOsVersion;
     CBDisplay: TComboBox;
     CBSort: TComboBox;
     ImgMnus: TImageList;
@@ -159,9 +160,7 @@ type
     ConfigFile: String;
     ListeChange, SettingsChange, WStateChange: Bool;
     SMnuMaskBars, SMnuShowBars: String;
-    //langue: Integer;
     LangFile: TBbiniFile;
-
     LangNums: TStringList;
     CurLang: Integer;
     CompileDateTime: TDateTime;
@@ -221,7 +220,7 @@ type
     procedure OnAppMinimize(Sender: TObject);
     function HideOnTaskbar: boolean;
   public
-     OSVersion: TOSVersion ;
+     //OSVersion: TOSVersion ;
   end;
 
  const
@@ -241,38 +240,12 @@ var
   ShutdownBlockReasonCreate: function (Handle: hWnd; Msg: lpcwstr): Bool; StdCall;
   ShutdownBlockReasonDestroy: function (Handle: hWnd): Bool; StdCall;
 
-  function EnumWindowsProc(WHandle: HWND; LParM: LParam): LongBool;StdCall;Export;
 
 implementation
 
 {$R *.lfm}
 
 { TFProgram }
-
-// Enumerate Windows to search a previous instance with the same group name
-// If there is a previous instance, we will close it when the current instance is activated
-// and restore it if it is minimized
-
-function EnumWindowsProc(WHandle: HWND; LParM: LParam): LongBool;StdCall;Export;
-var
-  Title, ClassName:array[0..128] of char;
-  phandle: HWND;
-  i: INteger;
-begin
-{  Title:= '';
-  ClassName:= '';
-  Result:=True;
-  GetWindowText(wHandle, Title,128);
-  GetClassName(wHandle, ClassName,128);
-  if IsWindowVisible(wHandle) then
-  begin
-    if (AnsiToUTF8(Title)=FProgram.GetGrpParam) and (ClassName='Window') then
-    begin
-      PostMessage(wHandle, WM_SYSCOMMAND, SC_Restore, 0);
-      Application.Terminate;
-    end;
-  end; }
-end;
 
 // Needed to proper display image in listbox.
 
@@ -388,8 +361,6 @@ procedure TFProgram.FormCreate(Sender: TObject);
 var
   aPath : Array[0..MaxPathLen] of Char; //Allocate memory
 begin
-  // check previous instance
-  EnumWindows(@EnumWindowsProc,0);
   inherited;
   Application.OnQueryEndSession := @OnQueryendSession;
   Application.ONEndSession:= @OnEndSession;
@@ -420,12 +391,11 @@ begin
   ExecPath:= ExtractFilePath(Application.ExeName);
   ProgName:= 'ProgramGrpMgr';
   LocalizedName:= 'Gestionnaire de Groupe de Programmes';
-
-   // Chargement des chaînes de langue...
-  LangFile:= TBbIniFile.create(ExecPath+ProgName+'.lng');
+  // Chargement des chaînes de langue à partir de la resource ou du fichier s'il existe
+  if FileExists(ExecPath+ProgName+'.lng') then LangFile:= TBbIniFile.create(ExecPath+ProgName+'.lng')
+  else LangFile:= TBbIniFile.create(HINSTANCE, 'PROGRAMGRPMGR_LNG');
   LangNums:= TStringList.Create;
   Settings.GroupName:= GetGrpParam;
-
   ListeChange:= False;
   SettingsChange:= False;
   // Get special folders
@@ -492,14 +462,13 @@ procedure TFProgram.FormActivate(Sender: TObject);
 var
   reg: Tregistry;
   IniFile: TBbInifile;
-  rec: TRect;
 begin
   inherited;
 
   if not first then exit;
   Settings.GroupName:= GetGrpParam;
   // We get Windows Version
-  OSVersion:= TOSVersion.Create(LangStr, LangFile);
+  //OSVersion:= TOSVersion.Create(LangStr, LangFile);
   // For popup menu, retrieve bitmap from buttons
   CropBitmap(SBGroup.Glyph, PmnuGroup.Bitmap, SBGroup.Enabled);
   CropBitmap(SBFolder.Glyph, PMnuFolder.Bitmap, SBFolder.Enabled);
@@ -732,16 +701,18 @@ begin
   // Background Image
   PMnuAddBkgndImg.Caption:= MnuAddImageStr;
   if fileExists (Settings.BkgrndImage) then
-  try
-    BkGndPicture:= TPicture.Create;
-    BkGndPicture.LoadFromFile(Settings.BkgrndImage);
-    PMnuDelBkgndImg.Enabled:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, true, 1);
-    PMnuAddBkgndImg.Caption:= MnuRepImageStr;
-  except
-    BkGndPicture:= nil;
-    Settings.BkgrndImage:='';
-    PMnuDelBkgndImg.Enabled:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, false, 1);
-  end;
+  begin
+    try
+      BkGndPicture:= TPicture.Create;
+      BkGndPicture.LoadFromFile(Settings.BkgrndImage);
+      PMnuDelBkgndImg.visible:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, true, 1);
+      PMnuAddBkgndImg.Caption:= MnuRepImageStr;
+    except
+      BkGndPicture:= nil;
+      Settings.BkgrndImage:='';
+      PMnuDelBkgndImg.visible:= false; //PMnuEnable (PMnuDelBkgndImg, ImgMnus, false, 1);
+    end;
+  end else PMnuDelBkgndImg.visible:= false; ;
   // Taille et position précédentes
   if Settings.SavSizePos then
   begin
@@ -800,7 +771,7 @@ begin
   AboutBox.LProductName.Caption:= GetVersionInfo.ProductName+' ('+OsTarget+')';
   AboutBox.LCopyright.Caption:= GetVersionInfo.CompanyName+' - '+DateTimeToStr(CompileDateTime);
   AboutBox.LVersion.Caption:= 'Version: '+Version;
-  //AboutBox.LVersion.Hint:= OSVersion.VerDetail;
+  AboutBox.LVersion.Hint:= OSVersion.VerDetail;
   AboutBox.LUpdate.Hint := AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
   AboutBox.Version:= Version;
   AboutBox.ProgName:= ProgName;
@@ -1541,6 +1512,7 @@ begin
         CurLang:= CBLangue.ItemIndex;
         Settings.LangStr:= LangNums[CurLang];
         ModLangue;
+        AboutBox.LVersion.Hint:= OSVersion.VerDetail;
         Application.QueueAsyncCall(@CheckUpdate, ChkVerInterval);
       end;
       Settings.StartWin:= CBStartWin.Checked;
@@ -1551,6 +1523,16 @@ begin
       Settings.DeskTopMnu:= CBXDesktopMnu.Checked;
       Settings.BkgrndColor:= ColorPickerBkgnd.color;
       ListView1.Color:= ColorPickerBkgnd.color;
+      if fileExists (Settings.BkgrndImage) then
+      begin
+        PMnuAddBkgndImg.Caption:= MnuRepImageStr;
+        //PMnuDelBkgndImg.Caption:= MnuDelBkGndImage;
+      end else
+      begin
+        PMnuAddBkgndImg.Caption:= MnuAddImageStr;
+        PMnuDelBkgndImg.visible:= false;
+      end;
+
       // Display text properly after color change
       if not (Settings.TextColor= ColorPickerFont.color) then
       begin
@@ -1677,11 +1659,11 @@ begin
       BkGndPicture:= TPicture.Create;
       BkGndPicture.LoadFromFile(Settings.BkgrndImage);
       PMnuAddBkgndImg.Caption:= MnuRepImageStr;
-      PMnuDelBkgndImg.Enabled:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, true, 1);
+      PMnuDelBkgndImg.Visible:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, true, 1);
     except
       BkGndPicture:= nil;
       Settings.BkgrndImage:='';
-      PMnuDelBkgndImg.Enabled:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, false, 1);
+      PMnuDelBkgndImg.Visible:=  false;
     end;
     ListView1.Invalidate;
   end;
@@ -1692,7 +1674,7 @@ end;
 procedure TFProgram.SBAboutClick(Sender: TObject);
 var
     chked: Boolean;
-    alertmsg, s: String;
+    alertmsg: String;
 begin
   AboutBox.LastUpdate:= Settings.LastUpdChk;
   chked:= AboutBox.Checked;
@@ -1783,7 +1765,6 @@ begin
     PMnuAddFile.Visible:= False;
     N3.Visible:= False;
     PMnuAddBkgndImg.Visible:= False;
-    PMnuDelBkgndImg.Visible:= False;
     N41.Visible:= False;
     N4.Visible:= False;
     PMnuSave.Visible:= False;
@@ -1809,7 +1790,6 @@ begin
     PMnuAddFile.Visible:= True;
     N3.Visible:= True;
     PMnuAddBkgndImg.Visible:= True;
-    PMnuDelBkgndImg.Visible:= True;
     N41.Visible:= True;
     N4.Visible:= True;
     PMnuSave.Visible:= True;
@@ -1837,9 +1817,9 @@ end;
 
 procedure TFProgram.PMnuDelBkgndImgClick(Sender: TObject);
 begin
-    Settings.BkgrndImage:='';
+  Settings.BkgrndImage:='';
   BkGndPicture:= nil;
-  PMnuDelBkgndImg.Enabled:= PMnuEnable (PMnuDelBkgndImg, ImgMnus, false, 1);
+  PMnuDelBkgndImg.visible:= False;
   PMnuAddBkgndImg.Caption:= MnuAddImageStr;
   ListView1.Invalidate;
 end;
@@ -2043,12 +2023,9 @@ end;
 
 procedure TFProgram.ModLangue ;
 var
-  UTF16S: UnicodeString;
-  s: string;
+  i: integer;
 begin
 LangStr:=  Settings.LangStr;
-OSVersion:= TOSVersion.Create(LangStr, LangFile);
-AboutBox.LVersion.Hint:= OSVersion.VerDetail;
 With LangFile do
  begin
    // MessageBox buttons
@@ -2119,11 +2096,11 @@ With LangFile do
     Aboutbox.Caption:=ReadString(LangStr,'Aboutbox.Caption','A propos du Gestionnaire de programmes');
     AboutBox.LProductName.Caption:= caption;
     AboutBox.LProgPage.Caption:= ReadString(LangStr,'AboutBox.LProgPage.Caption', AboutBox.LProgPage.Caption);
-    AboutBox.UrlProgSite:= sUrlProgSite+ ReadString(LangStr,'AboutBox.UrlProgSite','Accueil');
+    AboutBox.UrlProgSite:= sUrlProgSite+ ReadString(LangStr,'AboutBox.UrlProgSite','/Accueil');
     AboutBox.LWebSite.Caption:= ReadString(LangStr,'AboutBox.LWebSite.Caption', AboutBox.LWebSite.Caption);
     AboutBox.LSourceCode.Caption:= ReadString(LangStr,'AboutBox.LSourceCode.Caption', AboutBox.LSourceCode.Caption);
 
-   NoLongerChkUpdates:= ReadString(LangStr, 'NoLongerChkUpdates', 'Ne plus rechercher les mises à jour');
+    NoLongerChkUpdates:= ReadString(LangStr, 'NoLongerChkUpdates', 'Ne plus rechercher les mises à jour');
    //NextChkCaption:= ReadString(LangStr, 'NextChkCaption', 'Prochaine vérification');
    NoDeleteGroup:= ReadString(LangStr, 'NoDeleteGroup', 'Impossible de supprimer le groupe en cours');
    DeleteGrpMsg:= ReadString(LangStr, 'DeleteGrpMsg', 'Vous allez effacer le groupe %s. Etes-vous sur ?');
@@ -2194,6 +2171,16 @@ With LangFile do
    FloadConf.Caption:= ReadString(LangStr, 'FloadConf.Caption', FloadConf.Caption);
    FLoadConf.BtnApply.Caption:= ReadString(LangStr, 'FLoadConf.BtnApply.Caption', FLoadConf.BtnApply.Caption);
    FLoadConf.BtnCancel.Caption:= ReadString(LangStr, 'FLoadConf.BtnCancel.Caption', FLoadConf.BtnCancel.Caption);
+   with OsVersion do
+   begin
+     ProdStr[1]:= ReadString(LangStr,'Home','Famille');
+     ProdStr[2]:= ReadString(LangStr,'Professional','Entreprise');
+     ProdStr[3]:= ReadString(LangStr,'Server','Serveur');
+     for i:= 0 to high(Win10Build) do Win10Build[i,1]:= ReadString(LangStr,Win10Build[i,0],Win10Build[i,1]);
+     for i:= 0 to high(Win11Build) do Win11Build[i,1]:= ReadString(LangStr,Win11Build[i,0],Win11Build[i,1]);
+     GetSysInfo;
+     //AboutBox.LVersion.Hint:= OSVersion.VerDetail;
+   end;
  end;
 end;
 

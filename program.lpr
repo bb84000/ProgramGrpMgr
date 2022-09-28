@@ -12,7 +12,7 @@ uses
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, program1,  lazbbaboutupdate, SaveCfg1, prefs1, Property1,
-  LoadGroup1, LoadConf1 ;
+  LoadGroup1, LoadConf1;
 
 {$R *.res}
 
