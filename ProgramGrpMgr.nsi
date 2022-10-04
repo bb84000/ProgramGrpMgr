@@ -12,12 +12,15 @@
   ;General
   Name "Program Group Manager"
   OutFile "InstallPrgGrpMgr.exe"
-  !define source_dir "C:\Users\Bernard\Documents\Lazarus\ProgramGrpMgr"
+ 
   !define lazarus_dir "C:\Users\Bernard\Documents\Lazarus"
+  !define source_dir "${lazarus_dir}\ProgramGrpMgr"
+  
+  RequestExecutionLevel admin
 
   ;Windows vista.. 10 manifest
   ManifestSupportedOS all
-  RequestExecutionLevel admin
+
 
   !define MUI_ICON "${source_dir}\ProgramGrpMgr.ico"
   !define MUI_UNICON "${source_dir}\ProgramGrpMgr.ico"
@@ -30,8 +33,6 @@
   var exe_to_del
   var dll_to_inst       ; "32.dll" or "64.dll"
   var dll_to_del
-  ;var instnewfolder     ; if old Delphi 32 bits version, install 32 bit new version in another folder
-  ;var instfolder
   var sysfolder         ; system 32 folder
 
 ;--------------------------------
@@ -48,6 +49,7 @@
   !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
   !define MUI_FINISHPAGE_SHOWREADME
   !define MUI_FINISHPAGE_SHOWREADME_TEXT "$(Check_box)"
+  !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
   !define MUI_FINISHPAGE_SHOWREADME_FUNCTION inst_shortcut
 ; Pages
 
@@ -183,6 +185,7 @@ Section "" ;No components page, name is not important
   File "${source_dir}\ProgramGrpMgr.lng"
   File "${source_dir}\ProgramGrpMgr.ini"
   File "${source_dir}\FAQ.txt"
+  
   ; write out uninstaller
   WriteUninstaller "$INSTDIR\uninst.exe"
   ; Get install folder size

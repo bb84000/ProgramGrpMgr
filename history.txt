@@ -301,6 +301,9 @@ Version 0.9.3.0 - 27/09/2022
   l'utilisateur souhaite ajouter une langue. Il n'est plus installé par défaut.
 - Utilisation du composant TbbOsVersion à la place cde l'unité lazbbOsVer
 
+Version 0.9.3.1 - 04/10/2022
+- Modification du code suite à modification du composnat TbbOsVersion
+
 
 
 

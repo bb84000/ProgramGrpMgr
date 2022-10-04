@@ -771,7 +771,7 @@ begin
   AboutBox.LProductName.Caption:= GetVersionInfo.ProductName+' ('+OsTarget+')';
   AboutBox.LCopyright.Caption:= GetVersionInfo.CompanyName+' - '+DateTimeToStr(CompileDateTime);
   AboutBox.LVersion.Caption:= 'Version: '+Version;
-  AboutBox.LVersion.Hint:= OSVersion.VerDetail;
+  //AboutBox.LVersion.Hint:= OSVersion.VerDetail;
   AboutBox.LUpdate.Hint := AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
   AboutBox.Version:= Version;
   AboutBox.ProgName:= ProgName;
@@ -1483,7 +1483,6 @@ begin
   TxtStyleChg:=false;
   With Prefs do
   begin
-    LWinVer.Caption:= ' '+OSVersion.VerDetail;
     if OSVersion.VerMaj > 5 then   // Vista et après
     IconDefFile:= SystemRoot+'\system32\imageres.dll' else
     IconDefFile:= SystemRoot+'\system32\shell32.dll';
@@ -2024,10 +2023,28 @@ end;
 procedure TFProgram.ModLangue ;
 var
   i: integer;
+  A: TStringArray;
 begin
-LangStr:=  Settings.LangStr;
-With LangFile do
- begin
+  LangStr:=  Settings.LangStr;
+  With LangFile do
+  begin
+    with OsVersion do
+    begin
+      ProdStrs.Strings[1]:= ReadString(LangStr,'Home','Famille'); ;
+      ProdStrs.Strings[2]:= ReadString(LangStr,'Professional','Entreprise');
+      ProdStrs.Strings[3]:= ReadString(LangStr,'Server','Serveur');
+      for i:= 0 to Win10Strs.count-1 do
+      begin
+        A:= Win10Strs.Strings[i].split('=');
+        Win10Strs.Strings[i]:= A[0]+'='+ReadString(LangStr,A[0],A[1]);
+      end;
+      for i:= 0 to Win11Strs.count-1 do
+      begin
+        A:= Win11Strs.Strings[i].split('=');
+        Win11Strs.Strings[i]:= A[0]+'='+ReadString(LangStr,A[0],A[1]);
+      end;
+      //
+    end;
    // MessageBox buttons
    YesBtn:= ReadString(LangStr, 'YesBtn', 'Oui');
    NoBtn:= ReadString(LangStr, 'NoBtn', 'Non');
@@ -2099,7 +2116,7 @@ With LangFile do
     AboutBox.UrlProgSite:= sUrlProgSite+ ReadString(LangStr,'AboutBox.UrlProgSite','/Accueil');
     AboutBox.LWebSite.Caption:= ReadString(LangStr,'AboutBox.LWebSite.Caption', AboutBox.LWebSite.Caption);
     AboutBox.LSourceCode.Caption:= ReadString(LangStr,'AboutBox.LSourceCode.Caption', AboutBox.LSourceCode.Caption);
-
+    AboutBox.LVersion.Hint:= OSVersion.VerDetail;
     NoLongerChkUpdates:= ReadString(LangStr, 'NoLongerChkUpdates', 'Ne plus rechercher les mises à jour');
    //NextChkCaption:= ReadString(LangStr, 'NextChkCaption', 'Prochaine vérification');
    NoDeleteGroup:= ReadString(LangStr, 'NoDeleteGroup', 'Impossible de supprimer le groupe en cours');
@@ -2142,6 +2159,7 @@ With LangFile do
    Prefs.CBUnder.Caption:= ReadString(LangStr, 'Prefs.CBUnder.Caption', Prefs.CBUnder.Caption);
    Prefs.ESize.Hint:=  ReadString(LangStr, 'Prefs.ESize.Hint', Prefs.ESize.Hint);
    Prefs.LTextStyle.Caption:= ReadString(LangStr, 'Prefs.LTextStyle.Caption', Prefs.LTextStyle.Caption);
+   Prefs.LWinVer.Caption:= ' '+OSVersion.VerDetail;
 
    FPropertyCaption:= ReadString(LangStr, 'FPropertyCaption', 'Propriétés de %s');
    FProperty.TSGeneral.Caption:= ReadString(LangStr, 'FProperty.TSGeneral.Caption', FProperty.TSGeneral.Caption);
@@ -2171,16 +2189,7 @@ With LangFile do
    FloadConf.Caption:= ReadString(LangStr, 'FloadConf.Caption', FloadConf.Caption);
    FLoadConf.BtnApply.Caption:= ReadString(LangStr, 'FLoadConf.BtnApply.Caption', FLoadConf.BtnApply.Caption);
    FLoadConf.BtnCancel.Caption:= ReadString(LangStr, 'FLoadConf.BtnCancel.Caption', FLoadConf.BtnCancel.Caption);
-   with OsVersion do
-   begin
-     ProdStr[1]:= ReadString(LangStr,'Home','Famille');
-     ProdStr[2]:= ReadString(LangStr,'Professional','Entreprise');
-     ProdStr[3]:= ReadString(LangStr,'Server','Serveur');
-     for i:= 0 to high(Win10Build) do Win10Build[i,1]:= ReadString(LangStr,Win10Build[i,0],Win10Build[i,1]);
-     for i:= 0 to high(Win11Build) do Win11Build[i,1]:= ReadString(LangStr,Win11Build[i,0],Win11Build[i,1]);
-     GetSysInfo;
-     //AboutBox.LVersion.Hint:= OSVersion.VerDetail;
-   end;
+
  end;
 end;
 
