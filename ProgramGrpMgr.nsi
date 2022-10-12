@@ -1,5 +1,5 @@
 ;Installation script for ProgramGrpMgr
-; bb - sdtp - august 2022
+; bb - sdtp - october 2022
 ;--------------------------------
 
   !include "MUI2.nsh"

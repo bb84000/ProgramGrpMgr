@@ -1,15 +1,15 @@
 object FSaveCfg: TFSaveCfg
-  Left = 399
-  Height = 178
-  Top = 164
+  Left = 820
+  Height = 198
+  Top = 206
   Width = 402
   BorderStyle = bsDialog
   Caption = 'Enregistrement des modifications'
-  ClientHeight = 178
+  ClientHeight = 198
   ClientWidth = 402
   OnCreate = FormCreate
   Position = poMainFormCenter
-  LCLVersion = '2.0.0.4'
+  LCLVersion = '2.2.2.0'
   object Label1: TLabel
     Left = 0
     Height = 15
@@ -33,25 +33,25 @@ object FSaveCfg: TFSaveCfg
   object RBtnSaveAs: TRadioButton
     Left = 16
     Height = 19
-    Top = 72
-    Width = 136
+    Top = 74
+    Width = 120
     AutoSize = False
     Caption = 'Enregistrer sous :'
     OnClick = RadioButtonclick
     TabOrder = 1
   end
   object EGrpName: TEdit
-    Left = 156
+    Left = 140
     Height = 23
-    Top = 68
-    Width = 236
+    Top = 70
+    Width = 252
     Enabled = False
     TabOrder = 2
   end
   object CBXShortCut: TCheckBox
     Left = 16
     Height = 19
-    Top = 102
+    Top = 132
     Width = 216
     AutoSize = False
     Caption = 'Placer un raccourci sur le bureau'
@@ -60,7 +60,7 @@ object FSaveCfg: TFSaveCfg
   object LGrpIcon: TLabel
     Left = 256
     Height = 15
-    Top = 102
+    Top = 132
     Width = 96
     AutoSize = False
     Caption = 'Icone du groupe'
@@ -70,7 +70,7 @@ object FSaveCfg: TFSaveCfg
     Left = 360
     Height = 32
     Hint = 'Double clic pour changer l''icone'
-    Top = 94
+    Top = 124
     Width = 32
     OnDblClick = ImgGrpIconDblClick
     ParentShowHint = False
@@ -79,7 +79,7 @@ object FSaveCfg: TFSaveCfg
   object BtnOK: TButton
     Left = 96
     Height = 25
-    Top = 130
+    Top = 160
     Width = 75
     Caption = 'OK'
     ModalResult = 1
@@ -88,10 +88,27 @@ object FSaveCfg: TFSaveCfg
   object BtnCancel: TButton
     Left = 232
     Height = 25
-    Top = 130
+    Top = 160
     Width = 75
     Caption = 'Annuler'
     ModalResult = 2
     TabOrder = 5
+  end
+  object LGrpComment: TLabel
+    Left = 16
+    Height = 15
+    Top = 100
+    Width = 120
+    AutoSize = False
+    Caption = 'Commentaire'
+    ParentColor = False
+  end
+  object EGrpComment: TEdit
+    Left = 140
+    Height = 23
+    Top = 96
+    Width = 252
+    Enabled = False
+    TabOrder = 6
   end
 end

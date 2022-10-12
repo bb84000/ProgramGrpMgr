@@ -191,7 +191,7 @@ type
     sCannotGetNewVerList: String;
     sNoLongerChkUpdates: String;
     sUrlProgSite: String;
-    ChkVerInterval: Int64;
+    ChkVerInterval: Int64;  //iDays ?
     Iconized: Boolean;
     PrevLeft: Integer;
     PrevTop: Integer;
@@ -938,19 +938,21 @@ begin
     FSaveCfg.IconDefFile:= SystemRoot+'\system32\shell32.dll';
     FSaveCfg.EGrpName.Text:= Settings.GroupName;
     FSaveCfg.ImgGrpIcon.Picture.Icon:= Application.Icon;
+    if Settings.GrpComment='' then FSaveCfg.EGrpComment.text:= sProgramsGroup+' '+Settings.GroupName
+    else FSaveCfg.EGrpComment.text:= Settings.GrpComment;
     If FSaveCfg.Showmodal = mrOK then
     begin
       if FSaveCfg.RBtnSaveAs.Checked then
       begin
         if length(FSaveCfg.EGrpName.Text) > 0 then Settings.GroupName:= FSaveCfg.EGrpName.Text;
+        if length(FSaveCfg.EGrpComment.Text) > 0 then Settings.GrpComment:= FSaveCfg.EGrpComment.Text;
       end;
-
       if FSaveCfg.CBXShortCut.Checked then
       begin
         if length(FSaveCfg.IconFile) > 0 then Settings.GrpIconFile:= FSaveCfg.IconFile;
         if FSaveCfg.IconIndex >=0 then Settings.GrpIconIndex:= FSaveCfg.IconIndex;
         CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
-                       sProgramsGroup+' '+Settings.GroupName, Settings.GrpIconFile, Settings.GrpIconIndex);
+                       Settings.GrpComment, Settings.GrpIconFile, Settings.GrpIconIndex);
       end;
       SaveConfig(Settings.GroupName, All);
     end;
@@ -1443,11 +1445,14 @@ begin
   FSaveCfg.IconDefFile:= SystemRoot+'\system32\shell32.dll';
   FSaveCfg.EGrpName.Text:= Settings.GroupName;
   FSaveCfg.ImgGrpIcon.Picture.Icon.Handle:= ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
+  if Settings.GrpComment='' then FSaveCfg.EGrpComment.text:= sProgramsGroup+' '+Settings.GroupName
+  else FSaveCfg.EGrpComment.text:= Settings.GrpComment;
   If FSaveCfg.Showmodal = mrOK then
   begin
     if FSaveCfg.RBtnSaveAs.Checked then
     begin
       if length(FSaveCfg.EGrpName.Text) > 0 then Settings.GroupName:= FSaveCfg.EGrpName.Text;
+      if length(FSaveCfg.EGrpComment.Text) > 0 then Settings.GrpComment:= FSaveCfg.EGrpComment.Text;
     end;
     if length(FSaveCfg.IconFile) > 0 then Settings.GrpIconFile:= FSaveCfg.IconFile;
     if FSaveCfg.IconIndex >=0 then Settings.GrpIconIndex:= FSaveCfg.IconIndex;
@@ -1456,7 +1461,7 @@ begin
       if length(FSaveCfg.IconFile) > 0 then Settings.GrpIconFile:= FSaveCfg.IconFile;
       if FSaveCfg.IconIndex >=0 then Settings.GrpIconIndex:= FSaveCfg.IconIndex;
       CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
-                     sProgramsGroup+' '+Settings.GroupName, Settings.GrpIconFile, Settings.GrpIconIndex);
+                     Settings.GrpComment, Settings.GrpIconFile, Settings.GrpIconIndex);
     end;
     SaveConfig(Settings.GroupName, StateChanged);
     ListeChange:= False;
@@ -1487,6 +1492,8 @@ begin
     IconDefFile:= SystemRoot+'\system32\imageres.dll' else
     IconDefFile:= SystemRoot+'\system32\shell32.dll';
     ImgGrpIcon.Picture.Icon.Handle:= Application.Icon.Handle;
+    EGrpGroupName.Text:= Settings.GroupName;
+    EGrpComment.Text:= Settings.GrpComment;
     CBLangue.ItemIndex:= CurLang;
     CBStartWin.Checked:= Settings.StartWin;
     CBSavSizePos.Checked:= Settings.SavSizePos;
@@ -1514,6 +1521,8 @@ begin
         AboutBox.LVersion.Hint:= OSVersion.VerDetail;
         Application.QueueAsyncCall(@CheckUpdate, ChkVerInterval);
       end;
+      Settings.GroupName:= EGrpGroupName.Text;
+      Settings.GrpComment:= EGrpComment.Text;
       Settings.StartWin:= CBStartWin.Checked;
       Settings.SavSizePos:= CBSavSizePos.Checked;
       Settings.NoChkNewVer:= CBNoChkNewVer.Checked;
@@ -2132,6 +2141,7 @@ begin
    FSaveCfg.LGrpIcon.Caption:= ReadString(LangStr, 'FSaveCfg.LGrpIcon.Caption', FSaveCfg.LGrpIcon.Caption);
    FSaveCfg.ImgGrpIcon.Hint:= ReadString(LangStr, 'FSaveCfg.ImgGrpIcon.Hint', FSaveCfg.ImgGrpIcon.Hint);
    FSaveCfg.BtnCancel.Caption:= CancelBtn;
+   FSaveCfg.LGrpComment.Caption:= ReadString(LangStr, 'FSaveCfg.LGrpComment.Caption', FSaveCfg.LGrpComment.Caption);
    //AboutBox.Caption:= SBAbout.Hint;
 
    use64bitcaption:= ReadString(LangStr, 'use64bitcaption', 'Utilisez la version 64 bits de ce programme');
@@ -2148,7 +2158,9 @@ begin
    Prefs.CBHideInTaskBar.Hint:= ReadString(LangStr, 'Prefs.CBHideInTaskBar.Hint',  Prefs.CBHideInTaskBar.Hint);
    Prefs.ImgGrpIcon.Hint:= FSaveCfg.ImgGrpIcon.Hint;
    Prefs.LGrpIcon.Caption:= FSaveCfg.LGrpIcon.Caption;
+   Prefs.LGrpComment.Caption:= FSaveCfg.LGrpComment.Caption;
    Prefs.CBXShortCut.Caption:= FSaveCfg.CBXShortCut.Caption;
+   Prefs.LGrpName.Caption:= ReadString(LangStr, 'Prefs.LGrpName.Caption', Prefs.LGrpName.Caption);;
    Prefs.CBXDesktopMnu.Caption:= ReadString(LangStr, 'Prefs.CBXDesktopMnu.Caption',  Prefs.CBXDesktopMnu.Caption);
    Prefs.CBXDesktopMnu.Hint:= StringReplace(ReadString(LangStr, 'Prefs.CBXDesktopMnu.Hint', Prefs.CBXDesktopMnu.Hint),
                                '%s', #13#10, [rfReplaceAll]);

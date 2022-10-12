@@ -304,6 +304,9 @@ Version 0.9.3.0 - 27/09/2022
 Version 0.9.3.1 - 04/10/2022
 - Modification du code suite à modification du composnat TbbOsVersion
 
+Version 0.9.3.2 - 12/10/2022
+- Ajout d'un commentaire affiché dans le raccourci sur le bureau
+
 
 
 

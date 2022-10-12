@@ -22,6 +22,7 @@ type
     FWState: string;
     FGrpIconFile: string;
     FGrpIconIndex: integer;
+    FGrpComment: String;
     FIconDisplay: integer;
     FIconSort: Integer;
     FLastUpdChk: Tdatetime;
@@ -50,6 +51,7 @@ type
     procedure SetWState (s: string);
     procedure SetGrpIconFile (s: string);
     procedure SetGrpIconIndex (i: integer);
+    procedure SetGrpComment(s: String);
     procedure SetIconDisplay (i: integer);
     procedure SetIconSort (i: integer);
     procedure SetLastUpdChk (dt: TDateTime);
@@ -76,6 +78,7 @@ type
     property GroupName: string read FGroupName write SetGroupName;
     property GrpIconFile: string read FGrpIconFile write SetGrpIconFile ;
     property GrpIconIndex: integer read FGrpIconIndex write SetGrpIconIndex;
+    property GrpComment: String read FGrpComment write SetGrpComment;
     property SavSizePos: Boolean read FSavSizePos write SetSavSizePos;
     property WState: string read FWState write SetWState;
     property IconDisplay: integer read FIconDisplay write SetIconDisplay default 3;
@@ -149,6 +152,15 @@ begin
     FGrpIconIndex:= i;
     if Assigned(FOnChange) then FOnChange(Self);
    end;
+end;
+
+procedure TConfig.SetGrpComment(s: String);
+begin
+   if FGrpComment <> s then
+   begin
+    FGrpComment:= s;
+    if Assigned(FOnChange) then FOnChange(Self);
+    end;
 end;
 
 procedure TConfig.SetIconDisplay (i: integer);
@@ -312,6 +324,7 @@ begin
     TDOMElement(iNode).SetAttribute('groupname', FGroupName);
     TDOMElement(iNode).SetAttribute ('grpiconfile', FGrpIconFile);
     TDOMElement(iNode).SetAttribute ('grpiconindex', IntToStr(FGrpIconIndex));
+    TDOMElement(iNode).SetAttribute ('grpcomment', FGrpComment);
     TDOMElement(iNode).SetAttribute ('savsizepos', IntToStr(Integer(FSavSizePos)));
     TDOMElement(iNode).SetAttribute ('icondisplay', IntToStr(FIconDisplay));
     TDOMElement(iNode).SetAttribute ('iconsort' , IntToStr(FIconSort));
@@ -368,6 +381,7 @@ begin
     FGroupName:= TDOMElement(iNode).GetAttribute('groupname');
     FGrpIconFile:= TDOMElement(iNode).GetAttribute('grpiconfile');
     FGrpIconIndex:= readIntValue(iNode, 'grpiconindex');   //StrToInt(TDOMElement(iNode).GetAttribute('grpiconindex'));
+    FGrpComment:= TDOMElement(iNode).GetAttribute('grpcomment');
     FSavSizePos:= Boolean(readIntValue(iNode, 'savsizepos'));    //StrToInt(TDOMElement(iNode).GetAttribute('savsizepos')));
     FIconDisplay:= readIntValue(iNode, 'icondisplay'); //StrToInt(TDOMElement(iNode).GetAttribute('icondisplay'));
     FIconSort:=  readIntValue(iNode, 'iconsort');   //StrToInt(TDOMElement(iNode).GetAttribute('iconsort'));

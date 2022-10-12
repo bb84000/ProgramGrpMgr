@@ -16,8 +16,10 @@ type
     BtnOK: TButton;
     CBXShortCut: TCheckBox;
     EGrpName: TEdit;
+    EGrpComment: TEdit;
     ImgGrpIcon: TImage;
     Label1: TLabel;
+    LGrpComment: TLabel;
     LGrpIcon: TLabel;
     RBtnSave: TRadioButton;
     RBtnSaveAs: TRadioButton;
@@ -61,6 +63,8 @@ end;
 procedure TFSaveCfg.RadioButtonclick(Sender: TObject);
 begin
   EGrpName.Enabled:= RbtnSaveAs.Checked;
+  EGrpComment.Enabled:= RbtnSaveAs.Checked;
+  LGrpComment.Enabled:= RbtnSaveAs.Checked; ;
 end;
 
 end.

@@ -33,8 +33,12 @@ type
     CBUnder: TCheckBox;
     ColorPickerBkgnd: TColorPicker;
     ColorPickerFont: TColorPicker;
+    EGrpGroupName: TEdit;
+    EGrpComment: TEdit;
     ESize: TEdit;
     ImgGrpIcon: TImage;
+    LGrpName: TLabel;
+    LGrpComment: TLabel;
     LTextStyle: TLabel;
     LBkgndColor: TLabel;
     LTextColor: TLabel;
@@ -47,6 +51,7 @@ type
     procedure CBMiniInTrayClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure ImgGrpIconDblClick(Sender: TObject);
+    procedure Panel1Click(Sender: TObject);
   private
 
   public
@@ -89,6 +94,11 @@ begin
      ImgGrpIcon.Picture.Icon.Handle:= ExtractIcon(Handle, PChar(IconFile), IconIndex);
      ImgChanged:= True;
   end;
+
+end;
+
+procedure TPrefs.Panel1Click(Sender: TObject);
+begin
 
 end;
 

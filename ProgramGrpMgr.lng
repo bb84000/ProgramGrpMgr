@@ -62,7 +62,7 @@ FSaveCfg.RBtnSaveAs.Caption=Save as
 FSaveCfg.CBXShortCut.Caption= Place a shortcut on the desktop
 FSaveCfg.LGrpIcon.Caption=Group Icon
 FSaveCfg.ImgGrpIcon.Hint=Double click to change icon
-
+FSaveCfg.LGrpComment.Caption=Comment
 
 
 NoDeleteGroup=Cannot delete current group
@@ -100,6 +100,7 @@ Prefs.CBItal.Caption=Italic
 Prefs.CBUnder.Caption=Underline
 Prefs.ESize.Hint=Font size, default 0
 Prefs.LTextStyle.Caption=Text style
+Prefs.LGrpName.Caption=Group name
 
 FPropertyCaption=%s properties
 FProperty.TSGeneral.Caption=General
@@ -202,7 +203,7 @@ FSaveCfg.RBtnSaveAs.Caption=Enregistrer sous
 FSaveCfg.CBXShortCut.Caption=Placer un raccourci sur le bureau
 FSaveCfg.LGrpIcon.Caption=Icone du groupe
 FSaveCfg.ImgGrpIcon.Hint=Double clic pour changer l'icone
-
+FSaveCfg.LGrpComment.Caption=Commentaire
 
 NoDeleteGroup=Impossible de supprimer le groupe en cours
 DeleteGrpMsg=Vous allez effacer le groupe %s. Etes-vous sur ?
@@ -239,6 +240,8 @@ Prefs.CBItal.Caption=Italique
 Prefs.CBUnder.Caption=Souligné
 Prefs.ESize.Hint=Taille de la police, 0 par défaut
 Prefs.LTextStyle.Caption=Style du texte
+Prefs.LGrpName.Caption=Nom du groupe
+
 
 FPropertyCaption=Propriétés de %s
 FProperty.TSGeneral.Caption=Général
