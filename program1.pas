@@ -81,6 +81,7 @@ type
     PnlTop: TPanel;
     LVPMnu: TPopupMenu;
     SDD1: TSelectDirectoryDialog;
+    Timer1: TTimer;
     TrayMnu: TPopupMenu;
     SBGroup: TSpeedButton;
     SBFolder: TSpeedButton;
@@ -140,6 +141,7 @@ type
     procedure SBPrefsClick(Sender: TObject);
     procedure SBQuitClick(Sender: TObject);
     procedure SBSaveClick(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
     procedure Timer2Timer(Sender: TObject);
     procedure TrayProgmanDblClick(Sender: TObject);
   private
@@ -195,6 +197,7 @@ type
     Iconized: Boolean;
     PrevLeft: Integer;
     PrevTop: Integer;
+    mini: Boolean;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -622,6 +625,8 @@ end;
 procedure TFProgram.FormShow(Sender: TObject);
 begin
   ListView1.Invalidate;
+
+
 end;
 
 function TFProgram.PMnuEnable (PMenu: TmenuItem; InImgList: TImageList; Enable: Boolean; ListIndex: Integer):Boolean;
@@ -729,8 +734,10 @@ begin
     WindowState := WinState;
     PrevLeft:= left;
     PrevTop:= top;
-    Case WindowState of
-      wsNormal: begin
+    //Case WindowState of
+    Case WinState of
+    wsNormal: begin
+        WindowState := WinState;
         PTrayMnuRestore.Enabled:= False;
         PTrayMnuMinimize.Enabled:= True;
         PTrayMnuMaximize.Enabled:= True;
@@ -739,10 +746,12 @@ begin
         PTrayMnuRestore.Enabled:= True;
         PTrayMnuMinimize.Enabled:= False;
         PTrayMnuMaximize.Enabled:= True;
-        WindowState:=wsNormal;
-        Application.Minimize;
+        WindowState:=wsNormal;   // then minimize in timer event to avoid windows to remain on the desktop once minimized
+        mini:= true;
+        Timer1.enabled:= true;
       end;
       wsMaximized: begin
+        WindowState := WinState;
         PTrayMnuRestore.Enabled:= True;
         PTrayMnuMinimize.Enabled:= True;
         PTrayMnuMaximize.Enabled:= False;
@@ -1469,6 +1478,12 @@ begin
     SBSave.Enabled:= False;
     PMnuSave.Enabled:= PMnuEnable(PMnuSave, SBSave.Glyph,  False);
   end ;
+end;
+
+procedure TFProgram.Timer1Timer(Sender: TObject);
+begin
+  Timer1.Enabled:= false;
+  PTrayMnuMinimizeClick(self);
 end;
 
 procedure TFProgram.Timer2Timer(Sender: TObject);

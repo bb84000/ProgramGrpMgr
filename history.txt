@@ -307,6 +307,12 @@ Version 0.9.3.1 - 04/10/2022
 Version 0.9.3.2 - 12/10/2022
 - Ajout d'un commentaire affiché dans le raccourci sur le bureau
 
+Version 0.9.3.3 - 29/10/2022
+- Correction du démarrage nminimisé avec windows 10 22H2 : la fenêtre minimisée
+  reste sur le bureau, utilisation d'un timer pour rétablir un fonctionnement correct
+- Réécriture de l'installateur : meilleure gestion en cas de versions antérieures
+
+
 
 
 
