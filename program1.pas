@@ -467,8 +467,11 @@ var
   IniFile: TBbInifile;
 begin
   inherited;
+  if not first then
+  begin
 
-  if not first then exit;
+    exit;
+  end;
   Settings.GroupName:= GetGrpParam;
   // We get Windows Version
   //OSVersion:= TOSVersion.Create(LangStr, LangFile);
@@ -625,8 +628,6 @@ end;
 procedure TFProgram.FormShow(Sender: TObject);
 begin
   ListView1.Invalidate;
-
-
 end;
 
 function TFProgram.PMnuEnable (PMenu: TmenuItem; InImgList: TImageList; Enable: Boolean; ListIndex: Integer):Boolean;
