@@ -25,10 +25,10 @@
       <UseVersionInfo Value="True"/>
       <MinorVersionNr Value="9"/>
       <RevisionNr Value="3"/>
-      <BuildNr Value="3"/>
+      <BuildNr Value="4"/>
       <Language Value="040C"/>
       <Attributes pvaPreRelease="True"/>
-      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp" LegalTrademarks="bb - sdtp" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="0.9.3.3"/>
+      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp" LegalTrademarks="bb - sdtp" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="0.9.3.4"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -173,6 +173,11 @@
         </Win32>
       </Options>
     </Linking>
+    <Other>
+      <CompilerMessages>
+        <IgnoredMessages idx6058="True"/>
+      </CompilerMessages>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3" IgnoreAll="True">

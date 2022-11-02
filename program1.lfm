@@ -36376,11 +36376,4 @@ object FProgram: TFProgram
     Left = 374
     Top = 178
   end
-  object Timer1: TTimer
-    Enabled = False
-    Interval = 100
-    OnTimer = Timer1Timer
-    Left = 239
-    Top = 193
-  end
 end

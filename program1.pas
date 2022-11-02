@@ -1,6 +1,7 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - september 2022
+// bb - sdtp - november 2022
+// Windows only program
 //******************************************************************************
 unit program1;
 
@@ -17,6 +18,12 @@ uses
   Clipbrd, lazbbOneInst, lazbbOsVersion, FileUtil;
 
 
+const
+  // Message post at the end of activation procedure, processed once the form is shown
+  WM_FORMSHOWN = WM_USER + 1;
+  // Message sent to a listview to set the space between icons
+  LVM_SETICONSPACING =  LVM_FIRST+ 53;
+
 type
   { int64 or longint type for Application.QueueAsyncCall}
   {$IFDEF CPU32}
@@ -31,8 +38,6 @@ type
   SaveType = (None, State, All);
 
   AttributeType = (atString, atInteger, atDatetime, atBoolean);
-
-
 
   TFProgram = class(TForm)
     bbOneInst1: TbbOneInst;
@@ -81,7 +86,6 @@ type
     PnlTop: TPanel;
     LVPMnu: TPopupMenu;
     SDD1: TSelectDirectoryDialog;
-    Timer1: TTimer;
     TrayMnu: TPopupMenu;
     SBGroup: TSpeedButton;
     SBFolder: TSpeedButton;
@@ -141,8 +145,6 @@ type
     procedure SBPrefsClick(Sender: TObject);
     procedure SBQuitClick(Sender: TObject);
     procedure SBSaveClick(Sender: TObject);
-    procedure Timer1Timer(Sender: TObject);
-    procedure Timer2Timer(Sender: TObject);
     procedure TrayProgmanDblClick(Sender: TObject);
   private
     First: Boolean;
@@ -197,7 +199,7 @@ type
     Iconized: Boolean;
     PrevLeft: Integer;
     PrevTop: Integer;
-    mini: Boolean;
+    StartMini: Boolean;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -222,13 +224,13 @@ type
     procedure CheckUpdate(days: iDays);
     procedure OnAppMinimize(Sender: TObject);
     function HideOnTaskbar: boolean;
+    procedure OnFormShown(var Msg: TMessage); message WM_FORMSHOWN;
   public
-     //OSVersion: TOSVersion ;
+
   end;
 
- const
-   // Message sent to a listview to set the space between icons
-   LVM_SETICONSPACING =  LVM_FIRST+ 53;
+
+
 
 
 var
@@ -249,6 +251,15 @@ implementation
 {$R *.lfm}
 
 { TFProgram }
+
+// Procedure to answer post message at the end of activation procedure
+// so after form is shown
+
+procedure TFProgram.OnFormShown(var Msg: TMessage);
+begin
+  if StartMini then Application.minimize;
+  StartMini:= false;
+end;
 
 // Needed to proper display image in listbox.
 
@@ -467,11 +478,7 @@ var
   IniFile: TBbInifile;
 begin
   inherited;
-  if not first then
-  begin
-
-    exit;
-  end;
+  if not first then  exit;
   Settings.GroupName:= GetGrpParam;
   // We get Windows Version
   //OSVersion:= TOSVersion.Create(LangStr, LangFile);
@@ -520,6 +527,8 @@ begin
   begin
     ShowMessage(use64bitcaption);
   end;
+  Application.ProcessMessages;
+  if StartMini then PostMessage(Handle, WM_FORMSHOWN, 0, 0) ;
   Application.QueueAsyncCall(@CheckUpdate, ChkVerInterval);       // async call to let icons loading
 end;
 
@@ -732,10 +741,9 @@ begin
     except
     end;
     TrayProgman.Visible:= Settings.MiniInTray;
-    WindowState := WinState;
+    //WindowState := WinState;
     PrevLeft:= left;
     PrevTop:= top;
-    //Case WindowState of
     Case WinState of
     wsNormal: begin
         WindowState := WinState;
@@ -747,9 +755,11 @@ begin
         PTrayMnuRestore.Enabled:= True;
         PTrayMnuMinimize.Enabled:= False;
         PTrayMnuMaximize.Enabled:= True;
-        WindowState:=wsNormal;   // then minimize in timer event to avoid windows to remain on the desktop once minimized
-        mini:= true;
-        Timer1.enabled:= true;
+        // On newer Lazarus versions, minimize at startup no longer works properly
+        // Application.minimize let a minmized window on the desktop when called in OnActivate event
+        // Check StartMini at the end of activate procedure then send user message wm_formshown
+        // which will be at the end of message queue, when form activation is complete
+        StartMini:= true;
       end;
       wsMaximized: begin
         WindowState := WinState;
@@ -1481,17 +1491,6 @@ begin
   end ;
 end;
 
-procedure TFProgram.Timer1Timer(Sender: TObject);
-begin
-  Timer1.Enabled:= false;
-  PTrayMnuMinimizeClick(self);
-end;
-
-procedure TFProgram.Timer2Timer(Sender: TObject);
-begin
-
-end;
-
 procedure TFProgram.SBPrefsClick(Sender: TObject);
 var
   OldDSKMnu: Boolean;
@@ -1602,7 +1601,7 @@ begin
     if CBXShortCut.Checked then
     begin
       CreateShortcut(Application.ExeName, DesktopPath, Settings.GroupName, '','', 'Grp='+Settings.GroupName,
-                     sProgramsGroup+' '+Settings.GroupName, Settings.GrpIconFile, Settings.GrpIconIndex);
+                     Settings.GrpComment, Settings.GrpIconFile, Settings.GrpIconIndex);
     end;
     // Program in desktop context menu has changed
     if Settings.DeskTopMnu <> OldDSKMnu then
@@ -1986,8 +1985,6 @@ begin
     end;
   ListView1.Invalidate;
 end;
-
-
 
 // Display background image
 

@@ -312,6 +312,10 @@ Version 0.9.3.3 - 29/10/2022
   reste sur le bureau, utilisation d'un timer pour rétablir un fonctionnement correct
 - Réécriture de l'installateur : meilleure gestion en cas de versions antérieures
 
+Version 0.9.3.4 - 02/11/2022
+- Bug du démarrage minimisé non lié à la vesrion de Windows depuis Lazarus 2.2.2 :
+  correction avec un message WM_USER à la fin de la procédure d'activation de la forme
+
 
 
 
