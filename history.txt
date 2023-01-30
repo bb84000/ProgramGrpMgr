@@ -316,6 +316,13 @@ Version 0.9.3.4 - 02/11/2022
 - Bug du démarrage minimisé non lié à la vesrion de Windows depuis Lazarus 2.2.2 :
   correction avec un message WM_USER à la fin de la procédure d'activation de la forme
 
+Version 0.9.3.5 - 03/11/2022
+- Correction de la sauvegarde du commentaire du réccourci sur le bureau
+
+Version 1.0.0.1 - 30/01/2023
+- Utilisation de fichiers de langue individuels
+- Traduction des formes transférées dans les unités correspondantes
+
 
 
 

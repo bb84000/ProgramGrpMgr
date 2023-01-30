@@ -18,8 +18,7 @@ type
     BtnOK: TButton;
     IL1: TImageList;
     LV1: TListView;
-    procedure LV1SelectItem(Sender: TObject; Item: TListItem; Selected: Boolean
-      );
+    procedure LV1SelectItem(Sender: TObject; Item: TListItem; Selected: Boolean );
   private
 
   public

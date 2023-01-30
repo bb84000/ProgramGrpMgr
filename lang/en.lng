@@ -1,0 +1,163 @@
+﻿;Languages File
+;It is possible to create a new language file using its ID as name (example it.lng)
+;Danish	[da], Dutch [nl], Finnish [fi], German [de], Greek [el], Hungarian [hu]
+;Icelandic [is], Italian [it], Norwegian [no], Polish [pl], Portuguese [pt]
+;Russian [ru], Serbo Croatian [sr], Slovak [sk], Swedish [sv], Turkish [tr]
+
+; ProgName must be the same as defined in the application code
+
+; Save the file in a secure place as it can be replaced by any update !
+
+;Submit your translation on GitHub
+
+;English
+
+[common]
+ProgName=ProgramGrpMgr
+Language=English
+DefaultCaption=Programs group manager
+OKBtn=OK
+YesBtn=Yes
+NoBtn=No
+CancelBtn=Cancel
+
+[main]
+;General
+Language=English
+CBDisplay.Items.Text=Very large icons%sLarge icons%sMedium icons%sStandard icons%sSmall icons
+CBSort.Items.Text=No sort%sSort by name (ascendant)%sSort by name (descendant)%sSort by date(ascendant)%sSort by date(descendant)
+SDD1.Title=Select the folder where are located the shortcuts and/or files you want add to the group
+SBGroup.Hint=Open, create or delete a group
+SBFolder.Hint=Add all shortcuts and files from a folder
+SBAddFile.Hint=Add a shortcut or a file
+SBSave.Hint=Save the group
+SBAbout.Hint=About Programs Groups manager
+SBPrefs.Hint=Change settings
+SBRefresh.Hint=Refresh the programs list
+SBQuit.Hint=Close the application
+SBLoadConf.Hint=Load a previous setting
+BackupPrefs=Settings backup
+ODlg1.Title=Add a file
+PMnuRun.Caption=Run
+PMnuRunAs.Caption=Run as administrator
+PMnuProps.Caption=Properties
+PMnuDelete.Caption=Delete
+PMnuQuit.Caption=Quit
+PMnuCopy.Caption=Copy the item
+PMnuPaste.Caption=Paste an item
+PMnuMaskBars=Mask the buttons and status bars
+PMnuShowBars=Show the buttons and status bars
+sProgramsGroup=Programs group:
+
+MnuAddImageStr=Add a background image
+MnuRepImageStr=Replace the background image
+PMnuDelBkGndImage.Caption=Delete the background image
+
+PTrayMnuRestore.Caption=Restore
+PTrayMnuMinimize.Caption=Minimize
+PTrayMnuMaximize.Caption=Maximize
+
+DeleteOKMsg=You will delete %u item%s. Are you sure?
+ShortCutName=Program Group Manager
+
+NoDeleteGroup=Cannot delete current group
+DeleteGrpMsg=You will delete %s group. Are you sure?
+use64bitcaption=Use the 64bit version of the program
+
+UpdateAlertBox=Current version: %sA new version %s is available
+
+FLoadGroup.BtnNew.Caption=New
+FLoadGroup.BtnDelete.Caption=Delete
+
+FloadConf.Caption=Load a previous list
+FLoadConf.BtnApply.Caption=Apply
+FLoadConf.BtnCancel.Caption=Cancel
+
+[OsVersion]
+;lazbbosver
+Home=Home
+Professional=Professional
+Server=Server
+00000=Unknown version
+10240=v 1507 "July 2015 update"
+10586=v 1511 "November 2015 update"
+14393=v 1607 "July 2016 (Anniversary update)"
+15063=v 1703 "April 2017 (Creators update)"
+16299=v 1709 "October 2017 (Fall Creators update)"
+17134=v 1803 "April 2018 update"
+17763=v 1809 "October 2018 update"
+18362=v 1903 "May 2019 update"
+18363=v 1909 "November 2019 update"
+19041=v 2004 "May 2020 update"
+19042=v 20H2 "October 2020 update"
+19043=v 21H1 "May 2021 updsate"
+19044=v 21H2 "November 2021 update"
+19045=v 22H2 "October 2022 update"
+22000=v 21H2 "October 2021 Initial Version"
+22621=v 22H2 "September 2022 update"
+
+[AboutBox]
+Caption=About %s
+sLastUpdateSearch=Last update check
+sUpdateAvailable=New version %s available. Click to download it
+sNoUpdateAvailable=%s is up to date.
+LUpdate.Caption=Search update
+LProgPage.Caption=Program home page
+UrlProgSite=/wiki
+LWebSite.Caption=Web site home page
+LSourceCode.Caption=Source code Web page
+
+
+[Prefs]
+Caption=%s Settings
+CBStartWin.Caption=Run at Windows startup
+CBSavSizePos.Caption=Save size and position of the window
+CBNoChkNewVer.Caption=Don't check automatically a new version
+LLangue.Caption=Language
+CBMiniInTray.Caption=Minimize in tray area
+CBMiniInTray.Hint=The application icon is not shown in the task bar, instead in the tray area
+CBHideInTaskBar.Caption=Do not show the application in the Task bar
+CBHideInTaskBar.Hint=The application is not shown in the Task Bar. Need to be minimized in the tray
+CBXDesktopMnu.Caption=Add to desktop context menu
+CBXDesktopMnu.Hint=Add a command in the desktop context menu %sto create a new Program Group Manager window
+LBkgndColor.Caption=Background color
+LTextColor.Caption=Text color
+CBBold.Caption=Bold
+CBItal.Caption=Italic
+CBUnder.Caption=Underline
+ESize.Hint=Font size, default 0
+LTextStyle.Caption=Text style
+LGrpName.Caption=Group name
+CBXShortCut.Caption= Place a shortcut on the desktop
+LGrpIcon.Caption=Group Icon
+ImgGrpIcon.Hint=Double click to change icon
+LGrpComment.Caption=Comment
+
+[FProperty]
+Caption=%s properties
+FileSizeByte=Byte(s)
+FileSizeKB=KB
+FileSizeMB=MB
+FileSizeGB=GB
+TSGeneral.Caption=General
+LFileType.Caption=Type
+LDescription.Caption=Description
+LCible.Caption=Target
+SBCible.Hint=Change target file
+LParams.Caption= Parameters
+LPath.Caption=Start path
+PMnuSelectIcon.Caption=Select an icon
+PMnuPropsOldIcon.Caption=Improve the icon display
+FileSizeCaption=Size:
+FileDateCaption=Date:
+
+[FSaveCfg]
+Caption=Save changes
+Label1.Caption=The program group has changed.%sDo you want save the changes ?
+RBtnSave.Caption=Save
+RBtnSaveAs.Caption=Save as
+CBXShortCut.Caption= Place a shortcut on the desktop
+LGrpIcon.Caption=Group Icon
+ImgGrpIcon.Hint=Double click to change icon
+LGrpComment.Caption=Comment
+

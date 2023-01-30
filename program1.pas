@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - november 2022
+// bb - sdtp - january 2023
 // Windows only program
 //******************************************************************************
 unit program1;
@@ -14,7 +14,7 @@ uses
   ComCtrls, Buttons, StdCtrls, CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM,
   laz2_XMLRead, laz2_XMLWrite, files1, Registry, LCLIntf, Menus, ExtDlgs,
   ShellAPI, SaveCfg1, prefs1, property1, lazbbinifiles, LoadGroup1, LazUTF8,
-  LoadConf1, Config1, lazbbutils, lmessages, lazbbaboutupdate,
+  LoadConf1, Config1, lazbbutils, lmessages, lazbbaboutdlg,
   Clipbrd, lazbbOneInst, lazbbOsVersion, FileUtil;
 
 
@@ -155,7 +155,7 @@ type
     PrgMgrAppsData: string;
     ProgName: String;
     sProgramsGroup: String;
-    LocalizedName: String;
+    DefaultCaption: String;
     Settings: Tconfig;
     oldw: array [0..50] of Integer;
     ListeFichiers: TFichierList;
@@ -212,7 +212,8 @@ type
     procedure ListeFichiersOnChange(sender: TObject);
     procedure SettingsOnChange(sender: TObject);
     procedure SettingsOnStateChange(sender: TObject);
-    procedure ModLangue;
+    //procedure ModLangue;
+    procedure Translate(LngFile: TBbInifile);
     function ClosestItem(pt: Tpoint; ptArr:array of Tpoint): TlistItem;
     function ReadFolder(strPath: string; Directory: Bool): Integer;
     procedure EnumerateResourceNames(Instance: THandle; var list: TStringList);
@@ -404,10 +405,12 @@ begin
   ExecName:= ExtractFileName(Application.ExeName);
   ExecPath:= ExtractFilePath(Application.ExeName);
   ProgName:= 'ProgramGrpMgr';
-  LocalizedName:= 'Gestionnaire de Groupe de Programmes';
+  DefaultCaption:= 'Gestionnaire de Groupe de Programmes';
   // Chargement des chaînes de langue à partir de la resource ou du fichier s'il existe
-  if FileExists(ExecPath+ProgName+'.lng') then LangFile:= TBbIniFile.create(ExecPath+ProgName+'.lng')
-  else LangFile:= TBbIniFile.create(HINSTANCE, 'PROGRAMGRPMGR_LNG');
+  //if FileExists(ExecPath+ProgName+'.lng') then LangFile:= TBbIniFile.create(ExecPath+ProgName+'.lng')
+  //else LangFile:= TBbIniFile.create(HINSTANCE, 'PROGRAMGRPMGR_LNG');
+    // Loading default language file..
+  LangFile:= TBbIniFile.Create(ExtractFilePath(Application.ExeName) + 'lang'+PathDelim+'fr.lng');
   LangNums:= TStringList.Create;
   Settings.GroupName:= GetGrpParam;
   ListeChange:= False;
@@ -547,6 +550,7 @@ begin
   alertmsg:= '';
   if not visible then alertpos:= poDesktopCenter
   else alertpos:= poMainFormCenter;
+  AboutBox.LastUpdate:= Trunc(Settings.LastUpdChk);
   if (Trunc(Now)>= Trunc(Settings.LastUpdChk)+days) and (not Settings.NoChkNewVer) then
   begin
      Settings.LastUpdChk := Trunc(Now);
@@ -584,10 +588,14 @@ begin
    begin
     if VersionToInt(Settings.LastVersion)>VersionToInt(version) then
        AboutBox.LUpdate.Caption := Format(AboutBox.sUpdateAvailable, [Settings.LastVersion]) else
-       AboutBox.LUpdate.Caption:= AboutBox.sNoUpdateAvailable;
+       begin
+         AboutBox.LUpdate.Caption:= AboutBox.sNoUpdateAvailable;
+         // Already checked the same day
+         if Trunc(Settings.LastUpdChk) = Trunc(now) then AboutBox.checked:= true;
+       end;
    end;
-   AboutBox.LUpdate.Hint:= AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
-
+   //AboutBox.LUpdate.Hint:= AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
+   AboutBox.Translate(LangFile);
 end;
 
 procedure TFProgram.FormChangeBounds(Sender: TObject);
@@ -687,22 +695,38 @@ begin
   // Détermination de la langue
   //LangFound:= false;
   // old settings used nubers instead characters
-  if Settings.LangStr='12' then Settings.LangStr:= 'fr';
+  if (Settings.LangStr='12') or (Settings.LangStr = '') then Settings.LangStr:= 'fr';
   LangFound:= false;
-  LangFile.ReadSections(LangNums);
-  if LangNums.Count > 1 then
-    For i:= 0 to LangNums.Count-1 do
+  try
+    FindAllFiles(LangNums, ExtractFilePath(Application.ExeName) + 'lang', '*.lng', true); //find all language files
+    if LangNums.count > 0 then
     begin
-      Prefs.CBLangue.Items.Add (LangFile.ReadString(LangNums.Strings[i],'Language', 'Aucune'));
-      If LangNums.Strings[i] = Settings.LangStr then LangFound:= True;
+      for i:= 0 to LangNums.count-1 do
+      begin
+        LangFile:= TBbInifile.Create(LangNums.Strings[i]);
+        LangNums.Strings[i]:= TrimFileExt(ExtractFileName(LangNums.Strings[i]));
+        Prefs.CBLangue.Items.Add(LangFile.ReadString('common', 'Language', 'Inconnu'));
+        if LangNums.Strings[i] = Settings.LangStr then LangFound := True;
+      end;
     end;
+  except
+    LangFound := false;
+  end;
+  //LangFile.ReadSections(LangNums);
+  //if LangNums.Count > 1 then
+  //  For i:= 0 to LangNums.Count-1 do
+  //  begin
+  //    Prefs.CBLangue.Items.Add (LangFile.ReadString(LangNums.Strings[i],'Language', 'Aucune'));
+  //    If LangNums.Strings[i] = Settings.LangStr then LangFound:= True;
+  //  end;
   // Si la langue n'est pas traduite, alors on passe en Anglais
   If not LangFound then
    begin
     Settings.LangStr := 'en';
   end;
   CurLang:= LangNums.IndexOf(Settings.LangStr);
-  Modlangue;
+  LangFile:= TBbIniFile.Create(ExtractFilePath(Application.ExeName) + 'lang'+PathDelim+Settings.LangStr+'.lng');
+  Translate(LangFile);
   // bakground colour
   ListView1.Color:= Settings.BkgrndColor;
   // Text Colour
@@ -1532,7 +1556,8 @@ begin
       begin
         CurLang:= CBLangue.ItemIndex;
         Settings.LangStr:= LangNums[CurLang];
-        ModLangue;
+        LangFile:= TBbIniFile.Create(ExtractFilePath(Application.ExeName) + 'lang'+PathDelim+Settings.LangStr+'.lng');
+        self.Translate(LangFile);
         AboutBox.LVersion.Hint:= OSVersion.VerDetail;
         Application.QueueAsyncCall(@CheckUpdate, ChkVerInterval);
       end;
@@ -1615,7 +1640,7 @@ begin
         Reg.CreateKey(DskCtxKey);
         Reg.CreateKey(DskCtxKey+'\command');
         Reg.OpenKey(DskCtxKey, true);
-        Reg.WriteString('',LocalizedName);
+        Reg.WriteString('',DefaultCaption);
         reg.CloseKey;
         Reg.OpenKey(DskCtxKey+'\command', true);
         Reg.WriteString('',Application.ExeName) ;
@@ -1908,28 +1933,9 @@ begin
   If Item = nil then exit;
   Fproperty.IconDefFile:= IconDefFile;
   MyFichier:=  ListeFichiers.GetItem(Item.Index);
-  Fproperty.IconFile:= MyFichier.IconFile;
-  Fproperty.IconIndex:= MyFichier.IconIndex;
-  Fproperty.Image1.Picture.Icon.Handle:= ExtractAssociatedIconU(Handle, PChar(MyFichier.IconFile), MyFichier.IconIndex);
-  Fproperty.Caption:= Format(FpropertyCaption, [MyFichier.DisplayName]);
-  FProperty.EDisplayName.Text:= MyFichier.DisplayName;
-  FProperty.LTypeName.Caption:= MyFichier.TypeName;
-  FProperty.ECible.Text:= MyFichier.Path+ MyFichier.Name;
-  FProperty.EParams.Text:= MyFichier.Params;
+  FProperty.MyFile:= MyFichier;
   OldTarget:= FProperty.ECible.Text;
-  Fproperty.EPath.Text:= MyFichier.StartPath;
-  siz:= MyFichier.size;
-  if (siz >= 0) and  (siz < $400) then unite:= Format(Fproperty.FileSizeCaption+' %.0n %s', [siz, Fproperty.FileSizeByte]);     // less 1Ko
-  if (siz >= $400) and  (siz < $100000) then unite:= Format(Fproperty.FileSizeCaption+' %.2n %s', [siz/$400, Fproperty.FileSizeKB]);   // less 1Mo
-  if (siz >= $100000) and  (siz < $40000000) then unite:= Format(Fproperty.FileSizeCaption+'  %.2n %s', [siz/$100000, Fproperty.FileSizeMB]);  // less 1Go
-  if (siz >= $40000000) then unite:=  Format(Fproperty.FileSizeCaption+' %.2n %s', [siz/$40000000, Fproperty.FileSizeGB]);  // less 1Go
-  FProperty.LFileSize.Caption:= unite;
-  try
-     FProperty.LFiledate.Caption:= FProperty.FileDateCaption+' '+DateTimeToStr(MyFichier.Date) ;
-  except
-  end;
-  FProperty.Memo1.Text:= MyFichier.Description;
-  FProperty.PMnuPropsOldIcon.Checked:= MyFichier.OldIcon;
+  FProperty.Translate(LangFile);
   if FProperty.Showmodal = mrOK then
   begin
       if FProperty.ECible.Text <> OldTarget then
@@ -2042,58 +2048,45 @@ end;
 
 // Language translation routines
 
-procedure TFProgram.ModLangue ;
-var
-  i: integer;
-  A: TStringArray;
+procedure TFProgram.Translate(LngFile: TBbInifile) ;
 begin
   LangStr:=  Settings.LangStr;
-  With LangFile do
+  if Assigned(LngFile) then
+  With LngFile do
   begin
-    with OsVersion do
-    begin
-      ProdStrs.Strings[1]:= ReadString(LangStr,'Home','Famille'); ;
-      ProdStrs.Strings[2]:= ReadString(LangStr,'Professional','Entreprise');
-      ProdStrs.Strings[3]:= ReadString(LangStr,'Server','Serveur');
-      for i:= 0 to Win10Strs.count-1 do
-      begin
-        A:= Win10Strs.Strings[i].split('=');
-        Win10Strs.Strings[i]:= A[0]+'='+ReadString(LangStr,A[0],A[1]);
-      end;
-      for i:= 0 to Win11Strs.count-1 do
-      begin
-        A:= Win11Strs.Strings[i].split('=');
-        Win11Strs.Strings[i]:= A[0]+'='+ReadString(LangStr,A[0],A[1]);
-      end;
-      //
-    end;
-   // MessageBox buttons
-   YesBtn:= ReadString(LangStr, 'YesBtn', 'Oui');
-   NoBtn:= ReadString(LangStr, 'NoBtn', 'Non');
-   CancelBtn:= ReadString(LangStr, 'CancelBtn', 'Annuler');
-   LocalizedName:= ReadString(LangStr, 'LocalizedName', LocalizedName);
+    OsVersion.Translate(LngFile);
+    DefaultCaption:= ReadString('common', 'DefaultCaption', DefaultCaption);
    //Form
-   CBDisplay.Items.Text:= StringReplace(ReadString(LangStr, 'CBDisplay.Items.Text', ''),
-                      '%s', #13#10, [rfReplaceAll]);
+   CBDisplay.Items.Text:= Format(ReadString('main', 'CBDisplay.Items.Text',
+                                            'Très grandes icones%s'+
+                                            'Grandes icones%s'+
+                                            'Icones moyennes%s'+
+                                            'Icones normales%s'+
+                                            'Petites icones'),
+                                            [#13#10, #13#10, #13#10, #13#10]);
    CBDisplay.ItemIndex:= Settings.IconDisplay;
-   CBSort.Items.Text:=  StringReplace(ReadString(LangStr, 'CBSort.Items.Text',
-                      'Pas de tri%sTri par nom (ascendant)%sTri par nom (descendant)%sTri par date (ascendant)%sTri par date (descendant)'),
-                     '%s', #13#10, [rfReplaceAll]);
+   CBSort.Items.Text:= Format(ReadString('main', 'CBSort.Items.Text',
+                                         'Pas de tri%s'+
+                                         'Tri par nom (ascendant)%s'+
+                                         'Tri par nom (descendant)%s'+
+                                         'Tri par date (ascendant)%s'+
+                                         'Tri par date (descendant)'),
+                                         [#13#10, #13#10, #13#10, #13#10]);
    CBSort.ItemIndex:= Settings.IconSort;
-   SDD1.Title:= ReadString(LangStr, 'SDD1.Title', SDD1.Title);
-   SBGroup.Hint:= ReadString(LangStr, 'SBGroup.Hint', SBGroup.Hint);
-   SBFolder.Hint:= ReadString(LangStr, 'SBFolder.Hint', SBFolder.Hint);
-   SBAddFile.Hint:= ReadString(LangStr, 'SBAddFile.Hint', SBAddFile.Hint);
-   SBAbout.Hint:= ReadString(LangStr, 'SBAbout.Hint', SBAbout.Hint);
-   SBSave.Hint:=  ReadString(LangStr, 'SBSave.Hint', SBSave.Hint);
-   SBPrefs.Hint:= ReadString(LangStr, 'SBPrefs.Hint', SBPrefs.Hint);
-   SBQuit.Hint:= ReadString(LangStr, 'SBQuit.Hint', SBQuit.Hint);
-   SBLoadConf.Hint:= ReadString(LangStr, 'SBLoadConf.Hint', SBLoadConf.Hint);
-   ODlg1.Title:= ReadString(LangStr, 'ODlg1.Title', ODlg1.Title);
-   PMnuRun.Caption:= ReadString(LangStr, 'PMnuRun.Caption', PMnuRun.Caption);
-   PMnuRunAs.Caption:= ReadString(LangStr, 'PMnuRunAs.Caption', PMnuRunAs.Caption);
-   PMnuProps.Caption:= ReadString(LangStr, 'PMnuProps.Caption', PMnuProps.Caption);
-   PMnuDelete.Caption:= ReadString(LangStr, 'PMnuDelete.Caption', PMnuDelete.Caption);
+   SDD1.Title:= ReadString('main', 'SDD1.Title', SDD1.Title);
+   SBGroup.Hint:= ReadString('main', 'SBGroup.Hint', SBGroup.Hint);
+   SBFolder.Hint:= ReadString('main', 'SBFolder.Hint', SBFolder.Hint);
+   SBAddFile.Hint:= ReadString('main', 'SBAddFile.Hint', SBAddFile.Hint);
+   SBAbout.Hint:= ReadString('main', 'SBAbout.Hint', SBAbout.Hint);
+   SBSave.Hint:=  ReadString('main', 'SBSave.Hint', SBSave.Hint);
+   SBPrefs.Hint:= ReadString('main', 'SBPrefs.Hint', SBPrefs.Hint);
+   SBQuit.Hint:= ReadString('main', 'SBQuit.Hint', SBQuit.Hint);
+   SBLoadConf.Hint:= ReadString('main', 'SBLoadConf.Hint', SBLoadConf.Hint);
+   ODlg1.Title:= ReadString('main', 'ODlg1.Title', ODlg1.Title);
+   PMnuRun.Caption:= ReadString('main', 'PMnuRun.Caption', PMnuRun.Caption);
+   PMnuRunAs.Caption:= ReadString('main', 'PMnuRunAs.Caption', PMnuRunAs.Caption);
+   PMnuProps.Caption:= ReadString('main', 'PMnuProps.Caption', PMnuProps.Caption);
+   PMnuDelete.Caption:= ReadString('main', 'PMnuDelete.Caption', PMnuDelete.Caption);
    PMnuGroup.Caption:= SBGroup.Hint;
    PMnuFolder.Caption:= SBFolder.Hint;
    PMnuAddFile.Caption:= SBAddFile.Hint;
@@ -2101,120 +2094,57 @@ begin
    PMnuSave.Caption:= SBSave.Hint;
    PMnuPrefs.Caption:= SBPrefs.Hint;
    PMnuLoadConf.Caption:= SBLoadConf.Hint;
-   PMnuQuit.Caption:= ReadString(LangStr, 'PMnuQuit.Caption', PMnuQuit.Caption);
-   PMnuCopy.Caption:= ReadString(LangStr, 'PMnuCopy.Caption', PMnuCopy.Caption);
-   PMnuPaste.Caption:= ReadString(LangStr, 'PMnuPaste.Caption', PMnuPaste.Caption);
-   MnuAddImageStr:= ReadString(LangStr, 'MnuAddImageStr', 'Ajouter une image d''arrière plan');
-   MnuRepImageStr:= ReadString(LangStr, 'MnuRepImageStr', 'Remplacer l''image d''arrière plan');
-   PMnuDelBkgndImg.Caption:= ReadString(LangStr, 'PMnuDelBkGndImage.Caption', PMnuDelBkgndImg.Caption);
-   PTrayMnuRestore.Caption:= ReadString(LangStr, 'PTrayMnuRestore.Caption', PTrayMnuRestore.Caption);
-   PTrayMnuMinimize.Caption:= ReadString(LangStr, 'PTrayMnuMinimize.Caption', PTrayMnuMinimize.Caption);
-   PTrayMnuMaximize.Caption:= ReadString(LangStr, 'PTrayMnuMaximize.Caption', PTrayMnuMaximize.Caption);
+   PMnuQuit.Caption:= ReadString('main', 'PMnuQuit.Caption', PMnuQuit.Caption);
+   PMnuCopy.Caption:= ReadString('main', 'PMnuCopy.Caption', PMnuCopy.Caption);
+   PMnuPaste.Caption:= ReadString('main', 'PMnuPaste.Caption', PMnuPaste.Caption);
+   MnuAddImageStr:= ReadString('main', 'MnuAddImageStr', 'Ajouter une image d''arrière plan');
+   MnuRepImageStr:= ReadString('main', 'MnuRepImageStr', 'Remplacer l''image d''arrière plan');
+   PMnuDelBkgndImg.Caption:= ReadString('main', 'PMnuDelBkGndImage.Caption', PMnuDelBkgndImg.Caption);
+   PTrayMnuRestore.Caption:= ReadString('main', 'PTrayMnuRestore.Caption', PTrayMnuRestore.Caption);
+   PTrayMnuMinimize.Caption:= ReadString('main', 'PTrayMnuMinimize.Caption', PTrayMnuMinimize.Caption);
+   PTrayMnuMaximize.Caption:= ReadString('main', 'PTrayMnuMaximize.Caption', PTrayMnuMaximize.Caption);
    PTrayMnuAbout.Caption:= SBAbout.Hint;
    PTrayMnuQuit.Caption:= PMnuQuit.Caption;
-   sBackupPrefs:= ReadString(LangStr, 'BackupPrefs', 'Sauvegarde des préférences');
-   SMnuMaskBars:= LangFile.ReadString(LangStr, 'PMnuMaskBars','Masquer la barre de boutons');
-   SMnuShowBars:= LangFile.ReadString(LangStr, 'PMnuShowBars','Afficher la barre de boutons');
+   sBackupPrefs:= ReadString('main', 'BackupPrefs', 'Sauvegarde des préférences');
+   SMnuMaskBars:= LangFile.ReadString('main', 'PMnuMaskBars','Masquer la barre de boutons');
+   SMnuShowBars:= LangFile.ReadString('main', 'PMnuShowBars','Afficher la barre de boutons');
    if Settings.HideBars then PMnuHideBars.Caption:= SMnuShowBars
    else PMnuHideBars.Caption:= SMnuMaskBars;
-   ShortCutName:= ReadString(LangStr, 'ShortCutName', 'Gestionnaire de groupe de programmes');
-   DeleteOKMsg:= ReadString(LangStr, 'DeleteOKMsg', 'Vous allez effacer %u élément%s. Etes-vous sur ?');
-   sProgramsGroup:= ReadString(LangStr, 'sProgramsGroup', 'Groupe de programmes:');
-   sCannotGetNewVerList:=ReadString(LangStr,'CannotGetNewVerList','Liste des nouvelles versions indisponible');
-   sNoLongerChkUpdates:=ReadString(LangStr,'NoLongerChkUpdates','Ne plus rechercher les mises à jour');
+   ShortCutName:= ReadString('main', 'ShortCutName', 'Gestionnaire de groupe de programmes');
+   DeleteOKMsg:= ReadString('main', 'DeleteOKMsg', 'Vous allez effacer %u élément%s. Etes-vous sur ?');
+   sProgramsGroup:= ReadString('main', 'sProgramsGroup', 'Groupe de programmes:');
+   sCannotGetNewVerList:=ReadString('main','CannotGetNewVerList','Liste des nouvelles versions indisponible');
+   sNoLongerChkUpdates:=ReadString('main','NoLongerChkUpdates','Ne plus rechercher les mises à jour');
 
-    // About
-    if not AboutBox.checked then AboutBox.LUpdate.Caption:=ReadString(LangStr,'AboutBox.LUpdate.Caption',AboutBox.LUpdate.Caption) else
-    begin
-      if AboutBox.NewVersion then AboutBox.LUpdate.Caption:= Format(AboutBox.sUpdateAvailable, [AboutBox.LastVersion])
-      else AboutBox.LUpdate.Caption:= AboutBox.sNoUpdateAvailable;
-    end;
-    AboutBox.sLastUpdateSearch:=ReadString(LangStr,'AboutBox.LastUpdateSearch','Dernière recherche de mise à jour');
-    AboutBox.sUpdateAvailable:=ReadString(LangStr,'AboutBox.UpdateAvailable','Nouvelle version %s disponible');
-    AboutBox.sNoUpdateAvailable:=ReadString(LangStr,'AboutBox.NoUpdateAvailable','Le gestionnaire de programmes est à jour');
-    Aboutbox.Caption:=ReadString(LangStr,'Aboutbox.Caption','A propos du Gestionnaire de programmes');
-    AboutBox.LProductName.Caption:= caption;
-    AboutBox.LProgPage.Caption:= ReadString(LangStr,'AboutBox.LProgPage.Caption', AboutBox.LProgPage.Caption);
-    AboutBox.UrlProgSite:= sUrlProgSite+ ReadString(LangStr,'AboutBox.UrlProgSite','/Accueil');
-    AboutBox.LWebSite.Caption:= ReadString(LangStr,'AboutBox.LWebSite.Caption', AboutBox.LWebSite.Caption);
-    AboutBox.LSourceCode.Caption:= ReadString(LangStr,'AboutBox.LSourceCode.Caption', AboutBox.LSourceCode.Caption);
+    // About box
+    AboutBox.Translate(LngFile);
     AboutBox.LVersion.Hint:= OSVersion.VerDetail;
-    NoLongerChkUpdates:= ReadString(LangStr, 'NoLongerChkUpdates', 'Ne plus rechercher les mises à jour');
-   //NextChkCaption:= ReadString(LangStr, 'NextChkCaption', 'Prochaine vérification');
-   NoDeleteGroup:= ReadString(LangStr, 'NoDeleteGroup', 'Impossible de supprimer le groupe en cours');
-   DeleteGrpMsg:= ReadString(LangStr, 'DeleteGrpMsg', 'Vous allez effacer le groupe %s. Etes-vous sur ?');
 
-   FSaveCFG.Caption := ReadString(LangStr, 'FSaveCFG.Caption', FSaveCFG.Caption);
-   FSaveCfg.Label1.Caption:= StringReplace(ReadString(LangStr, 'FSaveCfg.Label1.Caption',
-                              'Le groupe de programmes a été mofifié.%sVoulez-vous enregistrer ces modifications ?'),
-                               '%s', #13#10, [rfReplaceAll]);
-   FSaveCfg.RBtnSave.Caption:= ReadString(LangStr, 'FSaveCfg.RBtnSave.Caption', FSaveCfg.RBtnSave.Caption);
-   FSaveCfg.RBtnSaveAs.Caption:= ReadString(LangStr, 'FSaveCfg.RBtnSaveAs.Caption', FSaveCfg.RBtnSaveAs.Caption);
-   FSaveCfg.CBXShortCut.Caption:= ReadString(LangStr, 'FSaveCfg.CBXShortCut.Caption', FSaveCfg.CBXShortCut.Caption);
-   FSaveCfg.LGrpIcon.Caption:= ReadString(LangStr, 'FSaveCfg.LGrpIcon.Caption', FSaveCfg.LGrpIcon.Caption);
-   FSaveCfg.ImgGrpIcon.Hint:= ReadString(LangStr, 'FSaveCfg.ImgGrpIcon.Hint', FSaveCfg.ImgGrpIcon.Hint);
-   FSaveCfg.BtnCancel.Caption:= CancelBtn;
-   FSaveCfg.LGrpComment.Caption:= ReadString(LangStr, 'FSaveCfg.LGrpComment.Caption', FSaveCfg.LGrpComment.Caption);
-   //AboutBox.Caption:= SBAbout.Hint;
+    NoLongerChkUpdates:= ReadString('main', 'NoLongerChkUpdates', 'Ne plus rechercher les mises à jour');
+   //NextChkCaption:= ReadString('main', 'NextChkCaption', 'Prochaine vérification');
+   NoDeleteGroup:= ReadString('main', 'NoDeleteGroup', 'Impossible de supprimer le groupe en cours');
+   DeleteGrpMsg:= ReadString('main', 'DeleteGrpMsg', 'Vous allez effacer le groupe %s. Etes-vous sur ?');
+   use64bitcaption:= ReadString('main', 'use64bitcaption', 'Utilisez la version 64 bits de ce programme');
 
-   use64bitcaption:= ReadString(LangStr, 'use64bitcaption', 'Utilisez la version 64 bits de ce programme');
+   // FSaveCfg form
+   FSaveCfg.Translate(LngFile);
 
-   Prefs.Caption:= ReadString(LangStr, 'Prefs.Caption', Prefs.Caption);
-   Prefs.CBStartWin.Caption:= ReadString(LangStr, 'Prefs.CBStartWin.Caption', prefs.CBStartWin.Caption);
-   Prefs.CBSavSizePos.Caption:= ReadString(LangStr, 'Prefs.CBSavSizePos.Caption', Prefs.CBSavSizePos.Caption);
-   Prefs.CBNoChkNewVer.Caption:= ReadString(LangStr, 'Prefs.CBNoChkNewVer.Caption', Prefs.CBNoChkNewVer.Caption);
-   Prefs.LLangue.Caption:= ReadString(LangStr, 'Prefs.LLangue.Caption', Prefs.LLangue.Caption);
-   Prefs.BtnCancel.Caption:= CancelBtn;
-   Prefs.CBMiniInTray.Caption:= ReadString(LangStr, 'Prefs.CBMiniInTray.Caption', Prefs.CBMiniInTray.Caption);
-   Prefs.CBMiniInTray.Hint:= ReadString(LangStr, ' Prefs.CBMiniInTray.Hint',  Prefs.CBMiniInTray.Hint);
-   Prefs.CBHideInTaskBar.Caption:= ReadString(LangStr, 'Prefs.CBHideInTaskBar.Caption', Prefs.CBHideInTaskBar.Caption);
-   Prefs.CBHideInTaskBar.Hint:= ReadString(LangStr, 'Prefs.CBHideInTaskBar.Hint',  Prefs.CBHideInTaskBar.Hint);
-   Prefs.ImgGrpIcon.Hint:= FSaveCfg.ImgGrpIcon.Hint;
-   Prefs.LGrpIcon.Caption:= FSaveCfg.LGrpIcon.Caption;
-   Prefs.LGrpComment.Caption:= FSaveCfg.LGrpComment.Caption;
-   Prefs.CBXShortCut.Caption:= FSaveCfg.CBXShortCut.Caption;
-   Prefs.LGrpName.Caption:= ReadString(LangStr, 'Prefs.LGrpName.Caption', Prefs.LGrpName.Caption);;
-   Prefs.CBXDesktopMnu.Caption:= ReadString(LangStr, 'Prefs.CBXDesktopMnu.Caption',  Prefs.CBXDesktopMnu.Caption);
-   Prefs.CBXDesktopMnu.Hint:= StringReplace(ReadString(LangStr, 'Prefs.CBXDesktopMnu.Hint', Prefs.CBXDesktopMnu.Hint),
-                               '%s', #13#10, [rfReplaceAll]);
-   Prefs.LBkgndColor.Caption:= ReadString(LangStr, 'Prefs.LBkgndColor.Caption', Prefs.LBkgndColor.Caption);
-   Prefs.LTextColor.Caption:= ReadString(LangStr, 'Prefs.LTextColor.Caption', Prefs.LTextColor.Caption);
-   Prefs.CBBold.Caption:= ReadString(LangStr, 'Prefs.CBBold.Caption', Prefs.CBBold.Caption);
-   Prefs.CBItal.Caption:= ReadString(LangStr, 'Prefs.CBItal.Caption', Prefs.CBItal.Caption);
-   Prefs.CBUnder.Caption:= ReadString(LangStr, 'Prefs.CBUnder.Caption', Prefs.CBUnder.Caption);
-   Prefs.ESize.Hint:=  ReadString(LangStr, 'Prefs.ESize.Hint', Prefs.ESize.Hint);
-   Prefs.LTextStyle.Caption:= ReadString(LangStr, 'Prefs.LTextStyle.Caption', Prefs.LTextStyle.Caption);
+   // Settings form
+   Prefs.Translate(LngFile);
    Prefs.LWinVer.Caption:= ' '+OSVersion.VerDetail;
 
-   FPropertyCaption:= ReadString(LangStr, 'FPropertyCaption', 'Propriétés de %s');
-   FProperty.TSGeneral.Caption:= ReadString(LangStr, 'FProperty.TSGeneral.Caption', FProperty.TSGeneral.Caption);
-   FProperty.LFileType.Caption:= ReadString(LangStr, 'FProperty.LFileType.Caption', FProperty.LFileType.Caption);
-   FProperty.LDescription.Caption:= ReadString(LangStr, 'FProperty.LDescription.Caption', FProperty.LDescription.Caption);
-   FProperty.Caption:= FPropertyCaption;
+   // Porperties form
+   FProperty.Translate(LngFile);
    FProperty.Image1.Hint:= FSaveCfg.ImgGrpIcon.Hint;
-   FProperty.BtnCancel.Caption:= CancelBtn; //FSaveCfg.BtnCancel.Caption;
-   FProperty.LCible.Caption:= ReadString(LangStr, 'FProperty.LCible.Caption', FProperty.LCible.Caption);
-   FProperty.SBCible.Hint:= ReadString(LangStr, 'FProperty.SBCible.Hint', FProperty.SBCible.Hint);
-   FProperty.LParams.Caption:= ReadString(LangStr, 'FProperty.LParams.Caption', FProperty.LParams.Caption);
-   FProperty.LPath.Caption:= ReadString(LangStr, 'Fproperty.LPath.Caption', FProperty.LPath.Caption);
-   FProperty.PMnuSelectIcon.Caption:= ReadString(LangStr, 'FProperty.PMnuSelectIcon.Caption', FProperty.PMnuSelectIcon.Caption);
-   FProperty.PMnuPropsOldIcon.Caption:= ReadString(LangStr, 'FProperty.PMnuPropsOldIcon', FProperty.PMnuPropsOldIcon.Caption);
-   FProperty.FileSizeCaption:= ReadString(LangStr, 'FProperty.FileSizeCaption', 'Taille :');
-   FProperty.FileDateCaption:= ReadString(LangStr, 'FProperty.FileDateCaption', 'Date :');
-   FProperty.FileSizeByte:= ReadString(LangStr, 'FProperty.FileSizeByte', 'octet(s)');
-   FProperty.FileSizeKB:= ReadString(LangStr, 'FProperty.FileSizeKB', 'Ko');
-   FProperty.FileSizeMB:= ReadString(LangStr, 'FProperty.FileSizeMB', 'Mo');
-   FProperty.FileSizeGB:= ReadString(LangStr, 'FProperty.FileSizeGB', 'Go');
 
    FLoadGroup.Caption:= SBGroup.Hint;
-   FLoadGroup.BtnNew.Caption:= ReadString(LangStr, 'FLoadGroup.BtnNew.Caption', FLoadGroup.BtnNew.Caption);
-   FLoadGroup.BtnDelete.Caption:= ReadString(LangStr, 'FLoadGroup.BtnDelete.Caption', FLoadGroup.BtnDelete.Caption);
+   FLoadGroup.BtnNew.Caption:= ReadString('main', 'FLoadGroup.BtnNew.Caption', FLoadGroup.BtnNew.Caption);
+   FLoadGroup.BtnDelete.Caption:= ReadString('main', 'FLoadGroup.BtnDelete.Caption', FLoadGroup.BtnDelete.Caption);
    FLoadGroup.BtnCancel.Caption:= CancelBtn; //SBrow1.CancelBtnCaption;
 
-   FloadConf.Caption:= ReadString(LangStr, 'FloadConf.Caption', FloadConf.Caption);
-   FLoadConf.BtnApply.Caption:= ReadString(LangStr, 'FLoadConf.BtnApply.Caption', FLoadConf.BtnApply.Caption);
-   FLoadConf.BtnCancel.Caption:= ReadString(LangStr, 'FLoadConf.BtnCancel.Caption', FLoadConf.BtnCancel.Caption);
-
+   FloadConf.Caption:= ReadString('main', 'FloadConf.Caption', FloadConf.Caption);
+   FLoadConf.BtnApply.Caption:= ReadString('main', 'FLoadConf.BtnApply.Caption', FLoadConf.BtnApply.Caption);
+   FLoadConf.BtnCancel.Caption:= ReadString('main', 'FLoadConf.BtnCancel.Caption', FLoadConf.BtnCancel.Caption);
  end;
 end;
 
@@ -2260,5 +2190,7 @@ begin
 end;
 
 end.
+
+
 
 

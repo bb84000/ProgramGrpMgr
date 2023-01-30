@@ -21,7 +21,7 @@ ${Using:StrFunc} StrRep   ; Replace substring function, uses StrFunc.nsh needed 
 ;------------------------------------------------------------------------------------------
 ; Installer customization
 !define lazarus_dir "C:\Users\Bernard\Documents\Lazarus"
-  !define source_dir "${lazarus_dir}\ProgramGrpMgr"
+!define source_dir "${lazarus_dir}\ProgramGrpMgr"
 ; generic program name suffix, then use ${prog_name} constant
 !define prog_name "ProgramGrpMgr"
 ; Key name for uninstall
@@ -112,7 +112,7 @@ LangString UninstLnkStr ${LANG_ENGLISH} "Program Group Manager uninstall.lnk"
 LangString UninstLnkStr ${LANG_FRENCH} "Désinstallation du Gestionnaire de groupe de programmes.lnk"
 LangString ProgramDescStr ${LANG_ENGLISH} "Program Group Manager"
 LangString ProgramDescStr ${LANG_FRENCH} "Gestionnaire de groupe de programmes"
-LangString ShortcutDescStr ${LANG_ENGLISH} "Desktop window to regroup similar applilcations, i.e games"
+LangString ShortcutDescStr ${LANG_ENGLISH} "Desktop window to regroup similar applications, i.e games"
 LangString ShortcutDescStr ${LANG_FRENCH} "Fenêtre du bureau regroupant des applications similaires, par ex. Jeux"
 ;--------------------------------------------------------
 
@@ -235,16 +235,26 @@ Section "" ;No components page, name is not important
   Delete "$INSTDIR\ssleay32$dll_to_del"
   ; Install other files
   File "${source_dir}\license.txt"
-  File "${source_dir}\OpenSSL License.txt"
+  File "${source_dir}\licensf.txt"
+  File "${lazarus_dir}\openssl\OpenSSL License.txt"
   File "${source_dir}\history.txt"
   File "${source_dir}\${prog_name}.txt"
-  File "${source_dir}\${prog_name}.lng"
+ ; File "${source_dir}\${prog_name}.lng"
   File "${source_dir}\${prog_name}.ini"
   File "${source_dir}\FAQ.txt"
-  
+   ; delete old lng file
+  IfFileExists "$INSTDIR\${prog_name}.lng" 0 +2
+  Delete "$INSTDIR\${prog_name}.lng"
+  ; Install language files
+  CreateDirectory "$INSTDIR\lang"
+  SetOutPath "$INSTDIR\lang"
+  File "${source_dir}\lang\en.lng"
+  File "${source_dir}\lang\fr.lng"
+  ; restore install directory variable
+  SetOutPath "$INSTDIR"
   ; write out uninstaller
   WriteUninstaller "$INSTDIR\uninst.exe"
-    ; Get install folder size in var $estimated_size
+  ; Get install folder size in var $estimated_size
   ${GetSize} "$INSTDIR" "/S=0K" $estimated_size $1 $2
   ; Get install date in var $install_date
   ${GetTime} "" "L" $0 $1 $2 $3 $4 $5 $6 ; $0 day ; $1 month ; $2 year $3 day of week name ; $4 hour ; $5 minutes ; $6 seconds
@@ -307,6 +317,7 @@ Section Uninstall
   Delete  "$DESKTOP\$(ProgramLnkStr)"
   ; remove directories used.
   RMDir "$SMPROGRAMS\$(RemoveStr)"
+  RMDir /r "$INSTDIR\lang"
   RMDir "$INSTDIR"
   ; Remove installed keys
   DeleteRegKey HKCU "Software\SDTP\${prog_name}"
@@ -353,7 +364,7 @@ Function ChkVerPage
   ${else}
      ; Check delphi program installed on win64 and win32
     ${If} ${RunningX64}
-      ReadRegStr $old_uninstpath HKLM "SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\MailAttente" "UninstallString"
+      ReadRegStr $old_uninstpath HKLM "SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\ProgramGrpMgr" "UninstallString"
       ${if} $old_uninstpath != ""
         ${NSD_CreateLabel} 0 40 100% 20u $(Custom_delphifound)
         Pop $0

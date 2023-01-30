@@ -8,7 +8,7 @@ object FLoadGroup: TFLoadGroup
   ClientHeight = 294
   ClientWidth = 368
   Position = poMainFormCenter
-  LCLVersion = '2.0.0.4'
+  LCLVersion = '2.2.4.0'
   object LV1: TListView
     Left = 0
     Height = 225
@@ -63,7 +63,7 @@ object FLoadGroup: TFLoadGroup
     TabOrder = 4
   end
   object IL1: TImageList
-    left = 112
-    top = 104
+    Left = 112
+    Top = 104
   end
 end

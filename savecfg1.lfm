@@ -9,7 +9,7 @@ object FSaveCfg: TFSaveCfg
   ClientWidth = 402
   OnCreate = FormCreate
   Position = poMainFormCenter
-  LCLVersion = '2.2.2.0'
+  LCLVersion = '2.2.4.0'
   object Label1: TLabel
     Left = 0
     Height = 15

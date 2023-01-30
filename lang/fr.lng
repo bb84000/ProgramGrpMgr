@@ -1,0 +1,165 @@
+﻿;Fichier de langue
+;Il est possibled e créer un fichier de langue en utilisant l'ID de langue comme nom (exemple it.lng)
+;Danois	[da], Néerlandais [nl], Finois [fi], Allemand [de], Grec [el], Hongrois [hu]
+;Islandais [is], Italien [it], Norvégien [no], Polonais [pl], Portugais [pt]
+;Russe [ru], Serbo Croate [sr], Slovaque [sk], Suedois [sv], Turc [tr]
+
+; ProgName doit correspondre à la variable du même nom dans le code de l'application
+
+; Sauvegardez votre fichier, il peut être remplacé ou effacé lors d'une msie à jour !
+
+;proposez votre traduction sur GitHub
+
+;Français
+
+[common]
+ProgName=ProgramGrpMgr
+Language=Français
+DefaultCaption=Gestionnaire de Groupe de Programmes
+OKBtn=OK
+YesBtn=Oui
+NoBtn=Non
+CancelBtn=Annuler
+
+[main]
+;General
+Language=Français
+CBDisplay.Items.Text=Très grandes icones%sGrandes icones%sIcones moyennes%sIcones normales%sPetites icones
+CBSort.Items.Text=Pas de tri%sTri par nom (ascendant)%sTri par nom (descendant)%sTri par date (ascendant)%sTri par date (descendant)
+SDD1.Title=Sélectionner le dossier dans lequel se trouvent les raccourcis ou fichiers que vous souhaitez ajouter au groupe
+SBGroup.Hint=Ouvrir, effacer ou créer un groupe
+SBFolder.Hint=Ajouter tous les raccourcis et fichiers d'un dossier
+SBAddFile.Hint=Ajouter un raccourci ou un fichier
+SBSave.Hint=Enregistrer le groupe
+SBAbout.Hint=A propos du Gestionnaire de Groupe de programmes
+SBPrefs.Hint=Modification des préférences
+SBRefresh.Hint=Actualise la liste de programmes
+SBQuit.Hint=Ferme l'application
+SBLoadConf.Hint=Charge une configuration antérieure
+BackupPrefs=Sauvegarde des préférences
+ODlg1.Title=Ajouter un fichier
+PMnuRun.Caption=Exécuter
+PMnuRunAs.Caption=Exécuter comme administrateur
+PMnuProps.Caption=Propriétés
+PMnuDelete.Caption=Supprimer
+PMnuQuit.Caption=Quitter
+PMnuCopy.Caption=Copier cet élément
+PMnuPaste.Caption=Coller un élément
+PMnuMaskBars=Masquer les barres de boutons et de statut
+PMnuShowBars=Afficher les barres de boutons et de statut
+sProgramsGroup=Groupe de programmes:
+
+MnuAddImageStr=Ajouter une image d'arrière plan
+MnuRepImageStr=Remplacer l'image d'arrière plan
+MnuDelBkGndImage.Caption=Supprimer l'image d'arrière plan
+
+PTrayMnuRestore.Caption=Restaurer
+PTrayMnuMinimize.Caption=Réduire
+PTrayMnuMaximize.Caption=Agrandir
+
+DeleteOKMsg=Vous allez effacer %u élément%s. Etes-vous sur ?
+ShortCutName=Gestionnaire de groupe de programme
+
+NoDeleteGroup=Impossible de supprimer le groupe en cours
+DeleteGrpMsg=Vous allez effacer le groupe %s. Etes-vous sur ?
+
+NoLongerChkUpdates=Ne plus rechercher les mises à jour
+UpdateAlertBox=Current version: %sUne nouvelle version %s est disponible
+
+use64bitcaption=Utilisez la version 64 bits de ce programme
+
+FLoadGroup.BtnNew.Caption=Nouveau
+FLoadGroup.BtnDelete.Caption=Supprimer
+
+FloadConf.Caption=Charge une liste antérieure
+FLoadConf.BtnApply.Caption=Appliquer
+FLoadConf.BtnCancel.Caption=Annuler
+
+[OsVersion]
+;lazbbosver
+Home=Famille
+Professional=Entreprise
+Server=Serveur
+00000=Version inconnue
+10240=v 1507 "Juillet 2015"
+10586=v 1511 "Novembre 2015"
+14393=v 1607 "Juillet 2016 (Màj Anniversaire)"
+15063=v 1703 "Avril 2017 (Màj Createurs)"
+16299=v 1709 "Octobre 2017(Màj Fall Créateurs)"
+17134=v 1803 "Avril 2018"
+17763=v 1809 "Octobre 2018"
+18362=v 1903 "Mai 2019"
+18363=v 1909 "Novembre 2019"
+19041=v 2004 "Mai 2020"
+19042=v 20H2 "Octobre 2020"
+19043=v 21H1 "Mai 2021"
+19044=v 21H2 "Novembre 2021"
+19045=v 22H2 "Octobre 2022"
+22000=v 21H2 "Octobre 2021 Version initiale"
+22621=v 22H2 "Septembre 2022"
+
+[AboutBox]
+Caption=A propos de %s
+sLastUpdateSearch=Dernière recherche de mise à jour
+sUpdateAvailable=Nouvelle version %s disponible. Cliquer pour la télécharger
+sNoUpdateAvailable=%s est à jour.
+LUpdate.Caption=Recherche de mise à jour
+LProgPage.Caption=Page d'accueil du programme
+LWebSite.Caption=Page d'accueil du site Web
+LSourceCode.Caption=Page Web du code source
+UrlProgSite=/wiki/Accueil
+
+[Prefs]
+Caption=Préfé rences de %s
+CBStartWin.Caption=Exécuter au démarrage de Windows
+CBSavSizePos.Caption=Sauvegarder la taille et la position de la fenêtre
+CBNoChkNewVer.Caption=Ne pas rechercher automatiquement les nouvelles versions
+LLangue.Caption=Langue
+CBMiniInTray.Caption=Minimiser dans la zone de notifications
+CBMiniInTray.Hint=L'application minimisée n'est pas affichée dans la barre des tâches mais dans la zone de notification
+CBHideInTaskBar.Caption=Ne pas afficher l'application dans la barre des tâches
+CBHideInTaskBar.Hint=L'application n'est pas affichée dans la barre des tâches. Impose de la minimiser dans la zone de notifications
+ImgHint=Double clic pour changer l'icone
+CBXDesktopMnu.Caption=Ajouter au menu contextuel du bureau
+CBXDesktopMnu.Hint=Ajoute une nouvelle commande au menu contextuel du bureau %spour créer une nouvelle fenêtre du Gestionnaire de Groupe de Programme
+LBkgndColor.Caption=Couleur de fond
+LTextColor.Caption=Couleur du texte
+CBBold.Caption=Gras
+CBItal.Caption=Italique
+CBUnder.Caption=Souligné
+ESize.Hint=Taille de la police, 0 par défaut
+LTextStyle.Caption=Style du texte
+LGrpName.Caption=Nom du groupe
+CBXShortCut.Caption=Placer un raccourci sur le bureau
+LGrpIcon.Caption=Icone du groupe
+ImgGrpIcon.Hint=Double clic pour changer l'icone
+LGrpComment.Caption=Commentaire
+
+[FProperty]
+Caption=Propriétés de %s
+FileSizeByte=octet(s)
+FileSizeKB=Ko
+FileSizeMB=Mo
+FileSizeGB=Go
+TSGeneral.Caption=Général
+LFileType.Caption=Type
+LDescription.Caption=Description
+LCible.Caption=Cible
+SBCible.Hint=Changer le fichier cible
+LParams.Caption=Paramètres
+LPath.Caption=Démarrer dans
+PMnuSelectIcon.Caption=Choisir une icone
+PMnuPropsOldIcon.Caption=Améliorer l'affichage de l'icone
+FileSizeCaption=Taille :
+FileDateCaption=Date :
+
+[FSaveCfg]
+Caption=Enregistrement des modifications
+Label1.Caption=Le groupe de programmes a été mofifié.%sVoulez-vous enregistrer ces modifications ?
+RBtnSave.Caption=Enregistrer
+RBtnSaveAs.Caption=Enregistrer sous
+CBXShortCut.Caption=Placer un raccourci sur le bureau
+LGrpIcon.Caption=Icone du groupe
+ImgGrpIcon.Hint=Double clic pour changer l'icone
+LGrpComment.Caption=Commentaire
+

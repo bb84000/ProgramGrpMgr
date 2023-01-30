@@ -1,5 +1,6 @@
 backup/**
 lib/
+lang/backup/**
 ProgramGrpMgrwin32.exe
 ProgramGrpMgrwin64.exe
 InstallPrgGrpMgr.exe

@@ -382,7 +382,7 @@ object FProgram: TFProgram
       ParentShowHint = False
     end
     object SBPrefs: TSpeedButton
-      Left = 105
+      Left = 104
       Height = 24
       Top = 8
       Width = 24

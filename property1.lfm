@@ -7,8 +7,9 @@ object FProperty: TFProperty
   Caption = 'FProperty'
   ClientHeight = 309
   ClientWidth = 469
+  OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.0.0.4'
+  LCLVersion = '2.2.4.0'
   object PC1: TPageControl
     Left = 0
     Height = 268
@@ -201,12 +202,12 @@ object FProperty: TFProperty
     end
   end
   object OD1: TOpenDialog
-    left = 392
-    top = 200
+    Left = 392
+    Top = 200
   end
   object PMnuIconProps: TPopupMenu
-    left = 29
-    top = 239
+    Left = 29
+    Top = 239
     object PMnuSelectIcon: TMenuItem
       Caption = 'Choisir une icone'
       OnClick = Image1DblClick
