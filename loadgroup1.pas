@@ -5,7 +5,8 @@ unit LoadGroup1;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, StdCtrls;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ComCtrls, StdCtrls,
+  lazbbinifiles;
 
 type
 
@@ -22,7 +23,7 @@ type
   private
 
   public
-
+    procedure Translate(LngFile: TBbiniFile);
   end;
 
 var
@@ -39,6 +40,18 @@ procedure TFLoadGroup.LV1SelectItem(Sender: TObject; Item: TListItem;
 begin
   BtnOK.Enabled:= True;
   BtnDelete.Enabled:= True;
+end;
+
+procedure TFLoadGroup.Translate(LngFile: TBbIniFile);
+begin
+  if assigned (Lngfile) then
+  with LngFile do
+  begin
+    BtnOK.Caption:= ReadString('common', 'OKBtn', BtnOK.Caption);
+    BtnCancel.Caption:= ReadString('common', 'CancelBtn', BtnCancel.Caption);
+    BtnDelete.Caption:= ReadString('FLoadGroup', 'BtnDelete.Caption', BtnDelete.Caption);
+    BtnNew.Caption:= ReadString('FLoadGroup', 'BtnNew.Caption', BtnNew.Caption);
+  end;
 end;
 
 end.

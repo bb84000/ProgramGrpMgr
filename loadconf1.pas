@@ -5,7 +5,8 @@ unit LoadConf1;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  lazbbinifiles;
 
 type
 
@@ -20,6 +21,7 @@ type
 
   public
     FileList : array [0..5 ] of array [0..1] of String;
+    procedure Translate(LngFile: TBbiniFile);
   end;
 
 var
@@ -39,6 +41,19 @@ begin
   //FProgram.LVDisplayFiles;
 
 end;
+
+procedure TFLoadConf.Translate(LngFile: TBbIniFile);
+begin
+  if assigned (Lngfile) then
+  with LngFile do
+  begin
+    BtnCancel.Caption:= ReadString('common', 'CancelBtn', BtnCancel.Caption);
+    Caption:= ReadString('FloadConf', 'Caption', Caption);
+    BtnApply.Caption:= ReadString('FLoadConf', 'BtnApply.Caption', BtnApply.Caption);
+  end;
+end;
+
+
 
 end.
 

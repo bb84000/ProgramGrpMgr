@@ -2056,6 +2056,8 @@ begin
   begin
     OsVersion.Translate(LngFile);
     DefaultCaption:= ReadString('common', 'DefaultCaption', DefaultCaption);
+    YesBtn:=ReadString('common','YesBtn','Oui');
+    NoBtn:=ReadString('common','NoBtn','Non');
    //Form
    CBDisplay.Items.Text:= Format(ReadString('main', 'CBDisplay.Items.Text',
                                             'Très grandes icones%s'+
@@ -2121,31 +2123,29 @@ begin
     AboutBox.LVersion.Hint:= OSVersion.VerDetail;
 
     NoLongerChkUpdates:= ReadString('main', 'NoLongerChkUpdates', 'Ne plus rechercher les mises à jour');
-   //NextChkCaption:= ReadString('main', 'NextChkCaption', 'Prochaine vérification');
-   NoDeleteGroup:= ReadString('main', 'NoDeleteGroup', 'Impossible de supprimer le groupe en cours');
-   DeleteGrpMsg:= ReadString('main', 'DeleteGrpMsg', 'Vous allez effacer le groupe %s. Etes-vous sur ?');
-   use64bitcaption:= ReadString('main', 'use64bitcaption', 'Utilisez la version 64 bits de ce programme');
+    //NextChkCaption:= ReadString('main', 'NextChkCaption', 'Prochaine vérification');
+    NoDeleteGroup:= ReadString('main', 'NoDeleteGroup', 'Impossible de supprimer le groupe en cours');
+    DeleteGrpMsg:= ReadString('main', 'DeleteGrpMsg', 'Vous allez effacer le groupe %s. Etes-vous sur ?');
+     use64bitcaption:= ReadString('main', 'use64bitcaption', 'Utilisez la version 64 bits de ce programme');
 
-   // FSaveCfg form
-   FSaveCfg.Translate(LngFile);
+    // FSaveCfg form
+    FSaveCfg.Translate(LngFile);
 
-   // Settings form
-   Prefs.Translate(LngFile);
-   Prefs.LWinVer.Caption:= ' '+OSVersion.VerDetail;
+    // Settings form
+    Prefs.Translate(LngFile);
+    Prefs.LWinVer.Caption:= ' '+OSVersion.VerDetail;
 
-   // Porperties form
-   FProperty.Translate(LngFile);
-   FProperty.Image1.Hint:= FSaveCfg.ImgGrpIcon.Hint;
+    // Properties form
+    FProperty.Translate(LngFile);
+    FProperty.Image1.Hint:= FSaveCfg.ImgGrpIcon.Hint;
 
-   FLoadGroup.Caption:= SBGroup.Hint;
-   FLoadGroup.BtnNew.Caption:= ReadString('main', 'FLoadGroup.BtnNew.Caption', FLoadGroup.BtnNew.Caption);
-   FLoadGroup.BtnDelete.Caption:= ReadString('main', 'FLoadGroup.BtnDelete.Caption', FLoadGroup.BtnDelete.Caption);
-   FLoadGroup.BtnCancel.Caption:= CancelBtn; //SBrow1.CancelBtnCaption;
+    // Load group form
+    FLoadGroup.Translate(LngFile);;
+    FLoadGroup.Caption:= SBGroup.Hint;
 
-   FloadConf.Caption:= ReadString('main', 'FloadConf.Caption', FloadConf.Caption);
-   FLoadConf.BtnApply.Caption:= ReadString('main', 'FLoadConf.BtnApply.Caption', FLoadConf.BtnApply.Caption);
-   FLoadConf.BtnCancel.Caption:= ReadString('main', 'FLoadConf.BtnCancel.Caption', FLoadConf.BtnCancel.Caption);
- end;
+    // Load conf form
+    FloadConf.Translate(LngFile);
+  end;
 end;
 
 

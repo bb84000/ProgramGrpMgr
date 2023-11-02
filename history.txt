@@ -323,6 +323,10 @@ Version 1.0.0.1 - 30/01/2023
 - Utilisation de fichiers de langue individuels
 - Traduction des formes transférées dans les unités correspondantes
 
+Version 1.0.0.2 - 02/11/2023
+- Correction des boutons Oui et Non manquants
+- Mise à jour pour Windows 23H2
+
 
 
 

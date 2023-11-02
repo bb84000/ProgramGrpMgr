@@ -78,7 +78,7 @@ begin
     BtnOK.Caption:= ReadString('common', 'OKBtn', BtnOK.Caption);
     BtnCancel.Caption:= ReadString('common', 'CancelBtn', BtnCancel.Caption);
     DefaultCaption:= ReadString('common', 'DefaultCaption', '...');
-    FSaveCfg.Caption := ReadString('FSaveCfg', 'Caption', Caption);
+    Caption := ReadString('FSaveCfg', 'Caption', Caption);
     Label1.Caption:= Format(ReadString('FSaveCfg', 'Label1.Caption',
                      'Le groupe de programmes a été mofifié.%sVoulez-vous enregistrer ces modifications ?'),
                                [#13#10]);

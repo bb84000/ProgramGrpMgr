@@ -66,12 +66,13 @@ use64bitcaption=Use the 64bit version of the program
 
 UpdateAlertBox=Current version: %sA new version %s is available
 
-FLoadGroup.BtnNew.Caption=New
-FLoadGroup.BtnDelete.Caption=Delete
+[FloadConf]
+Caption=Load a previous list
+BtnApply.Caption=Apply
 
-FloadConf.Caption=Load a previous list
-FLoadConf.BtnApply.Caption=Apply
-FLoadConf.BtnCancel.Caption=Cancel
+[FLoadGroup]
+BtnNew.Caption=New
+BtnDelete.Caption=Delete
 
 [OsVersion]
 ;lazbbosver
@@ -93,8 +94,10 @@ Server=Server
 19043=v 21H1 "May 2021 updsate"
 19044=v 21H2 "November 2021 update"
 19045=v 22H2 "October 2022 update"
+19046=v 23H2 "October 2023 update"
 22000=v 21H2 "October 2021 Initial Version"
 22621=v 22H2 "September 2022 update"
+22631=v 23H2 "October 2023 update"
 
 [AboutBox]
 Caption=About %s

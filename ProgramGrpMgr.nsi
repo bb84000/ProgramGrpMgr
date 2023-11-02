@@ -59,6 +59,7 @@ var install_date
 !define MUI_ICON "${source_dir}\${prog_name}.ico"
 !define MUI_UNICON "${source_dir}\${prog_name}.ico"
 ; Welcome and finsh pages vertical images 164x314 pixels max unstretched
+!define MUI_WELCOMEPAGE_TITLE_3LINES
 !define MUI_WELCOMEFINISHPAGE_BITMAP "${source_dir}\images\${prog_name}_welcome.bmp"
 !define MUI_WELCOMEFINISHPAGE_BITMAP_NOSTRETCH
 !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${source_dir}\images\${prog_name}_welcome.bmp"

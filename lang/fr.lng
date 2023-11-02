@@ -68,12 +68,13 @@ UpdateAlertBox=Current version: %sUne nouvelle version %s est disponible
 
 use64bitcaption=Utilisez la version 64 bits de ce programme
 
-FLoadGroup.BtnNew.Caption=Nouveau
-FLoadGroup.BtnDelete.Caption=Supprimer
+[FloadConf]
+Caption=Charge une liste antérieure
+BtnApply.Caption=Appliquer
 
-FloadConf.Caption=Charge une liste antérieure
-FLoadConf.BtnApply.Caption=Appliquer
-FLoadConf.BtnCancel.Caption=Annuler
+[FLoadGroup]
+BtnNew.Caption=Nouveau
+BtnDelete.Caption=Supprimer
 
 [OsVersion]
 ;lazbbosver
@@ -95,8 +96,10 @@ Server=Serveur
 19043=v 21H1 "Mai 2021"
 19044=v 21H2 "Novembre 2021"
 19045=v 22H2 "Octobre 2022"
+19046=v 23H2 "Octobre 2023"
 22000=v 21H2 "Octobre 2021 Version initiale"
 22621=v 22H2 "Septembre 2022"
+22631=v 23H2 "Octobre 2023"
 
 [AboutBox]
 Caption=A propos de %s
