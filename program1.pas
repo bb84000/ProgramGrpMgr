@@ -25,13 +25,7 @@ const
   LVM_SETICONSPACING =  LVM_FIRST+ 53;
 
 type
-  { int64 or longint type for Application.QueueAsyncCall}
-  {$IFDEF CPU32}
-    iDays= LongInt;
-  {$ENDIF}
-  {$IFDEF CPU64}
-    iDays= Int64;
-  {$ENDIF}
+
 
   { TFProgram }
 
@@ -222,7 +216,7 @@ type
     procedure OnDeactivate(Sender: TObject);
     procedure OnQueryendSession(var Cancel: Boolean);
     procedure OnEndSession(Sender: TObject);
-    procedure CheckUpdate(days: iDays);
+    procedure CheckUpdate(days: PtrInt);
     procedure OnAppMinimize(Sender: TObject);
     function HideOnTaskbar: boolean;
     procedure OnFormShown(var Msg: TMessage); message WM_FORMSHOWN;
@@ -537,7 +531,7 @@ end;
 
 // Parameter days defines the updates interval in days
 
-procedure TFProgram.CheckUpdate(days: iDays);
+procedure TFProgram.CheckUpdate(days: PtrInt);
 var
   errmsg: string;
   sNewVer: string;

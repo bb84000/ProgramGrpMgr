@@ -1,4 +1,4 @@
-ProgramGrpMgr.exe - Version 1.0.0.2
+ProgramGrpMgr.exe - Version 1.0.1.0
 
 English description at the end of french description
 
@@ -8,6 +8,8 @@ OBJET
 Création de groupes de programmes dans une fenêtre sur le bureau.
 
 INSTALLATION
+Téléchargez l'archive. Après le téléchargement, débloquer le fichier zip (Clic droit sur le fichier dans l'Explorateur de fichiers, 
+dans le menu, clic gauche sur "Propriétés", cocher la case "Débloquer" puis cliquez sur le bouton "OK".
 Exécuter le programme d'installation contenu dans l'archive, l'installateur choisit 
 la version 32bit ou 64 bit selon l'OS.
 
@@ -54,8 +56,9 @@ OBJECT
 Creates programs groups in a window on the desktop.
 
 INSTALLATION
+Download archive. After the download, unlock the zip file (rigth click on the file in File Explorer, 
+in the menu, left click on "Properties", check the "Unlock" case and click th "OK" button.
 Run the setup program in the archive, the installer uses the proper 32 bit or 64 bit version corresponding to your OS.
-
 
 USAGE
 To create a programs group from shortcuts and/or files containend in a folder,

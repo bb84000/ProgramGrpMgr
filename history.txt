@@ -327,6 +327,9 @@ Version 1.0.0.2 - 02/11/2023
 - Correction des boutons Oui et Non manquants
 - Mise à jour pour Windows 23H2
 
+Version 1.0.1.0 - 29/06/2024
+- Changement de OSVersion
+
 
 
 
