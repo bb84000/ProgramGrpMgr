@@ -330,6 +330,10 @@ Version 1.0.0.2 - 02/11/2023
 Version 1.0.1.0 - 29/06/2024
 - Changement de OSVersion
 
+Version 1.0.1.1 - 01/09/2024
+- Retour à la ligne dans Hints (utilise fonction wrapline au début du code)
+- Mise à jour pour Windows 24H2
+
 
 
 

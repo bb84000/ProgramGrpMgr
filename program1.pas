@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - january 2023
+// bb - sdtp - september 2024
 // Windows only program
 //******************************************************************************
 unit program1;
@@ -244,6 +244,17 @@ var
 implementation
 
 {$R *.lfm}
+
+// wrap function preserving single quotes
+function wrapline(s: string; len: integer): string;
+var
+  s1: String;
+begin
+  // Replace single quotes with ■ (254) in original string
+  s1:= WrapText(StringReplace (s, chr(39), chr(254), [rfReplaceAll]), len);
+  // restore single quotes
+  result:= StringReplace (s1, chr(254), chr(39), [rfReplaceAll]);
+end;
 
 { TFProgram }
 
@@ -1276,7 +1287,7 @@ procedure TFProgram.ListView1SelectItem(Sender: TObject; Item: TListItem;
 begin
   try
     // when llist change generate an error
-    ListView1.Hint:= ListeFichiers.GetItem(Item.Index).Description ;
+    ListView1.Hint:= WrapLine(ListeFichiers.GetItem(Item.Index).Description, 80) ;
     LPrgSel.Caption:= ListView1.Hint;
     ListView1.Invalidate;
   except
@@ -1767,14 +1778,14 @@ begin
   // We are on an item
   if liOver <> nil then
   begin
-    ListView1.Hint:= ListeFichiers.GetItem(liOver.Index).Description ;
+    ListView1.Hint:= WrapLine(ListeFichiers.GetItem(liOver.Index).Description, 80) ;
     hIco:= ExtractIconU(handle, ListeFichiers.GetItem(liOver.Index).IconFile,ListeFichiers.GetItem(liOver.Index).IconIndex);
     ImgPrgSel.Picture.Icon.Handle:=  hIco;
   end else
   begin
     if ListView1.Selected <> nil then
     begin
-      ListView1.Hint:= ListeFichiers.GetItem(ListView1.Selected.Index).Description;
+      ListView1.Hint:= WrapLine(ListeFichiers.GetItem(ListView1.Selected.Index).Description, 80);
       hIco:= ExtractIconU(handle, ListeFichiers.GetItem(ListView1.Selected.Index).IconFile,ListeFichiers.GetItem(ListView1.Selected.Index).IconIndex);
       ImgPrgSel.Picture.Icon.Handle:=  hIco;
     end ;

@@ -17,7 +17,7 @@ object FProgram: TFProgram
   OnResize = FormResize
   OnShow = FormShow
   OnWindowStateChange = FormWindowStateChange
-  LCLVersion = '2.2.6.0'
+  LCLVersion = '3.4.0.0'
   object PnlTop: TPanel
     Left = 0
     Height = 40
@@ -122,10 +122,10 @@ object FProgram: TFProgram
         'Icones normales'
         'Petites icones'
       )
-      OnChange = CBDisplayChange
       ParentShowHint = False
       TabOrder = 0
       Text = 'Très grandes icones'
+      OnChange = CBDisplayChange
     end
     object CBSort: TComboBox
       Left = 482
@@ -142,9 +142,9 @@ object FProgram: TFProgram
         'Tri par date (ascendant)'
         'Tri par date (descendant)'
       )
-      OnChange = CBDisplayChange
       TabOrder = 1
       Text = 'Pas de tri'
+      OnChange = CBDisplayChange
     end
     object SBFolder: TSpeedButton
       Left = 30
@@ -36351,7 +36351,6 @@ object FProgram: TFProgram
       'Professional'
       'Server'
     )
-    
     Left = 374
     Top = 178
   end

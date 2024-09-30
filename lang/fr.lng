@@ -100,6 +100,7 @@ Server=Serveur
 22000=v 21H2 "Octobre 2021 Version initiale"
 22621=v 22H2 "Septembre 2022"
 22631=v 23H2 "Octobre 2023"
+26100=v 24H2 "Octobre 2024"
 
 [AboutBox]
 Caption=A propos de %s
