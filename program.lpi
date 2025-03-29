@@ -21,11 +21,10 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="1"/>
-      <RevisionNr Value="1"/>
-      <BuildNr Value="1"/>
+      <RevisionNr Value="2"/>
       <Language Value="040C"/>
       <Attributes pvaPreRelease="True"/>
-      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp" LegalTrademarks="bb - sdtp" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="1.0.1.1"/>
+      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp" LegalTrademarks="bb - sdtp" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="1.0.2.0"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -37,19 +36,25 @@
     <RunParams>
       <FormatVersion Value="2"/>
     </RunParams>
-    <RequiredPackages Count="4">
+    <RequiredPackages Count="6">
       <Item1>
-        <PackageName Value="uniqueinstance_package"/>
+        <PackageName Value="ExCtrlsPkg_dsgn"/>
       </Item1>
       <Item2>
-        <PackageName Value="lazbbcomponents"/>
+        <PackageName Value="ExCtrlsPkg"/>
       </Item2>
       <Item3>
-        <PackageName Value="indylaz"/>
+        <PackageName Value="uniqueinstance_package"/>
       </Item3>
       <Item4>
-        <PackageName Value="LCL"/>
+        <PackageName Value="lazbbcomponents"/>
       </Item4>
+      <Item5>
+        <PackageName Value="indylaz"/>
+      </Item5>
+      <Item6>
+        <PackageName Value="LCL"/>
+      </Item6>
     </RequiredPackages>
     <Units Count="11">
       <Unit0>

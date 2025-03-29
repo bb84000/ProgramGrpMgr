@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <BuildModes Active="Default"/>
-    <Units Count="116">
+    <Units Count="117">
       <Unit0>
         <Filename Value="program.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -20,7 +20,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <CursorPos X="30" Y="3"/>
+        <TopLine Value="558"/>
+        <CursorPos X="8" Y="566"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -100,7 +101,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="LoadConf1"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="3"/>
         <CursorPos X="2" Y="50"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -119,7 +120,7 @@
         <HasResources Value="True"/>
         <EditorIndex Value="8"/>
         <TopLine Value="3"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
         <Loaded Value="True"/>
       </Unit10>
       <Unit11>
@@ -629,9 +630,10 @@
       </Unit77>
       <Unit78>
         <Filename Value="ProgramGrpMgr.ini"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="58" Y="8"/>
+        <EditorIndex Value="4"/>
+        <CursorPos X="92" Y="9"/>
         <UsageCount Value="24"/>
+        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit78>
       <Unit79>
@@ -815,8 +817,8 @@
       <Unit104>
         <Filename Value="..\Packets\Lazbbcomponents\lazbbosversion.pas"/>
         <UnitName Value="lazbbOsVersion"/>
-        <EditorIndex Value="1"/>
-        <CursorPos X="55" Y="615"/>
+        <EditorIndex Value="2"/>
+        <CursorPos X="13" Y="615"/>
         <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit104>
@@ -864,8 +866,8 @@
       <Unit111>
         <Filename Value="lang\en.lng"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="82"/>
-        <CursorPos X="35" Y="101"/>
+        <TopLine Value="143"/>
+        <CursorPos X="23" Y="177"/>
         <UsageCount Value="14"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
@@ -873,8 +875,8 @@
       <Unit112>
         <Filename Value="lang\fr.lng"/>
         <EditorIndex Value="10"/>
-        <TopLine Value="78"/>
-        <CursorPos X="28" Y="103"/>
+        <TopLine Value="146"/>
+        <CursorPos Y="180"/>
         <UsageCount Value="14"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
@@ -888,137 +890,147 @@
       </Unit113>
       <Unit114>
         <Filename Value="..\Packets\Lazbbcomponents\windows11_en.csv"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="35" Y="5"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit114>
       <Unit115>
         <Filename Value="..\Packets\Lazbbcomponents\windows10_en.csv"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit115>
+      <Unit116>
+        <Filename Value="..\lazbbunits\lazbbupdatedlg.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="3"/>
+        <CursorPos X="3" Y="20"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit116>
     </Units>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="program1.pas"/>
-        <Caret Line="2117" Column="27" TopLine="2089"/>
+        <Caret Line="1734" Column="11" TopLine="1706"/>
       </Position1>
       <Position2>
         <Filename Value="program1.pas"/>
-        <Caret Line="2134" Column="53" TopLine="2106"/>
+        <Caret Line="1735" Column="13" TopLine="1707"/>
       </Position2>
       <Position3>
         <Filename Value="program1.pas"/>
-        <Caret Line="2136" Column="65" TopLine="2110"/>
+        <Caret Line="1736" Column="11" TopLine="1708"/>
       </Position3>
       <Position4>
         <Filename Value="program1.pas"/>
-        <Caret Line="1279" Column="19" TopLine="1262"/>
+        <Caret Line="1738" Column="21" TopLine="1710"/>
       </Position4>
       <Position5>
         <Filename Value="program1.pas"/>
-        <Caret Line="1280" Column="37" TopLine="1262"/>
+        <Caret Line="1740" Column="25" TopLine="1712"/>
       </Position5>
       <Position6>
         <Filename Value="program1.pas"/>
-        <Caret Line="1765" Column="17" TopLine="1737"/>
+        <Caret Line="1745" Column="75" TopLine="1717"/>
       </Position6>
       <Position7>
         <Filename Value="program1.pas"/>
-        <Caret Line="1770" Column="19" TopLine="1742"/>
+        <Caret Line="1746" Column="20" TopLine="1718"/>
       </Position7>
       <Position8>
         <Filename Value="program1.pas"/>
-        <Caret Line="1777" Column="99" TopLine="1754"/>
+        <Caret Line="1748" Column="35" TopLine="1720"/>
       </Position8>
       <Position9>
         <Filename Value="program1.pas"/>
-        <Caret Line="1782" Column="35" TopLine="1754"/>
+        <Caret Line="2127" Column="13" TopLine="2099"/>
       </Position9>
       <Position10>
         <Filename Value="program1.pas"/>
-        <Caret Line="1279" Column="83" TopLine="1261"/>
+        <Caret Line="2128" Column="13" TopLine="2100"/>
       </Position10>
       <Position11>
         <Filename Value="program1.pas"/>
-        <Caret Line="1280" Column="37" TopLine="1261"/>
+        <Caret Line="54" TopLine="36"/>
       </Position11>
       <Position12>
         <Filename Value="program1.pas"/>
-        <Caret Line="1765" Column="17" TopLine="1737"/>
+        <Caret Line="560" Column="16" TopLine="532"/>
       </Position12>
       <Position13>
         <Filename Value="program1.pas"/>
-        <Caret Line="1770" Column="19" TopLine="1742"/>
+        <Caret Line="1734" Column="16" TopLine="1706"/>
       </Position13>
       <Position14>
         <Filename Value="program1.pas"/>
-        <Caret Line="1777" Column="21" TopLine="1749"/>
+        <Caret Line="1747" Column="80" TopLine="1719"/>
       </Position14>
       <Position15>
         <Filename Value="program1.pas"/>
-        <Caret Line="1782" Column="35" TopLine="1754"/>
+        <Caret Line="1748" Column="25" TopLine="1720"/>
       </Position15>
       <Position16>
         <Filename Value="program1.pas"/>
-        <Caret Line="1279" Column="22" TopLine="1262"/>
+        <Caret Line="1750" Column="40" TopLine="1722"/>
       </Position16>
       <Position17>
         <Filename Value="program1.pas"/>
-        <Caret Line="1777" Column="97" TopLine="1743"/>
+        <Caret Line="560" Column="16" TopLine="543"/>
       </Position17>
       <Position18>
         <Filename Value="program1.pas"/>
-        <Caret Line="1782" Column="35" TopLine="1754"/>
+        <Caret Line="1734" Column="16" TopLine="1706"/>
       </Position18>
       <Position19>
         <Filename Value="program1.pas"/>
-        <Caret Line="1279" Column="19" TopLine="1261"/>
+        <Caret Line="1747" Column="80" TopLine="1719"/>
       </Position19>
       <Position20>
         <Filename Value="program1.pas"/>
-        <Caret Line="1280" Column="37" TopLine="1261"/>
+        <Caret Line="1748" Column="25" TopLine="1720"/>
       </Position20>
       <Position21>
         <Filename Value="program1.pas"/>
-        <Caret Line="1765" Column="17" TopLine="1737"/>
+        <Caret Line="1750" Column="40" TopLine="1722"/>
       </Position21>
       <Position22>
         <Filename Value="program1.pas"/>
-        <Caret Line="1770" Column="19" TopLine="1742"/>
+        <Caret Line="524" Column="50" TopLine="507"/>
       </Position22>
       <Position23>
         <Filename Value="program1.pas"/>
-        <Caret Line="1777" Column="28" TopLine="1754"/>
+        <Caret Line="6" Column="91"/>
       </Position23>
       <Position24>
         <Filename Value="program1.pas"/>
-        <Caret Line="258" TopLine="224"/>
+        <Caret Line="178" Column="22" TopLine="151"/>
       </Position24>
       <Position25>
         <Filename Value="program1.pas"/>
-        <Caret Line="1290" Column="30" TopLine="1262"/>
+        <Caret Line="190" Column="23" TopLine="163"/>
       </Position25>
       <Position26>
         <Filename Value="program1.pas"/>
-        <Caret Line="1781" Column="30" TopLine="1753"/>
+        <Caret Line="574" Column="78" TopLine="546"/>
       </Position26>
       <Position27>
         <Filename Value="program1.pas"/>
-        <Caret Line="1788" Column="32" TopLine="1760"/>
+        <Caret Line="1746" Column="72" TopLine="1718"/>
       </Position27>
       <Position28>
-        <Filename Value="..\Packets\Lazbbcomponents\lazbbosversion.pas"/>
-        <Caret Line="595" Column="28" TopLine="587"/>
+        <Filename Value="program1.pas"/>
+        <Caret Line="2129" Column="61" TopLine="2101"/>
       </Position28>
       <Position29>
-        <Filename Value="..\Packets\Lazbbcomponents\lazbbosversion.pas"/>
-        <Caret Line="612" Column="28" TopLine="587"/>
+        <Filename Value="program1.pas"/>
+        <Caret Line="219" Column="26" TopLine="213"/>
       </Position29>
+      <Position30>
+        <Filename Value="program1.pas"/>
+        <Caret Line="542" Column="42" TopLine="514"/>
+      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

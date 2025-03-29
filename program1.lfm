@@ -17,7 +17,7 @@ object FProgram: TFProgram
   OnResize = FormResize
   OnShow = FormShow
   OnWindowStateChange = FormWindowStateChange
-  LCLVersion = '3.4.0.0'
+  LCLVersion = '3.8.0.0'
   object PnlTop: TPanel
     Left = 0
     Height = 40

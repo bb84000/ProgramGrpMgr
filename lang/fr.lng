@@ -167,3 +167,15 @@ LGrpIcon.Caption=Icone du groupe
 ImgGrpIcon.Hint=Double clic pour changer l'icone
 LGrpComment.Caption=Commentaire
 
+[UpdateDlg]
+Caption=Mise à jour de %s
+BtnDownload.Caption=Télécharger
+BtnUpdate.Caption=Mettre à jour
+BtnAbort.Caption-Abandonner
+sUpdtAvailable=Nouvelle version %s disponible. Cliquez sur le bouton "Télécharger"
+sNoUpdtAvailable=%s est à jour
+sUpdtInstall=Cliquer sur le bouton "Mettre à jour" pour installer la mise à jour
+DlError=Erreur de téléchargement
+ZipError=Erreur archive
+
+

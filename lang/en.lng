@@ -165,3 +165,14 @@ LGrpIcon.Caption=Group Icon
 ImgGrpIcon.Hint=Double click to change icon
 LGrpComment.Caption=Comment
 
+[UpdateDlg]
+Caption=%s update
+BtnDownload.Caption=Download
+BtnUpdate.Caption=Update now
+BtnAbort.Caption-Abort
+sUpdtAvailable=New version %s available. Click button to download it
+sNoUpdtAvailable=%s is up to date
+sUpdtInstall=Click the button "Update now" to install the update
+DlError=Download error
+ZipError=Archivc error
+

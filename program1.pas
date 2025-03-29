@@ -14,8 +14,8 @@ uses
   ComCtrls, Buttons, StdCtrls, CommCtrl, WinDirs, bbutils, shlobj, laz2_DOM,
   laz2_XMLRead, laz2_XMLWrite, files1, Registry, LCLIntf, Menus, ExtDlgs,
   ShellAPI, SaveCfg1, prefs1, property1, lazbbinifiles, LoadGroup1, LazUTF8,
-  LoadConf1, Config1, lazbbutils, lmessages, lazbbaboutdlg,
-  Clipbrd, lazbbOneInst, lazbbOsVersion, FileUtil;
+  LoadConf1, Config1, lazbbutils, lmessages, lazbbaboutdlg, lazbbupdatedlg,
+  Clipbrd, ExProgressbar, lazbbOneInst, lazbbOsVersion, FileUtil;
 
 
 const
@@ -518,6 +518,8 @@ begin
   AboutBox.UrlWebsite:= IniFile.ReadString('urls', 'UrlWebSite','https://www.sdtp.com');
   sUrlProgSite:= IniFile.ReadString('urls', 'UrlProgSite','https://github.com/bb84000/ProgramGrpMgr/wiki'); // can be localized
   AboutBox.UrlSourceCode:=IniFile.ReadString('urls', 'UrlSourceCode','https://github.com/bb84000/ProgramGrpMgr');
+  UpdateDlg.UrlInstall:= IniFile.ReadString('urls', 'UrlInstall', 'https://github.com/bb84000/ProgramGrpMgr/raw/refs/heads/master/ProgramGrpMgr.zip');
+  UpdateDlg.ExeInstall:= IniFile.ReadString('urls', 'ExeInstall', 'InstallProgramGrpMgr.exe');       // Installer executable
   ChkVerInterval:= IniFile.ReadInt64('urls', 'ChkVerInterval', 3);
   if assigned(inifile) then FreeAndNil(inifile);
   // Now load settings
@@ -574,7 +576,7 @@ begin
        end;
        exit;
      end;
-     NewVer := VersionToInt(sNewVer);
+     newVer := VersionToInt(sNewVer);
      // Cannot get new version
      if NewVer < 0 then exit;
      CurVer := VersionToInt(AboutBox.version);
@@ -583,7 +585,14 @@ begin
        Settings.LastVersion:= sNewVer;
        AboutBox.LUpdate.Caption := Format(AboutBox.sUpdateAvailable, [sNewVer]);
        AboutBox.NewVersion:= true;
-       AboutBox.ShowModal;
+       UpdateDlg.sNewVer:= version;
+       UpdateDlg.NewVersion:= true;
+       {$IFDEF WINDOWS}
+         if UpdateDlg.ShowModal = mryes then Close;    // New version install experimental
+       {$ELSE}
+         AboutBox.ShowModal;
+       {$ENDIF}
+       //AboutBox.ShowModal;
      end else
      begin
        AboutBox.LUpdate.Caption:= AboutBox.sNoUpdateAvailable;
@@ -824,6 +833,9 @@ begin
   AboutBox.LUpdate.Hint := AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
   AboutBox.Version:= Version;
   AboutBox.ProgName:= ProgName;
+  // Populate UpdateBox with proper variables
+  UpdateDlg.ProgName:= ProgName;
+  UpdateDlg.NewVersion:= false;
   // Dont want to have the same icon handle
   ImgPrgSel.Picture.Icon.Handle:=  ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
   // Pointer to files and settings change
@@ -2126,6 +2138,9 @@ begin
     // About box
     AboutBox.Translate(LngFile);
     AboutBox.LVersion.Hint:= OSVersion.VerDetail;
+
+    // UpdateDlg
+    UpdateDlg.Translate (LangFile);
 
     NoLongerChkUpdates:= ReadString('main', 'NoLongerChkUpdates', 'Ne plus rechercher les mises à jour');
     //NextChkCaption:= ReadString('main', 'NextChkCaption', 'Prochaine vérification');
