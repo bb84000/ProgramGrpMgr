@@ -337,6 +337,9 @@ Version 1.0.1.1 - 01/09/2024
 Version 1.0.2.0 - 29/03/2025
 - Ajout d'un module de mise à jour automatique (Windows seulement, expérimental)
 
+Version 1.0.2.1 - 31/03/2025
+- Bug d'affichage de nouvelle version corrigé
+
 
 
 

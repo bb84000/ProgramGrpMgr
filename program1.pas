@@ -585,7 +585,7 @@ begin
        Settings.LastVersion:= sNewVer;
        AboutBox.LUpdate.Caption := Format(AboutBox.sUpdateAvailable, [sNewVer]);
        AboutBox.NewVersion:= true;
-       UpdateDlg.sNewVer:= version;
+       UpdateDlg.sNewVer:= sNewVer;
        UpdateDlg.NewVersion:= true;
        {$IFDEF WINDOWS}
          if UpdateDlg.ShowModal = mryes then Close;    // New version install experimental
