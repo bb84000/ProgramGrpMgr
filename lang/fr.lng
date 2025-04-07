@@ -111,7 +111,7 @@ LUpdate.Caption=Recherche de mise à jour
 LProgPage.Caption=Page d'accueil du programme
 LWebSite.Caption=Page d'accueil du site Web
 LSourceCode.Caption=Page Web du code source
-UrlProgSite=/wiki/Accueil
+UrlProgSite=/Accueil
 
 [Prefs]
 Caption=Préfé rences de %s
@@ -123,6 +123,7 @@ CBMiniInTray.Caption=Minimiser dans la zone de notifications
 CBMiniInTray.Hint=L'application minimisée n'est pas affichée dans la barre des tâches mais dans la zone de notification
 CBHideInTaskBar.Caption=Ne pas afficher l'application dans la barre des tâches
 CBHideInTaskBar.Hint=L'application n'est pas affichée dans la barre des tâches. Impose de la minimiser dans la zone de notifications
+CBIconCache.Caption=Activer le cache des icones
 ImgHint=Double clic pour changer l'icone
 CBXDesktopMnu.Caption=Ajouter au menu contextuel du bureau
 CBXDesktopMnu.Hint=Ajoute une nouvelle commande au menu contextuel du bureau %spour créer une nouvelle fenêtre du Gestionnaire de Groupe de Programme

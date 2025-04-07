@@ -8,7 +8,7 @@ object Prefs: TPrefs
   ClientHeight = 294
   ClientWidth = 720
   OnCreate = FormCreate
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '3.8.0.0'
   object Panel1: TPanel
     Left = 8
     Height = 200
@@ -39,10 +39,10 @@ object Prefs: TPrefs
       Width = 330
       AutoSize = False
       Caption = 'Minimiser dans la zone de notification'
-      OnClick = CBMiniInTrayClick
       ParentShowHint = False
       ShowHint = True
       TabOrder = 1
+      OnClick = CBMiniInTrayClick
     end
     object CBSavSizePos: TCheckBox
       Left = 8
@@ -221,7 +221,7 @@ object Prefs: TPrefs
       Left = 163
       Height = 19
       Top = 171
-      Width = 59
+      Width = 57
       Caption = 'Italique'
       TabOrder = 4
     end
@@ -229,7 +229,7 @@ object Prefs: TPrefs
       Left = 226
       Height = 19
       Top = 171
-      Width = 66
+      Width = 64
       Caption = 'Souligné'
       TabOrder = 5
     end

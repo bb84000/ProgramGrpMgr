@@ -22,10 +22,10 @@
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="1"/>
       <RevisionNr Value="2"/>
-      <BuildNr Value="1"/>
+      <BuildNr Value="2"/>
       <Language Value="040C"/>
       <Attributes pvaPreRelease="True"/>
-      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp" LegalTrademarks="bb - sdtp" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="1.0.2.1"/>
+      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp" LegalTrademarks="bb - sdtp" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="1.0.2.2"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -125,7 +125,9 @@
       <Unit10>
         <Filename Value="..\lazbbunits\lazbbaboutdlg.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="AboutDlg"/>
         <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit10>
     </Units>
   </ProjectOptions>
@@ -151,8 +153,8 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <RunWithoutDebug Value="True"/>
         <DebugInfoType Value="dsDwarf2"/>
-        <StripSymbols Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>
       <Options>

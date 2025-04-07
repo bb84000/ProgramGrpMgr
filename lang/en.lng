@@ -107,7 +107,7 @@ sUpdateAvailable=New version %s available. Click to download it
 sNoUpdateAvailable=%s is up to date.
 LUpdate.Caption=Search update
 LProgPage.Caption=Program home page
-UrlProgSite=/wiki
+UrlProgSite=
 LWebSite.Caption=Web site home page
 LSourceCode.Caption=Source code Web page
 
@@ -122,6 +122,7 @@ CBMiniInTray.Caption=Minimize in tray area
 CBMiniInTray.Hint=The application icon is not shown in the task bar, instead in the tray area
 CBHideInTaskBar.Caption=Do not show the application in the Task bar
 CBHideInTaskBar.Hint=The application is not shown in the Task Bar. Need to be minimized in the tray
+CBIconCache.Caption=Enable icon's cache
 CBXDesktopMnu.Caption=Add to desktop context menu
 CBXDesktopMnu.Hint=Add a command in the desktop context menu %sto create a new Program Group Manager window
 LBkgndColor.Caption=Background color

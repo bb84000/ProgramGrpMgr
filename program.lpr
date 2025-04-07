@@ -11,7 +11,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, program1, lazbbaboutupdate, lazbbaboutdlg, SaveCfg1, prefs1, Property1,
+  Forms, program1,  SaveCfg1, prefs1, Property1,
   LoadGroup1, LoadConf1;
 
 {$R *.res}

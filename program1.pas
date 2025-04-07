@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - september 2024
+// bb - sdtp - april 2025
 // Windows only program
 //******************************************************************************
 unit program1;
@@ -15,7 +15,7 @@ uses
   laz2_XMLRead, laz2_XMLWrite, files1, Registry, LCLIntf, Menus, ExtDlgs,
   ShellAPI, SaveCfg1, prefs1, property1, lazbbinifiles, LoadGroup1, LazUTF8,
   LoadConf1, Config1, lazbbutils, lmessages, lazbbaboutdlg, lazbbupdatedlg,
-  Clipbrd, ExProgressbar, lazbbOneInst, lazbbOsVersion, FileUtil;
+  Clipbrd, lazbbOneInst, lazbbOsVersion, FileUtil;
 
 
 const
@@ -143,6 +143,7 @@ type
   private
     First: Boolean;
     OSTarget: String;
+    OS: String;
     AppDataPath: String;
     DesktopPath : String;
     StartMenuPath: String;
@@ -168,7 +169,6 @@ type
     sBackupPrefs: String;
     YesBtn, NoBtn, CancelBtn: String;
     ExecName, ExecPath: String;
-    FPropertyCaption: string;
     DeleteOKMsg: String;
     PtArray : array of Tpoint;
     IcoSize: Integer;
@@ -188,7 +188,7 @@ type
     BkGndPicture: Tpicture;
     sCannotGetNewVerList: String;
     sNoLongerChkUpdates: String;
-    sUrlProgSite: String;
+    //sUrlProgSite: String;
     ChkVerInterval: Int64;  //iDays ?
     Iconized: Boolean;
     PrevLeft: Integer;
@@ -220,13 +220,10 @@ type
     procedure OnAppMinimize(Sender: TObject);
     function HideOnTaskbar: boolean;
     procedure OnFormShown(var Msg: TMessage); message WM_FORMSHOWN;
+    procedure InitAboutBox;
   public
 
   end;
-
-
-
-
 
 var
   FProgram: TFProgram;
@@ -394,7 +391,7 @@ begin
   Pointer(SHDefExtractIcon) := GetProcAddress(GetModuleHandle('shell32.dll'),'SHDefExtractIconA');
   Pointer(ShutdownBlockReasonCreate):= GetProcAddress(GetModuleHandle('user32.dll'), 'ShutdownBlockReasonCreate');
   Pointer(ShutdownBlockReasonDestroy):= GetProcAddress(GetModuleHandle('user32.dll'), 'ShutdownBlockReasonDestroy');
-
+  OS := 'Windows ';
   // Compilation date/time
   try
     CompileDateTime:= Str2Date({$I %DATE%}, 'YYYY/MM/DD')+StrToTime({$I %TIME%});
@@ -483,13 +480,11 @@ end;
 procedure TFProgram.FormActivate(Sender: TObject);
 var
   reg: Tregistry;
-  IniFile: TBbInifile;
 begin
   inherited;
   if not first then  exit;
   Settings.GroupName:= GetGrpParam;
   // We get Windows Version
-  //OSVersion:= TOSVersion.Create(LangStr, LangFile);
   // For popup menu, retrieve bitmap from buttons
   CropBitmap(SBGroup.Glyph, PmnuGroup.Bitmap, SBGroup.Enabled);
   CropBitmap(SBFolder.Glyph, PMnuFolder.Bitmap, SBFolder.Enabled);
@@ -512,19 +507,12 @@ begin
   {$IFDEF CPU64}
      OSTarget := '64 bits';
   {$ENDIF}
-  // Check inifile with URLs, if not present, then use default
-  IniFile:= TBbInifile.Create('ProgramGrpMgr.ini');
-  AboutBox.ChkVerURL := IniFile.ReadString('urls', 'ChkVerURL','https://github.com/bb84000/ProgramGrpMgr/releases/latest');
-  AboutBox.UrlWebsite:= IniFile.ReadString('urls', 'UrlWebSite','https://www.sdtp.com');
-  sUrlProgSite:= IniFile.ReadString('urls', 'UrlProgSite','https://github.com/bb84000/ProgramGrpMgr/wiki'); // can be localized
-  AboutBox.UrlSourceCode:=IniFile.ReadString('urls', 'UrlSourceCode','https://github.com/bb84000/ProgramGrpMgr');
-  UpdateDlg.UrlInstall:= IniFile.ReadString('urls', 'UrlInstall', 'https://github.com/bb84000/ProgramGrpMgr/raw/refs/heads/master/ProgramGrpMgr.zip');
-  UpdateDlg.ExeInstall:= IniFile.ReadString('urls', 'ExeInstall', 'InstallProgramGrpMgr.exe');       // Installer executable
-  ChkVerInterval:= IniFile.ReadInt64('urls', 'ChkVerInterval', 3);
-  if assigned(inifile) then FreeAndNil(inifile);
+  version:= GetVersionInfo.ProductVersion;
   // Now load settings
   LoadConfig(Settings.GroupName);
   if length(Settings.LastVersion)=0 then Settings.LastVersion:= version;
+  // Init aboutbox and UpdateDlg variables
+  InitAboutBox;
   // check if desktop context menu enabled and change settings checkbox according.
   reg := TRegistry.Create;
   reg.RootKey := HKEY_CLASSES_ROOT;
@@ -539,7 +527,43 @@ begin
   end;
   Application.ProcessMessages;
   if StartMini then PostMessage(Handle, WM_FORMSHOWN, 0, 0) ;
+
   Application.QueueAsyncCall(@CheckUpdate, ChkVerInterval);       // async call to let icons loading
+end;
+
+// AboutBox and UploadDlg initialization
+
+procedure TFProgram.InitAboutBox;
+var
+  IniFile: TBbInifile;
+begin
+  // Check inifile with URLs, if not present, then use default
+  IniFile:= TBbInifile.Create('ProgramGrpMgr.ini');
+  AboutBox.UrlWebsite:= IniFile.ReadString('urls', 'UrlWebSite','https://www.sdtp.com');
+  AboutBox.UrlSourceCode:= IniFile.ReadString('urls', 'UrlSourceCode','https://github.com/bb84000/ProgramGrpMgr');
+  AboutBox.UrlProgSite:=  IniFile.ReadString('urls', 'UrlProgSite','https://github.com/bb84000/ProgramGrpMgr/wiki');
+  AboutBox.autoUpdate:= true;          // enable auto update on Aboutbox new version click
+  AboutBox.ChkVerURL := IniFile.ReadString('urls', 'ChkVerURL','https://github.com/bb84000/ProgramGrpMgr/releases/latest');
+  UpdateDlg.UrlInstall:= IniFile.ReadString('urls', 'UrlInstall', 'https://github.com/bb84000/ProgramGrpMgr/raw/refs/heads/master/ProgramGrpMgr.zip');
+  UpdateDlg.ExeInstall:= IniFile.ReadString('urls', 'ExeInstall', 'InstallProgramGrpMgr.exe');       // Installer executable
+  ChkVerInterval:= IniFile.ReadInt64('urls', 'ChkVerInterval', 3);
+  if assigned(inifile) then FreeAndNil(inifile);
+  AboutBox.Version:= Version;
+  AboutBox.LProductName.Caption:= GetVersionInfo.ProductName+' ('+OsTarget+')';
+  AboutBox.LCopyright.Caption:= GetVersionInfo.CompanyName+' - '+DateTimeToStr(CompileDateTime);
+  //AboutBox.Width:= 340; // to have more place for the long product name
+  AboutBox.LVersion.Caption:= 'Version: '+Version+ ' (' + OS + OSTarget + ')';
+  AboutBox.Image1.Picture.Icon.Handle:= Application.Icon.Handle;
+  AboutBox.ProgName:= ProgName;
+  AboutBox.LastUpdate:= Settings.LastUpdChk;
+  AboutBox.LastVersion:= Settings.LastVersion;
+  AboutBox.LUpdate.Hint := AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
+  // Populate UpdateDlg with proper variables
+  UpdateDlg.ChkVerURL := AboutBox.ChkVerUrl;
+  UpdateDlg.ProgName:= ProgName;
+  UpdateDlg.NewVersion:= false;
+  AboutBox.Translate(LangFile);
+  UpdateDlg.Translate(LangFile);
 end;
 
 // Parameter days defines the updates interval in days
@@ -557,7 +581,6 @@ begin
   alertmsg:= '';
   if not visible then alertpos:= poDesktopCenter
   else alertpos:= poMainFormCenter;
-  AboutBox.LastUpdate:= Trunc(Settings.LastUpdChk);
   if (Trunc(Now)>= Trunc(Settings.LastUpdChk)+days) and (not Settings.NoChkNewVer) then
   begin
      Settings.LastUpdChk := Trunc(Now);
@@ -565,21 +588,21 @@ begin
      AboutBox.ErrorMessage:='';
      //AboutBox.version:= '0.1.0.0' ;
      sNewVer:= AboutBox.ChkNewVersion;
+     //sNewVer:= UpdateDlg.ChkNewVersion;
      errmsg:= AboutBox.ErrorMessage;
+     //errmsg:= UpdateDlg.ErrorMessage;
      if length(sNewVer)=0 then
      begin
        if length(errmsg)=0 then alertmsg:= sCannotGetNewVerList
        else alertmsg:= errmsg;
-       begin
-         if AlertDlg(Caption,  alertmsg, ['OK', CancelBtn, sNoLongerChkUpdates],
+       if AlertDlg(Caption,  alertmsg, ['OK', CancelBtn, sNoLongerChkUpdates],
                   true, mtError, alertpos)= mrYesToAll then Settings.NoChkNewVer:= true;
-       end;
        exit;
      end;
      newVer := VersionToInt(sNewVer);
      // Cannot get new version
      if NewVer < 0 then exit;
-     CurVer := VersionToInt(AboutBox.version);
+     CurVer := VersionToInt(version);
      if NewVer > CurVer then
      begin
        Settings.LastVersion:= sNewVer;
@@ -587,12 +610,11 @@ begin
        AboutBox.NewVersion:= true;
        UpdateDlg.sNewVer:= sNewVer;
        UpdateDlg.NewVersion:= true;
-       {$IFDEF WINDOWS}
-         if UpdateDlg.ShowModal = mryes then Close;    // New version install experimental
+       {$IFDEF WINDOWS}                             // New version install experimental, windows only
+         if UpdateDlg.ShowModal = mryes then Close;
        {$ELSE}
          AboutBox.ShowModal;
        {$ENDIF}
-       //AboutBox.ShowModal;
      end else
      begin
        AboutBox.LUpdate.Caption:= AboutBox.sNoUpdateAvailable;
@@ -600,15 +622,18 @@ begin
      Settings.LastUpdChk:= now;
    end else
    begin
-    if VersionToInt(Settings.LastVersion)>VersionToInt(version) then
-       AboutBox.LUpdate.Caption := Format(AboutBox.sUpdateAvailable, [Settings.LastVersion]) else
-       begin
-         AboutBox.LUpdate.Caption:= AboutBox.sNoUpdateAvailable;
-         // Already checked the same day
-         if Trunc(Settings.LastUpdChk) = Trunc(now) then AboutBox.checked:= true;
-       end;
+     if VersionToInt(Settings.LastVersion)>VersionToInt(version) then
+     begin
+       AboutBox.LUpdate.Caption := Format(AboutBox.sUpdateAvailable, [Settings.LastVersion]);
+       AboutBox.NewVersion:= true ;
+     end else
+     begin
+       AboutBox.LUpdate.Caption:= AboutBox.sNoUpdateAvailable;
+       // Already checked the same day
+       if Trunc(Settings.LastUpdChk) = Trunc(now) then AboutBox.checked:= true;
+     end;
    end;
-   //AboutBox.LUpdate.Hint:= AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
+   AboutBox.LUpdate.Hint:= AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
    AboutBox.Translate(LangFile);
 end;
 
@@ -823,19 +848,7 @@ begin
   If not FileExists(Settings.GrpIconFile) then Settings.GrpIconFile:= Application.ExeName;
   Application.Icon.Handle:= ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
   TrayProgman.Icon:= Application.Icon;
-  version:= GetVersionInfo.ProductVersion;
-  // Aboutbox
-  AboutBox.Image1.Picture.Icon.Handle:= Application.Icon.Handle;
-  AboutBox.LProductName.Caption:= GetVersionInfo.ProductName+' ('+OsTarget+')';
-  AboutBox.LCopyright.Caption:= GetVersionInfo.CompanyName+' - '+DateTimeToStr(CompileDateTime);
-  AboutBox.LVersion.Caption:= 'Version: '+Version;
-  //AboutBox.LVersion.Hint:= OSVersion.VerDetail;
-  AboutBox.LUpdate.Hint := AboutBox.sLastUpdateSearch + ': ' + DateToStr(Settings.LastUpdChk);
-  AboutBox.Version:= Version;
-  AboutBox.ProgName:= ProgName;
-  // Populate UpdateBox with proper variables
-  UpdateDlg.ProgName:= ProgName;
-  UpdateDlg.NewVersion:= false;
+
   // Dont want to have the same icon handle
   ImgPrgSel.Picture.Icon.Handle:=  ExtractIconU(handle, Settings.GrpIconFile, Settings.GrpIconIndex);
   // Pointer to files and settings change
@@ -1741,11 +1754,25 @@ var
     chked: Boolean;
     alertmsg: String;
 begin
+  // If main windows is hidden, place the about box at the center of desktop,
+  // else at the center of main windows
+  if (Sender.ClassName= 'TMenuItem') and not visible then AboutBox.Position:= poDesktopCenter
+  else AboutBox.Position:= poMainFormCenter;
   AboutBox.LastUpdate:= Settings.LastUpdChk;
   chked:= AboutBox.Checked;
   AboutBox.ErrorMessage:='';
-  //AboutBox.Version:= '0.9.0.0';
-  AboutBox.ShowModal;
+  if AboutBox.ShowModal= mrLast then
+  begin
+      UpdateDlg.sNewVer:= AboutBox.LastVersion;
+      UpdateDlg.NewVersion:= true;
+      {$IFDEF WINDOWS}
+        if UpdateDlg.ShowModal = mryes then close;    // New version install experimental
+      {$ELSE}
+        OpenURL(AboutBox.UrlProgSite);
+      {$ENDIF}
+  end;
+  Settings.LastVersion:= AboutBox.LastVersion ;
+
   // If we have checked update and got an error
   if length(AboutBox.ErrorMessage)>0 then
   begin
@@ -1943,8 +1970,6 @@ var
   Item : TListItem;
   MyFichier: TFichier;
   OldTarget: String;
-  siz: double;
-  unite: string;
 begin
   Item := ListView1.Selected;
   If Item = nil then exit;

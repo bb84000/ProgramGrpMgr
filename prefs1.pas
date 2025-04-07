@@ -112,6 +112,7 @@ begin
     CBStartWin.Caption:= ReadString('Prefs', 'CBStartWin.Caption', CBStartWin.Caption);
     CBSavSizePos.Caption:= ReadString('Prefs', 'CBSavSizePos.Caption', CBSavSizePos.Caption);
     CBNoChkNewVer.Caption:= ReadString('Prefs', 'CBNoChkNewVer.Caption', CBNoChkNewVer.Caption);
+    CBIconCache.Caption:= ReadString('Prefs', 'CBIconCache.Caption', CBIconCache.Caption);
     LLangue.Caption:= ReadString('Prefs', 'LLangue.Caption', LLangue.Caption);
     CBMiniInTray.Caption:= ReadString('Prefs', 'CBMiniInTray.Caption', CBMiniInTray.Caption);
     CBMiniInTray.Hint:= ReadString('Prefs', 'CBMiniInTray.Hint',  CBMiniInTray.Hint);
