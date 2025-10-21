@@ -5,8 +5,9 @@ object FProgram: TFProgram
   Width = 659
   AllowDropFiles = True
   Caption = 'FProgram'
-  ClientHeight = 303
-  ClientWidth = 659
+  ClientHeight = 0
+  ClientWidth = 0
+  LCLVersion = '4.2.0.0'
   OnActivate = FormActivate
   OnChangeBounds = FormChangeBounds
   OnClose = FormClose
@@ -17,7 +18,6 @@ object FProgram: TFProgram
   OnResize = FormResize
   OnShow = FormShow
   OnWindowStateChange = FormWindowStateChange
-  LCLVersion = '3.8.0.0'
   object PnlTop: TPanel
     Left = 0
     Height = 40
@@ -103,9 +103,9 @@ object FProgram: TFProgram
         DBFFA2CADBFFA3CADBFFAEC9D3FFDADADAFFA0A0A000A0A0A000
       }
       NumGlyphs = 2
-      OnClick = SBGroupClick
       ShowHint = True
       ParentShowHint = False
+      OnClick = SBGroupClick
     end
     object CBDisplay: TComboBox
       Left = 330
@@ -220,9 +220,9 @@ object FProgram: TFProgram
         0000000000000000000000000000000000000000000000000000
       }
       NumGlyphs = 2
-      OnClick = SBFolderClick
       ShowHint = True
       ParentShowHint = False
+      OnClick = SBFolderClick
     end
     object SBAddFile: TSpeedButton
       Left = 55
@@ -298,9 +298,9 @@ object FProgram: TFProgram
         0000000000000000000000000000000000000000000000000000
       }
       NumGlyphs = 2
-      OnClick = SBAddFileClick
       ShowHint = True
       ParentShowHint = False
+      OnClick = SBAddFileClick
     end
     object SBSave: TSpeedButton
       Left = 80
@@ -377,9 +377,9 @@ object FProgram: TFProgram
         0000000000000000000000000000000000000000000000000000
       }
       NumGlyphs = 2
-      OnClick = SBSaveClick
       ShowHint = True
       ParentShowHint = False
+      OnClick = SBSaveClick
     end
     object SBPrefs: TSpeedButton
       Left = 104
@@ -455,10 +455,10 @@ object FProgram: TFProgram
         A1FFFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
       }
       NumGlyphs = 2
-      OnClick = SBPrefsClick
       ShowHint = True
       ParentFont = False
       ParentShowHint = False
+      OnClick = SBPrefsClick
     end
     object SBLoadConf: TSpeedButton
       Left = 130
@@ -534,9 +534,9 @@ object FProgram: TFProgram
         C4FF000000000000000000000000000000000000000000000000
       }
       NumGlyphs = 2
-      OnClick = SBLoadConfClick
       ShowHint = True
       ParentShowHint = False
+      OnClick = SBLoadConfClick
     end
     object SBAbout: TSpeedButton
       Left = 155
@@ -612,9 +612,9 @@ object FProgram: TFProgram
         7FD5A4AE7FB9A4AE7F6300000000000000000000000000000000
       }
       NumGlyphs = 2
-      OnClick = SBAboutClick
       ShowHint = True
       ParentShowHint = False
+      OnClick = SBAboutClick
     end
     object SBQuit: TSpeedButton
       Left = 180
@@ -690,9 +690,9 @@ object FProgram: TFProgram
         78FF787878FF0000000000000000000000000000000000000000
       }
       NumGlyphs = 2
-      OnClick = SBQuitClick
       ShowHint = True
       ParentShowHint = False
+      OnClick = SBQuitClick
     end
   end
   object ListView1: TListView

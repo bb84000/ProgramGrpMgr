@@ -1,6 +1,6 @@
 //******************************************************************************
 // Main unit for ProgramGrpManager (Lazarus)
-// bb - sdtp - april 2025
+// bb - sdtp - october 2025
 // Windows only program
 //******************************************************************************
 unit program1;
@@ -194,6 +194,7 @@ type
     PrevLeft: Integer;
     PrevTop: Integer;
     StartMini: Boolean;
+    idHttpErrMsgNames: array [0..16] of string;
     function GetGrpParam: String;
     procedure LoadCfgFile(FileName: String);
     procedure LoadConfig(GrpName: String);
@@ -588,13 +589,11 @@ begin
      AboutBox.ErrorMessage:='';
      //AboutBox.version:= '0.1.0.0' ;
      sNewVer:= AboutBox.ChkNewVersion;
-     //sNewVer:= UpdateDlg.ChkNewVersion;
      errmsg:= AboutBox.ErrorMessage;
-     //errmsg:= UpdateDlg.ErrorMessage;
      if length(sNewVer)=0 then
      begin
        if length(errmsg)=0 then alertmsg:= sCannotGetNewVerList
-       else alertmsg:= errmsg;
+       else alertmsg:= TranslateidHttpErrorMsg(errmsg, idHttpErrMsgNames);
        if AlertDlg(Caption,  alertmsg, ['OK', CancelBtn, sNoLongerChkUpdates],
                   true, mtError, alertpos)= mrYesToAll then Settings.NoChkNewVer:= true;
        exit;
@@ -1776,7 +1775,7 @@ begin
   // If we have checked update and got an error
   if length(AboutBox.ErrorMessage)>0 then
   begin
-    alertmsg := AboutBox.ErrorMessage;
+    alertmsg := TranslateidHttpErrorMsg(AboutBox.ErrorMessage, idHttpErrMsgNames);
     if AlertDlg(Caption,  alertmsg, ['OK', CancelBtn, NoLongerChkUpdates],
                     true, mtError)= mrYesToAll then Settings.NoChkNewVer:= true;
   end;
@@ -2173,7 +2172,14 @@ begin
     DeleteGrpMsg:= ReadString('main', 'DeleteGrpMsg', 'Vous allez effacer le groupe %s. Etes-vous sur ?');
      use64bitcaption:= ReadString('main', 'use64bitcaption', 'Utilisez la version 64 bits de ce programme');
 
-    // FSaveCfg form
+    // indy Error messages
+    idHttpErrMsgNames[0]:= ReadString('idHttpErr','idSSLLibraryNotFound','Bibliothèque SSL introuvable');
+    idHttpErrMsgNames[1]:= ReadString('idHttpErr','IdUnknownProtocol', 'Protocole inconnu');
+    idHttpErrMsgNames[2]:= ReadString('idHttpErr','IdHostNotFound', 'Hôte non trouvé');
+    idHttpErrMsgNames[3]:= ReadString('idHttpErr','idHTTP302','Page redirigée provisoirement (302)');
+    idHttpErrMsgNames[10]:= ReadString('idHttpErr','IdUnknownError', 'Erreur inconnue: %s');
+
+     // FSaveCfg form
     FSaveCfg.Translate(LngFile);
 
     // Settings form

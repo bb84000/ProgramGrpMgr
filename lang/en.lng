@@ -99,6 +99,7 @@ Server=Server
 22621=v 22H2 "September 2022 update"
 22631=v 23H2 "October 2023 update"
 26100=v 24H2 "October 2024 update"
+26200=v 25H2 "October 2025 update"
 
 [AboutBox]
 Caption=About %s
@@ -176,4 +177,11 @@ sNoUpdtAvailable=%s is up to date
 sUpdtInstall=Click the button "Update now" to install the update
 DlError=Download error
 ZipError=Archivc error
+
+[idHttpErr]
+idSSLLibraryNotFound=Could not load SSL library
+IdUnknownProtocol=Unknown Protocol
+IdHostNotFound=Host not found
+idHTTP302=Page moved temporarily (302)
+IdUnknownError=Unknown error: %s
 

@@ -21,11 +21,10 @@
     <VersionInfo>
       <UseVersionInfo Value="True"/>
       <MajorVersionNr Value="1"/>
-      <RevisionNr Value="2"/>
-      <BuildNr Value="2"/>
+      <RevisionNr Value="3"/>
       <Language Value="040C"/>
       <Attributes pvaPreRelease="True"/>
-      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp" LegalTrademarks="bb - sdtp" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="1.0.2.2"/>
+      <StringTable Comments="www.sdtp.com" CompanyName="sdtp" FileDescription="Program Group Manager" InternalName="ProgramGrpMgr" LegalCopyright="bb - sdtp" LegalTrademarks="bb - sdtp" OriginalFilename="ProgramGrpMgr.exe" ProductName="ProgramGrpMgr" ProductVersion="1.0.3.0"/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -37,25 +36,28 @@
     <RunParams>
       <FormatVersion Value="2"/>
     </RunParams>
-    <RequiredPackages Count="6">
+    <RequiredPackages Count="7">
       <Item1>
-        <PackageName Value="ExCtrlsPkg_dsgn"/>
+        <PackageName Value="TaurusTLSRT"/>
       </Item1>
       <Item2>
-        <PackageName Value="ExCtrlsPkg"/>
+        <PackageName Value="ExCtrlsPkg_dsgn"/>
       </Item2>
       <Item3>
-        <PackageName Value="uniqueinstance_package"/>
+        <PackageName Value="ExCtrlsPkg"/>
       </Item3>
       <Item4>
-        <PackageName Value="lazbbcomponents"/>
+        <PackageName Value="uniqueinstance_package"/>
       </Item4>
       <Item5>
-        <PackageName Value="indylaz"/>
+        <PackageName Value="lazbbcomponents"/>
       </Item5>
       <Item6>
-        <PackageName Value="LCL"/>
+        <PackageName Value="indylaz"/>
       </Item6>
+      <Item7>
+        <PackageName Value="LCL"/>
+      </Item7>
     </RequiredPackages>
     <Units Count="11">
       <Unit0>
