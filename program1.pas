@@ -1975,11 +1975,11 @@ begin
   Fproperty.IconDefFile:= IconDefFile;
   MyFichier:=  ListeFichiers.GetItem(Item.Index);
   FProperty.MyFile:= MyFichier;
-  OldTarget:= FProperty.ECible.Text;
+  OldTarget:= MyFichier.Path+MyFichier.Name;  //FProperty.ECible.Text;  Wriong, set only on show
   FProperty.Translate(LangFile);
   if FProperty.Showmodal = mrOK then
   begin
-      if FProperty.ECible.Text <> OldTarget then
+     if FProperty.ECible.Text <> OldTarget then
       begin
          ZeroMemory(@MyFichier, sizeOf(MyFichier));
          MyFichier:= GetFile(FProperty.ECible.Text);
@@ -2007,7 +2007,10 @@ begin
         if MyFichier.Date <> FileGetDateTime(MyFichier.Path+MyFichier.Name, ftCreate)then
            ListeFichiers.ModifyField(Item.Index, 'Date', FileGetDateTime(MyFichier.Path+MyFichier.Name, ftCreate));
       end;
-       If ListeChange then LVDisplayFiles;
+       If ListeChange then
+       begin
+         LVDisplayFiles;
+       end;
   end;
 end;
 

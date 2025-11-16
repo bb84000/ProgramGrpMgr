@@ -1,15 +1,15 @@
 object FProperty: TFProperty
-  Left = 546
+  Left = 566
   Height = 309
-  Top = 181
+  Top = 204
   Width = 469
   BorderStyle = bsDialog
   Caption = 'FProperty'
   ClientHeight = 309
   ClientWidth = 469
-  OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.2.4.0'
+  LCLVersion = '4.4.0.0'
+  OnShow = FormShow
   object PC1: TPageControl
     Left = 0
     Height = 268
@@ -28,10 +28,10 @@ object FProperty: TFProperty
         Height = 32
         Top = 6
         Width = 32
-        OnDblClick = Image1DblClick
         ParentShowHint = False
         PopupMenu = PMnuIconProps
         ShowHint = True
+        OnDblClick = Image1DblClick
       end
       object LFileType: TLabel
         Left = 10
@@ -91,9 +91,9 @@ object FProperty: TFProperty
           5555555555555555555555555555555555555555555555555555
         }
         NumGlyphs = 2
-        OnClick = SBCibleClick
         ShowHint = True
         ParentShowHint = False
+        OnClick = SBCibleClick
       end
       object LParams: TLabel
         Left = 10

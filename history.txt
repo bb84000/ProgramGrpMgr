@@ -347,6 +347,8 @@ Version 1.0.3.0 - 21/10/2025
 - Mise à jour de la détection de version Windows 25H2
 - Mise à jour pour OpenSSL version 3
 
+Version 1.0.3.1 - 16/11/2025
+- Correction d'un bug empechant la mise à jour des propriétés d'un programme
 
 
 

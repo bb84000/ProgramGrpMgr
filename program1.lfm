@@ -5,9 +5,9 @@ object FProgram: TFProgram
   Width = 659
   AllowDropFiles = True
   Caption = 'FProgram'
-  ClientHeight = 0
-  ClientWidth = 0
-  LCLVersion = '4.2.0.0'
+  ClientHeight = 303
+  ClientWidth = 659
+  LCLVersion = '4.4.0.0'
   OnActivate = FormActivate
   OnChangeBounds = FormChangeBounds
   OnClose = FormClose

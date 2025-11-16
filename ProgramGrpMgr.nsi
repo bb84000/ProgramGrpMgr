@@ -220,7 +220,7 @@ Section "" ;No components page, name is not important
   ; delete non used files
   Delete "$INSTDIR\${prog_name}win$exe_to_del"
   ; Install other files
-  File "${lazarus_dir}\openssl\OpenSSL License.txt"
+  File "${lazarus_dir}\openssl\OpenSSL3 License.txt"
   File "${source_dir}\licensf.txt"
   File "${source_dir}\license.txt"
   File "${source_dir}\history.txt"
@@ -297,6 +297,7 @@ Section Uninstall
   Delete "$INSTDIR\licensf.txt"
   Delete "$INSTDIR\license.txt"
   Delete "$INSTDIR\OpenSSL License.txt"
+  Delete "$INSTDIR\OpenSSL3 License.txt"
   Delete "$INSTDIR\FAQ.txt"
   Delete "$INSTDIR\uninst.exe"
 
